@@ -100,12 +100,9 @@ def _validate_owner(user_id: str | None, guest_id: str | None) -> tuple[str | No
     return clean_user_id, clean_guest_id
 
 
-@router.post("/chatlaya/internal/founder-projects")
-async def create_internal_founder_project(
+async def _create_founder_project_with_workspace(
     payload: FounderProjectCreatePayload,
-    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
 ) -> dict[str, object]:
-    _require_internal_token(x_internal_token)
     user_id, guest_id = _validate_owner(payload.user_id, payload.guest_id)
 
     now = datetime.now(timezone.utc)
@@ -160,6 +157,22 @@ async def create_internal_founder_project(
     }
 
 
+@router.post("/chatlaya/internal/founder-projects")
+async def create_internal_founder_project(
+    payload: FounderProjectCreatePayload,
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    return await _create_founder_project_with_workspace(payload)
+
+
+@router.post("/chatlaya/founder-projects")
+async def create_public_founder_project(
+    payload: FounderProjectCreatePayload,
+) -> dict[str, object]:
+    return await _create_founder_project_with_workspace(payload)
+
+
 @router.get("/chatlaya/internal/founder-projects")
 async def list_internal_founder_projects(
     user_id: str | None = None,
@@ -184,6 +197,28 @@ async def list_internal_founder_projects(
     }
 
 
+@router.get("/chatlaya/founder-projects")
+async def list_public_founder_projects(
+    user_id: str | None = None,
+    guest_id: str | None = None,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> dict[str, object]:
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    items = await list_founder_projects(
+        user_id=user_id,
+        guest_id=guest_id,
+        limit=limit,
+        offset=offset,
+    )
+    return {
+        "ok": True,
+        "items": items,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
 @router.get("/chatlaya/internal/founder-projects/{project_id}")
 async def get_internal_founder_project(
     project_id: str,
@@ -192,6 +227,26 @@ async def get_internal_founder_project(
     x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
 ) -> dict[str, object]:
     _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    project = await get_founder_project(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
+    }
+
+
+@router.get("/chatlaya/founder-projects/{project_id}")
+async def get_public_founder_project(
+    project_id: str,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+) -> dict[str, object]:
     user_id, guest_id = _validate_owner(user_id, guest_id)
     project = await get_founder_project(
         project_id=project_id,
@@ -234,6 +289,32 @@ async def patch_internal_founder_project(
     }
 
 
+@router.patch("/chatlaya/founder-projects/{project_id}")
+async def patch_public_founder_project(
+    project_id: str,
+    payload: FounderProjectUpdatePayload,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+) -> dict[str, object]:
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    project = await update_founder_project_data(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+        title=payload.title.strip() if payload.title is not None else None,
+        current_step=payload.current_step,
+        status=payload.status,
+        project_data=payload.project_data,
+        updated_at=datetime.now(timezone.utc),
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
+    }
+
+
 @router.post("/chatlaya/internal/founder-projects/{project_id}/archive")
 async def archive_internal_founder_project(
     project_id: str,
@@ -242,6 +323,32 @@ async def archive_internal_founder_project(
     x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
 ) -> dict[str, object]:
     _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    # Archiving keeps OpenCloud workspace intact.
+    project = await update_founder_project_data(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+        title=None,
+        current_step=None,
+        status="archived",
+        project_data=None,
+        updated_at=datetime.now(timezone.utc),
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
+    }
+
+
+@router.post("/chatlaya/founder-projects/{project_id}/archive")
+async def archive_public_founder_project(
+    project_id: str,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+) -> dict[str, object]:
     user_id, guest_id = _validate_owner(user_id, guest_id)
     # Archiving keeps OpenCloud workspace intact.
     project = await update_founder_project_data(
