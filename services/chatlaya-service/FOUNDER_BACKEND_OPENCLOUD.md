@@ -70,37 +70,40 @@ ChatLAYA Founder/
 - `GET /chatlaya/internal/founder-projects`
 - `GET /chatlaya/internal/founder-projects/{project_id}`
 - `PATCH /chatlaya/internal/founder-projects/{project_id}`
+- `POST /chatlaya/internal/founder-projects/{project_id}/archive`
 
 ### Précisions
 
-- Toutes ces routes sont internes
-- Toutes exigent le header `X-Internal-Token`
-- Aucune route publique frontend n'est encore branchée
+- Toutes ces routes sont internes.
+- Toutes exigent le header `X-Internal-Token`.
+- Aucune route publique frontend n'est encore branchée.
 
 ## Tests validés
 
-- Diagnostic OpenCloud reachability
-- Auth WebDAV par token applicatif avec retour `207`
-- Création du dossier racine Founder avec `201`, puis idempotence `405`
-- Création du workspace projet avec `201`, puis idempotence `405`
-- Creation d'un projet DB puis synchronisation du workspace OpenCloud
-- Lecture `list/get/patch`
-- Cleanup DB + OpenCloud
+- Diagnostic OpenCloud reachability.
+- Auth WebDAV par token applicatif avec retour `207`.
+- Création du dossier racine Founder avec `201`, puis idempotence `405`.
+- Création du workspace projet avec `201`, puis idempotence `405`.
+- Création d'un projet DB puis synchronisation du workspace OpenCloud.
+- Archivage d’un projet Founder avec conservation du workspace OpenCloud.
+- Après archivage, le projet disparaît de la liste active mais reste lisible par ID.
+- Lecture `list/get/patch`.
+- Cleanup DB + OpenCloud.
 
 ## Commits importants
 
-1. `60e4cde8fc9c5fc20b1334c8edc9a8d20bec5f5b` - `feat: update ChatLAYA Founder projects`
-2. `8afe6059d926052bc9ed454323e6c2bf655da17f` - `feat: list and read ChatLAYA Founder projects`
-3. `552d410d5e70ae147c47338d97839598c5c054c7` - `feat: create Founder projects with OpenCloud workspace`
-4. `70d8d81104da6e84a6def1e9aba261eeebbb57ad` - `feat: add ChatLAYA Founder project repository`
-5. `2fee9682b8babb2afb8405bebe2efce1c759722a` - `feat: add ChatLAYA Founder projects table`
-6. `ae70bb3dd7f788f99e82b8d328168e398b5d3c96` - `feat: ensure OpenCloud Founder project workspace`
-7. `8c0dc21418fba587f7b500a0b4bf9c735c985f49` - `feat: ensure OpenCloud Founder root folder`
-8. `609ec5fabbfaebd2a5dc013e7298e069e44f9f2e` - `feat: validate OpenCloud app token WebDAV diagnostics`
+1. `116b2a6` — `feat: archive ChatLAYA Founder projects`
+2. `60e4cde` — `feat: update ChatLAYA Founder projects`
+3. `8afe605` — `feat: list and read ChatLAYA Founder projects`
+4. `552d410` — `feat: create Founder projects with OpenCloud workspace`
+5. `70d8d81` — `feat: add ChatLAYA Founder project repository`
+6. `2fee968` — `feat: add ChatLAYA Founder projects table`
+7. `ae70bb3` — `feat: ensure OpenCloud Founder project workspace`
+8. `8c0dc21` — `feat: ensure OpenCloud Founder root folder`
+9. `609ec5f` — `feat: validate OpenCloud app token WebDAV diagnostics`
 
 ## Prochaine étape recommandée
 
-- Ne pas commencer les agents maintenant
-- Ajouter d'abord une route interne propre d'archivage du projet Founder
-- Ensuite préparer les routes publiques/backend pour le frontend
-- Ensuite brancher les agents Founder
+- Ne pas commencer les agents maintenant.
+- Préparer les routes publiques/backend pour le frontend.
+- Ensuite brancher les agents Founder.
