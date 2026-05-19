@@ -11,12 +11,32 @@ from app.repositories.chatlaya_pg import (
     create_founder_project,
     get_founder_project,
     list_founder_projects,
+    update_founder_project_data,
     update_founder_project_opencloud_workspace,
 )
 from app.services.opencloud_client import ensure_founder_project_workspace
 
 
 router = APIRouter()
+_FOUNDER_ALLOWED_STEPS = {
+    "point_de_depart",
+    "client_cible",
+    "probleme",
+    "offre_valeur",
+    "prix",
+    "business_model",
+    "validation_preuves",
+    "pitch_vente",
+    "business_plan",
+    "completed",
+}
+_FOUNDER_ALLOWED_STATUS = {
+    "draft",
+    "in_progress",
+    "validated",
+    "completed",
+    "archived",
+}
 
 
 class FounderProjectCreatePayload(BaseModel):
@@ -35,6 +55,30 @@ class FounderProjectCreatePayload(BaseModel):
             raise ValueError("Exactly one of user_id or guest_id is required")
         if not (self.title or "").strip():
             raise ValueError("title must not be empty")
+        return self
+
+
+class FounderProjectUpdatePayload(BaseModel):
+    title: str | None = None
+    current_step: str | None = None
+    status: str | None = None
+    project_data: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def validate_payload(self) -> FounderProjectUpdatePayload:
+        if (
+            self.title is None
+            and self.current_step is None
+            and self.status is None
+            and self.project_data is None
+        ):
+            raise ValueError("At least one field must be provided")
+        if self.title is not None and not self.title.strip():
+            raise ValueError("title must not be empty")
+        if self.current_step is not None and self.current_step not in _FOUNDER_ALLOWED_STEPS:
+            raise ValueError("current_step is invalid")
+        if self.status is not None and self.status not in _FOUNDER_ALLOWED_STATUS:
+            raise ValueError("status is invalid")
         return self
 
 
@@ -153,6 +197,34 @@ async def get_internal_founder_project(
         project_id=project_id,
         user_id=user_id,
         guest_id=guest_id,
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
+    }
+
+
+@router.patch("/chatlaya/internal/founder-projects/{project_id}")
+async def patch_internal_founder_project(
+    project_id: str,
+    payload: FounderProjectUpdatePayload,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    project = await update_founder_project_data(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+        title=payload.title.strip() if payload.title is not None else None,
+        current_step=payload.current_step,
+        status=payload.status,
+        project_data=payload.project_data,
+        updated_at=datetime.now(timezone.utc),
     )
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
