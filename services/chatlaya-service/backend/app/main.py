@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routers.chatlaya import router as chatlaya_router
 from app.routers.health import router as health_router
+from app.routers.opencloud import router as opencloud_router
 from app.services.postgres_bootstrap import close_pool, db_configured, init_pool
 
 
@@ -41,6 +42,7 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(chatlaya_router)
+app.include_router(opencloud_router)
 
 
 @app.options("/chatlaya/{path:path}", include_in_schema=False)
