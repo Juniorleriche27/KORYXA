@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     OPENCLOUD_TIMEOUT_S: float = 8.0
     OPENCLOUD_VERIFY_SSL: bool = True
     OPENCLOUD_SERVICE_USERNAME: str | None = None
+    OPENCLOUD_SERVICE_APP_TOKEN: str | None = None
     OPENCLOUD_SERVICE_PASSWORD: str | None = None
     OPENCLOUD_DEFAULT_ROOT_FOLDER: str = "ChatLAYA Founder"
 

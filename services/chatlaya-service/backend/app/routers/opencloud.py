@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Header, HTTPException, status
 
 from app.core.config import settings
-from app.services.opencloud_client import check_opencloud_reachability
+from app.services.opencloud_client import check_opencloud_reachability, check_opencloud_webdav_auth
 
 
 router = APIRouter()
@@ -21,4 +21,9 @@ async def opencloud_health(
     x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
 ) -> dict[str, object]:
     _require_internal_token(x_internal_token)
-    return await check_opencloud_reachability()
+    reachability = await check_opencloud_reachability()
+    webdav = await check_opencloud_webdav_auth()
+    return {
+        "reachability": reachability,
+        "webdav": webdav,
+    }
