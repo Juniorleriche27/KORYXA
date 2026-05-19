@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -26,6 +27,15 @@ def get_opencloud_auth() -> tuple[str, str] | None:
     if not username or not token:
         return None
     return username, token
+
+
+def _webdav_url(username: str, *segments: str) -> str:
+    encoded_username = quote(username.strip(), safe="")
+    base = f"{_base_url()}/remote.php/dav/files/{encoded_username}/"
+    cleaned_segments = [quote(segment.strip(), safe="") for segment in segments if segment.strip()]
+    if not cleaned_segments:
+        return base
+    return f"{base}{'/'.join(cleaned_segments)}/"
 
 
 async def check_opencloud_reachability() -> dict[str, Any]:
@@ -91,7 +101,7 @@ async def check_opencloud_webdav_auth() -> dict[str, Any]:
         return result
 
     username, token = auth
-    url = f"{_base_url()}/remote.php/dav/files/{username}/"
+    url = _webdav_url(username)
     try:
         async with httpx.AsyncClient(timeout=timeout, verify=verify_ssl) as client:
             response = await client.request(
@@ -114,3 +124,68 @@ async def check_opencloud_webdav_auth() -> dict[str, Any]:
     except httpx.HTTPError as exc:
         result["error"] = f"OpenCloud WebDAV request failed: {exc}"
         return result
+
+
+async def ensure_opencloud_folder(folder_path: str) -> dict[str, Any]:
+    cleaned_path = "/".join(segment.strip() for segment in folder_path.split("/") if segment.strip())
+    auth = get_opencloud_auth()
+    result: dict[str, Any] = {
+        "ok": False,
+        "folder_path": cleaned_path,
+        "created_segments": [],
+        "existing_segments": [],
+        "status_by_segment": [],
+        "error": None,
+    }
+    if not (settings.OPENCLOUD_BASE_URL or "").strip():
+        result["error"] = "OPENCLOUD_BASE_URL is not configured"
+        return result
+    if auth is None:
+        result["error"] = "OpenCloud service auth is not configured"
+        return result
+    if not cleaned_path:
+        result["error"] = "folder_path is empty"
+        return result
+
+    username, token = auth
+    timeout = max(1.0, float(settings.OPENCLOUD_TIMEOUT_S or 8.0))
+    verify_ssl = bool(settings.OPENCLOUD_VERIFY_SSL)
+    current_segments: list[str] = []
+
+    try:
+        async with httpx.AsyncClient(timeout=timeout, verify=verify_ssl) as client:
+            for segment in cleaned_path.split("/"):
+                current_segments.append(segment)
+                current_path = "/".join(current_segments)
+                response = await client.request(
+                    "MKCOL",
+                    _webdav_url(username, *current_segments),
+                    auth=(username, token),
+                )
+                result["status_by_segment"].append(
+                    {
+                        "path": current_path,
+                        "status_code": response.status_code,
+                    }
+                )
+                if response.status_code == 201:
+                    result["created_segments"].append(current_path)
+                    continue
+                if response.status_code == 405:
+                    result["existing_segments"].append(current_path)
+                    continue
+                result["error"] = f"OpenCloud folder creation failed [{response.status_code}] for {current_path}"
+                return result
+    except httpx.TimeoutException:
+        result["error"] = "OpenCloud folder creation timed out"
+        return result
+    except httpx.HTTPError as exc:
+        result["error"] = f"OpenCloud folder creation failed: {exc}"
+        return result
+
+    result["ok"] = True
+    return result
+
+
+async def ensure_default_founder_root_folder() -> dict[str, Any]:
+    return await ensure_opencloud_folder(settings.OPENCLOUD_DEFAULT_ROOT_FOLDER)

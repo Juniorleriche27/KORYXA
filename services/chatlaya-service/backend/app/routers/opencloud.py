@@ -3,7 +3,11 @@ from __future__ import annotations
 from fastapi import APIRouter, Header, HTTPException, status
 
 from app.core.config import settings
-from app.services.opencloud_client import check_opencloud_reachability, check_opencloud_webdav_auth
+from app.services.opencloud_client import (
+    check_opencloud_reachability,
+    check_opencloud_webdav_auth,
+    ensure_default_founder_root_folder,
+)
 
 
 router = APIRouter()
@@ -27,3 +31,11 @@ async def opencloud_health(
         "reachability": reachability,
         "webdav": webdav,
     }
+
+
+@router.post("/chatlaya/internal/opencloud/founder-root/ensure")
+async def ensure_opencloud_founder_root(
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    return await ensure_default_founder_root_folder()
