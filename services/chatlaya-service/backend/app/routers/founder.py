@@ -232,3 +232,31 @@ async def patch_internal_founder_project(
         "ok": True,
         "project": project,
     }
+
+
+@router.post("/chatlaya/internal/founder-projects/{project_id}/archive")
+async def archive_internal_founder_project(
+    project_id: str,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    # Archiving keeps OpenCloud workspace intact.
+    project = await update_founder_project_data(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+        title=None,
+        current_step=None,
+        status="archived",
+        project_data=None,
+        updated_at=datetime.now(timezone.utc),
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
+    }
