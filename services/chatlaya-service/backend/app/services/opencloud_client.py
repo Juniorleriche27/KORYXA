@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 from urllib.parse import quote
 
@@ -10,6 +11,14 @@ from app.core.config import settings
 
 class OpenCloudClientError(RuntimeError):
     pass
+
+
+_FOUNDER_WORKSPACE_SEGMENTS = [
+    "01_Cadrage",
+    "02_Validation_et_preuves",
+    "03_Livrables",
+    "04_Exports",
+]
 
 
 def _base_url() -> str:
@@ -189,3 +198,62 @@ async def ensure_opencloud_folder(folder_path: str) -> dict[str, Any]:
 
 async def ensure_default_founder_root_folder() -> dict[str, Any]:
     return await ensure_opencloud_folder(settings.OPENCLOUD_DEFAULT_ROOT_FOLDER)
+
+
+def sanitize_opencloud_folder_name(value: str, fallback: str = "Projet Founder") -> str:
+    normalized = re.sub(r"\s+", " ", (value or "").strip())
+    normalized = re.sub(r"[\\/:*?\"<>|#%&{}$!'@+=`~\[\]();,]+", " ", normalized)
+    normalized = re.sub(r"\s+", " ", normalized).strip(" .-_")
+    if len(normalized) > 80:
+        normalized = normalized[:80].rstrip(" .-_")
+    if normalized:
+        return normalized
+    return fallback
+
+
+def build_founder_project_folder_name(project_id: str, project_title: str | None = None) -> str:
+    project_suffix = (project_id or "").strip()[:8] or "unknown"
+    if project_title and project_title.strip():
+        title = sanitize_opencloud_folder_name(project_title)
+    else:
+        title = "Projet Founder"
+    return sanitize_opencloud_folder_name(f"{title} - {project_suffix}")
+
+
+async def ensure_founder_project_workspace(project_id: str, project_title: str | None = None) -> dict[str, Any]:
+    clean_project_id = (project_id or "").strip()
+    root_folder = settings.OPENCLOUD_DEFAULT_ROOT_FOLDER
+    project_folder = build_founder_project_folder_name(clean_project_id, project_title)
+    folder_paths = [
+        f"{root_folder}/{project_folder}",
+        *(f"{root_folder}/{project_folder}/{segment}" for segment in _FOUNDER_WORKSPACE_SEGMENTS),
+    ]
+    result: dict[str, Any] = {
+        "ok": False,
+        "root_folder": root_folder,
+        "project_id": clean_project_id,
+        "project_title": project_title,
+        "project_folder": project_folder,
+        "folders": [],
+        "error": None,
+    }
+    if not clean_project_id:
+        result["error"] = "project_id is empty"
+        return result
+
+    for path in folder_paths:
+        folder_result = await ensure_opencloud_folder(path)
+        folder_ok = bool(folder_result.get("ok"))
+        result["folders"].append(
+            {
+                "path": path,
+                "ok": folder_ok,
+                "result": folder_result,
+            }
+        )
+        if not folder_ok:
+            result["error"] = folder_result.get("error") or f"Failed to ensure folder: {path}"
+            return result
+
+    result["ok"] = True
+    return result
