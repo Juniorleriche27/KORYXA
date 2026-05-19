@@ -3,11 +3,16 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException, status
+from fastapi import APIRouter, Header, HTTPException, Query, status
 from pydantic import BaseModel, Field, model_validator
 
 from app.core.config import settings
-from app.repositories.chatlaya_pg import create_founder_project, update_founder_project_opencloud_workspace
+from app.repositories.chatlaya_pg import (
+    create_founder_project,
+    get_founder_project,
+    list_founder_projects,
+    update_founder_project_opencloud_workspace,
+)
 from app.services.opencloud_client import ensure_founder_project_workspace
 
 
@@ -40,17 +45,29 @@ def _require_internal_token(x_internal_token: str | None) -> None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 
+def _validate_owner(user_id: str | None, guest_id: str | None) -> tuple[str | None, str | None]:
+    clean_user_id = (user_id or "").strip() or None
+    clean_guest_id = (guest_id or "").strip() or None
+    if bool(clean_user_id) == bool(clean_guest_id):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Exactly one of user_id or guest_id is required",
+        )
+    return clean_user_id, clean_guest_id
+
+
 @router.post("/chatlaya/internal/founder-projects")
 async def create_internal_founder_project(
     payload: FounderProjectCreatePayload,
     x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
 ) -> dict[str, object]:
     _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(payload.user_id, payload.guest_id)
 
     now = datetime.now(timezone.utc)
     project = await create_founder_project(
-        user_id=(payload.user_id or "").strip() or None,
-        guest_id=(payload.guest_id or "").strip() or None,
+        user_id=user_id,
+        guest_id=guest_id,
         conversation_id=(payload.conversation_id or "").strip() or None,
         title=payload.title.strip(),
         current_step=payload.current_step,
@@ -75,8 +92,8 @@ async def create_internal_founder_project(
     opencloud_project_path = f"{root_folder}/{project_folder}" if project_folder else None
     updated_project = await update_founder_project_opencloud_workspace(
         project_id=str(project.get("id") or ""),
-        user_id=(payload.user_id or "").strip() or None,
-        guest_id=(payload.guest_id or "").strip() or None,
+        user_id=user_id,
+        guest_id=guest_id,
         opencloud_root_folder=root_folder,
         opencloud_project_folder=project_folder or None,
         opencloud_project_path=opencloud_project_path,
@@ -96,4 +113,50 @@ async def create_internal_founder_project(
         "project": updated_project,
         "opencloud": opencloud,
         "error": None,
+    }
+
+
+@router.get("/chatlaya/internal/founder-projects")
+async def list_internal_founder_projects(
+    user_id: str | None = None,
+    guest_id: str | None = None,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    items = await list_founder_projects(
+        user_id=user_id,
+        guest_id=guest_id,
+        limit=limit,
+        offset=offset,
+    )
+    return {
+        "ok": True,
+        "items": items,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.get("/chatlaya/internal/founder-projects/{project_id}")
+async def get_internal_founder_project(
+    project_id: str,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+    x_internal_token: str | None = Header(default=None, alias="X-Internal-Token"),
+) -> dict[str, object]:
+    _require_internal_token(x_internal_token)
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    project = await get_founder_project(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+    return {
+        "ok": True,
+        "project": project,
     }
