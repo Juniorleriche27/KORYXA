@@ -1,0 +1,134 @@
+import { getChatlayaApiBase } from "@/lib/env";
+import { requestJson } from "@/lib/api";
+
+type FounderOwner = {
+  guestId?: string | null;
+  userId?: string | null;
+};
+
+type FounderProjectData = Record<string, unknown>;
+
+export type FounderProject = {
+  id: string;
+  user_id?: string | null;
+  guest_id?: string | null;
+  conversation_id?: string | null;
+  title: string;
+  status?: string | null;
+  current_step?: string | null;
+  project_data: FounderProjectData;
+  created_at?: string | null;
+  updated_at?: string | null;
+  archived?: boolean;
+};
+
+type FounderProjectCreatePayload = FounderOwner & {
+  conversation_id?: string | null;
+  title?: string;
+  current_step?: string;
+  project_data?: FounderProjectData;
+};
+
+type FounderProjectUpdatePayload = {
+  title?: string;
+  current_step?: string;
+  status?: string;
+  project_data?: FounderProjectData;
+};
+
+function founderApiUrl(path: string): string {
+  return `${getChatlayaApiBase().replace(/\/$/, "")}${path}`;
+}
+
+function resolveOwner(owner: FounderOwner): URLSearchParams {
+  const userId = owner.userId?.trim();
+  const guestId = owner.guestId?.trim();
+  if (Boolean(userId) === Boolean(guestId)) {
+    throw new Error("Exactly one of userId or guestId is required.");
+  }
+  const params = new URLSearchParams();
+  if (userId) params.set("user_id", userId);
+  if (guestId) params.set("guest_id", guestId);
+  return params;
+}
+
+function normalizeProject(value: unknown): FounderProject {
+  const record = (value && typeof value === "object" ? value : {}) as Record<string, unknown>;
+  const status = typeof record.status === "string" ? record.status : null;
+  return {
+    id: typeof record.id === "string" ? record.id : typeof record.project_id === "string" ? record.project_id : "",
+    user_id: typeof record.user_id === "string" ? record.user_id : null,
+    guest_id: typeof record.guest_id === "string" ? record.guest_id : null,
+    conversation_id: typeof record.conversation_id === "string" ? record.conversation_id : null,
+    title: typeof record.title === "string" && record.title.trim() ? record.title : "Projet Founder",
+    status,
+    current_step: typeof record.current_step === "string" ? record.current_step : null,
+    project_data: record.project_data && typeof record.project_data === "object"
+      ? record.project_data as FounderProjectData
+      : {},
+    created_at: typeof record.created_at === "string" ? record.created_at : null,
+    updated_at: typeof record.updated_at === "string" ? record.updated_at : null,
+    archived: status === "archived",
+  };
+}
+
+export async function createFounderProject(payload: FounderProjectCreatePayload): Promise<FounderProject> {
+  const response = await requestJson<{ project?: unknown }>(founderApiUrl("/chatlaya/founder-projects"), {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: payload.userId?.trim() || undefined,
+      guest_id: payload.guestId?.trim() || undefined,
+      conversation_id: payload.conversation_id?.trim() || undefined,
+      title: payload.title?.trim() || "Projet Founder",
+      current_step: payload.current_step || "point_de_depart",
+      project_data: payload.project_data || {},
+    }),
+  });
+  return normalizeProject(response.project);
+}
+
+export async function listFounderProjects(owner: FounderOwner): Promise<FounderProject[]> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<{ items?: unknown[] }>(
+    founderApiUrl(`/chatlaya/founder-projects?${params.toString()}`),
+    { method: "GET" },
+  );
+  return Array.isArray(response.items) ? response.items.map(normalizeProject) : [];
+}
+
+export async function getFounderProject(projectId: string, owner: FounderOwner): Promise<FounderProject> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<{ project?: unknown }>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}?${params.toString()}`),
+    { method: "GET" },
+  );
+  return normalizeProject(response.project);
+}
+
+export async function updateFounderProject(
+  projectId: string,
+  payload: FounderProjectUpdatePayload,
+  owner: FounderOwner,
+): Promise<FounderProject> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<{ project?: unknown }>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}?${params.toString()}`),
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+  return normalizeProject(response.project);
+}
+
+export async function archiveFounderProject(projectId: string, owner: FounderOwner): Promise<FounderProject> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<{ project?: unknown }>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/archive?${params.toString()}`),
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+    },
+  );
+  return normalizeProject(response.project);
+}

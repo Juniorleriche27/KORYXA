@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useLocale } from "next-intl";
 import {
   Users, Target, Package, DollarSign, BarChart2, MessageCircle, FileText,
   Check, RotateCcw, ArrowRight, X, Sparkles, ChevronLeft,
@@ -8,7 +9,16 @@ import {
   MessageSquarePlus, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CHATLAYA_AUTONOMOUS_HOST, getChatlayaApiBase, SITE_BASE_URL } from "@/lib/env";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { CHATLAYA_AUTONOMOUS_HOST, getChatlayaApiBase } from "@/lib/env";
+import {
+  archiveFounderProject,
+  createFounderProject,
+  getFounderProject,
+  listFounderProjects,
+  updateFounderProject,
+  type FounderProject,
+} from "@/lib/api-client/chatlaya-founder";
 
 function apiUrl(path: string): string {
   return `${getChatlayaApiBase().replace(/\/$/, "")}${path}`;
@@ -27,12 +37,12 @@ function resolveFounderAuthHref(path: "/login" | "/signup", fallback?: string): 
             : currentUrl.pathname.startsWith("/chatlaya")
               ? `${currentUrl.pathname}${currentUrl.search}`
               : FOUNDER_AUTH_REDIRECT;
-      return `${SITE_BASE_URL}/chatlaya/auth${path}?redirect=${encodeURIComponent(redirectTarget)}`;
+      return `/chatlaya/auth${path}?redirect=${encodeURIComponent(redirectTarget)}`;
     } catch {
       // Fall through to the server-safe fallback below.
     }
   }
-  return fallback || `${SITE_BASE_URL}/chatlaya/auth${path}?redirect=${encodeURIComponent(FOUNDER_AUTH_REDIRECT)}`;
+  return fallback || `/chatlaya/auth${path}?redirect=${encodeURIComponent(FOUNDER_AUTH_REDIRECT)}`;
 }
 
 function resolveFounderLoginHref(fallback?: string): string {
@@ -87,6 +97,26 @@ type FounderConversation = {
   archived?: boolean;
   assistant_mode?: "general" | "launch_structure_sell";
 };
+
+type FounderProjectOwner = {
+  guestId?: string | null;
+  userId?: string | null;
+};
+
+const FOUNDER_GUEST_ID_KEY = "chatlaya_founder_guest_id";
+const FOUNDER_DEFAULT_PROJECT_TITLE = "Projet Founder";
+const FOUNDER_STEP_BY_MODULE_ID: Record<string, string> = {
+  client: "client_cible",
+  probleme: "probleme",
+  offre: "offre_valeur",
+  prix: "prix",
+  business_model: "business_model",
+  vente: "pitch_vente",
+  business_plan: "business_plan",
+};
+const FOUNDER_MODULE_ID_BY_STEP: Record<string, string> = Object.fromEntries(
+  Object.entries(FOUNDER_STEP_BY_MODULE_ID).map(([moduleId, step]) => [step, moduleId]),
+);
 
 // ─── Module definitions ─────────────────────────────────────────────────────
 
@@ -240,8 +270,6 @@ const MODULES: ModuleDef[] = [
   },
 ];
 
-const REQUIRED_MODULES = MODULES.filter((m) => !m.optional);
-
 // Document-appropriate labels for the final deliverable
 const DOC_LABELS: Record<string, { title: string; tagline: string }> = {
   client:         { title: "Client idéal",                    tagline: "À qui s'adresse ce projet" },
@@ -253,9 +281,309 @@ const DOC_LABELS: Record<string, { title: string; tagline: string }> = {
   business_plan:  { title: "Plan d'action",                   tagline: "Feuille de route et priorités" },
 };
 
+function founderIsEnglish(locale: string) {
+  return locale.toLowerCase().startsWith("en");
+}
+
+function localizeModules(locale: string): ModuleDef[] {
+  if (!founderIsEnglish(locale)) {
+    return MODULES;
+  }
+
+  return [
+    {
+      ...MODULES[0],
+      label: "Target customer",
+      tagline: "Who are you selling to?",
+      description: "Define your ideal customer precisely: who they are, what drives them and how to reach them.",
+      inputs: [
+        { ...MODULES[0].inputs[0], label: "Describe your business in 1-2 sentences", placeholder: "Example: I offer training courses to help people create modern African fashion from home..." },
+        { ...MODULES[0].inputs[1], label: "Who do you think you sell to? (be specific)", placeholder: "Example: Women aged 25-45 who want to launch their own African fashion brand but do not know how to sew..." },
+      ],
+    },
+    {
+      ...MODULES[1],
+      label: "Problem",
+      tagline: "What problem do you solve?",
+      description: "Clearly formulate your customer's pain: what they lose without your solution.",
+      inputs: [
+        { ...MODULES[1].inputs[0], label: "What is your customer's main problem?", placeholder: "Example: They want to get started in African sewing but traditional training is too expensive and too far away..." },
+      ],
+    },
+    {
+      ...MODULES[2],
+      label: "Offer & Value",
+      tagline: "What exactly are you offering?",
+      description: "Structure your offer and clarify what the customer gains or avoids thanks to you.",
+      inputs: [
+        { ...MODULES[2].inputs[0], label: "What exactly are you offering?", placeholder: "Example: A 6-hour video course + 3 live sessions per month + a starter kit..." },
+        { ...MODULES[2].inputs[1], label: "What does the customer gain or avoid thanks to you?", placeholder: "Example: They create their first outfits in 30 days without expensive machines and without travelling..." },
+      ],
+    },
+    {
+      ...MODULES[3],
+      label: "Pricing",
+      tagline: "How much and how should you charge?",
+      description: "Validate your pricing strategy and learn how to test your price quickly.",
+      inputs: [
+        { ...MODULES[3].inputs[0], label: "How do you plan to charge?", placeholder: "Example: One-time payment, monthly subscription, per session, lifetime access..." },
+        { ...MODULES[3].inputs[1], label: "What price level are you considering?", placeholder: "Example: 25,000 FCFA for the full course" },
+      ],
+    },
+    {
+      ...MODULES[4],
+      label: "Business model",
+      tagline: "How does your business create value?",
+      description: "Structure your revenue streams, anticipate key costs and strengthen your business model.",
+      inputs: [
+        { ...MODULES[4].inputs[0], label: "How do you make money in practice?", placeholder: "Example: Selling courses, paid one-to-one coaching, sewing kits, affiliate revenue..." },
+      ],
+    },
+    {
+      ...MODULES[5],
+      label: "Pitch & Sales message",
+      tagline: "How do you convince and trigger purchase?",
+      description: "Turn your framing into a clear pitch, sales message and channel-adapted messaging.",
+      inputs: [
+        { ...MODULES[5].inputs[0], label: "Where do you sell or plan to sell?", placeholder: "Example: WhatsApp, Instagram, word of mouth, physical market, TikTok..." },
+      ],
+    },
+    {
+      ...MODULES[6],
+      label: "Business plan",
+      tagline: "Your full 12-month plan",
+      description: "A structured synthesis of your project: vision, market, business model, action plan and key indicators.",
+      inputs: [
+        { ...MODULES[6].inputs[0], label: "What time horizon?", placeholder: "Example: 12 months" },
+        { ...MODULES[6].inputs[1], label: "Your main goals", placeholder: "Example: Reach 20 paying clients, generate 200,000 FCFA/month..." },
+      ],
+    },
+  ];
+}
+
+function localizeDocLabels(locale: string): Record<string, { title: string; tagline: string }> {
+  if (!founderIsEnglish(locale)) {
+    return DOC_LABELS;
+  }
+
+  return {
+    client: { title: "Ideal customer", tagline: "Who this project is for" },
+    probleme: { title: "Core problem", tagline: "What we solve" },
+    offre: { title: "Offer & value proposition", tagline: "What we bring" },
+    prix: { title: "Pricing strategy", tagline: "Our pricing model" },
+    business_model: { title: "Business model", tagline: "How we create value" },
+    vente: { title: "Pitch & sales message", tagline: "Our commercial narrative" },
+    business_plan: { title: "Action plan", tagline: "Roadmap and priorities" },
+  };
+}
+
+function founderUi(locale: string) {
+  if (!founderIsEnglish(locale)) {
+    return {
+      newConversation: "Nouvelle conversation",
+      loadingWorkspace: "Préparation de l'espace Founder...",
+      authRequiredTitle: "Connexion requise pour Founder",
+      authRequiredBody: "Connectez-vous pour retrouver vos dossiers Founder, continuer votre cadrage guidé et exporter votre document final.",
+      login: "Se connecter",
+      loginNewTab: "Ouvrir la connexion Founder dans un nouvel onglet",
+      backGeneral: "Revenir au mode général",
+      history: "Historique Founder",
+      newFolder: "Nouveau dossier Founder",
+      yourConversations: "Vos conversations",
+      expandHistory: "Agrandir l'historique",
+      collapseHistory: "Réduire l'historique",
+      activeFolder: "Dossier actif",
+      founderFolder: "Dossier Founder",
+      archive: "Archiver",
+      generalMode: "Mode général",
+      framingBadge: "Espace de cadrage business guidé",
+      framingBody: "En 6 étapes, Founder vous aide à clarifier votre client cible, votre problème, votre offre, votre prix, votre modèle de revenus et votre pitch commercial — et à rédiger un dossier projet structuré, exportable à la fin du parcours.",
+      bravo: "Félicitations !",
+      stepsDone: "Les 6 étapes sont validées. Votre dossier est prêt.",
+      finalFolder: "Dossier final",
+      revisionTitle: "Mode révision",
+      revisionBody: "Modifiez vos réponses ci-dessous et régénérez pour affiner, ou revalidez directement la version existante.",
+      starterBadge: "ChatLAYA Founder",
+      starterTitle1: "Cadrez votre projet.",
+      starterTitle2: "Repartez avec un dossier exploitable.",
+      starterBody: "Un coach IA vous accompagne étape par étape pour clarifier votre client, votre problème, votre offre, votre prix, votre modèle économique et votre pitch commercial.",
+      deliverableTitle: "Le livrable vendu",
+      deliverableBody: "Un dossier projet rédigé dans les mots de l'utilisateur, exportable et présentable à un partenaire, une équipe ou un investisseur.",
+      startingPoint: "Point de départ",
+      startingTitle: "Décrivez votre projet en quelques phrases.",
+      startingBody: "Donnez l'idée, le client visé, ce que vous vendez ou ce que vous voulez lancer. Founder transformera ça en parcours de cadrage.",
+      startingPlaceholder: "Ex : Je veux vendre des PC portables performants aux étudiants et jeunes professionnels avec paiement échelonné...",
+      preparingFraming: "Préparation de votre cadrage…",
+      startFraming: "Commencer le cadrage",
+      loginToStart: "Se connecter pour commencer",
+      createAccount: "Créer un compte",
+      introAfterStart: "Ensuite, cette intro disparaît et vous travaillez étape par étape avec le coach.",
+      secureReturn: "Connexion securisee, puis retour direct sur ChatLAYA Founder.",
+      founderThinking: "ChatLAYA réfléchit",
+      finalizeTitle: "Finalisation du cadrage",
+      validated: "validée",
+      readyVersion: "version prête",
+      toWrite: "à rédiger",
+      yourFeedback: "Votre avis ou vos ajouts (optionnel)",
+      feedbackPlaceholder: "Ex : garde cette idée, mais précise que je cible surtout les PME de services ; ajoute aussi l'angle gain de temps et réduction des coûts.",
+      feedbackHelp: "Si vous n'ajoutez rien, Founder considère que vous validez le cadrage et rédige directement la version finale.",
+      preparingDoc: "Founder prépare le document…",
+      rewriteFinal: "Re-rédiger la version finale complète",
+      writeFinal: "Rédiger la version finale complète",
+      preparingFullDoc: "Préparation d'un document complet",
+      preparingFullDocBody: "Pour un meilleur rendu, Founder peut prendre 2 à 3 minutes afin de bien analyser, structurer et peaufiner la version dossier.",
+      dossierVersion: "Version dossier",
+      exportNote: "sera utilisée dans l'export final",
+      dossierPlaceholder: "La version finale rédigée par Founder apparaîtra ici. Vous pourrez encore la modifier avant validation.",
+      noUsableAnswer: "- Aucune réponse utilisateur exploitable pour cette étape.",
+      close: "Fermer",
+      closeHistory: "Fermer l'historique",
+      noFounderFiles: "Aucun dossier Founder pour le moment.",
+      optional: "optionnel",
+      generating: "Génération en cours…",
+      refineWithChatlaya: "Peaufiner avec ChatLAYA",
+      generateWithChatlaya: "Générer avec ChatLAYA",
+      cancel: "Annuler",
+      generatingAnother: "Génération en cours sur une autre étape…",
+      previousVersion: "Voir la version précédente",
+      chatlayaAnalysis: "Analyse ChatLAYA",
+      inProgress: "En cours…",
+      copyAction: "Copier",
+      copied: "Copié !",
+      revalidateForDossier: "Revalider pour le dossier",
+      validateForDossier: "Valider pour le dossier",
+      dossierVersionValidated: "Version dossier validée",
+      editThisStep: "Modifier cette étape",
+      exportDossier: "Exporter le dossier",
+      emptyStatePrefix: "Renseignez les champs ci-dessus puis cliquez sur",
+      synthesisBack: "Retour",
+      synthesisTitle: "Dossier projet final",
+      synthesisProjectOf: "Projet de {name}",
+      synthesisConsolidated: "Votre dossier consolidé",
+      exportPdf: "Exporter PDF",
+      exportIncomplete: "Exporter ({count} section{plural} incomplète{plural})",
+      noFormulationWarning: "{count} section{plural} sans formulation — le document exporté affichera des espaces vides à ces endroits.",
+      noFormulationSections: "Sections : {sections}. Le contenu coaching ne sera pas inclus.",
+      exportAnyway: "Exporter quand même",
+      noFinalFormulation: "{count} section{plural} sans formulation finale",
+      noFinalFormulationBody: "{sections} — ces sections apparaîtront comme non finalisées dans le document exporté. Le contenu coaching n'y sera pas inclus. Retournez dans chaque étape pour rédiger votre formulation propre.",
+      synthesisIntroBadge: "Dossier Projet — Synthèse complète",
+      synthesisIntroBody: "{count} section{plural} validée{plural}. Ce document présente votre projet cadré. Cliquez Exporter PDF pour générer le dossier premium.",
+      optionalStep: "Optionnelle",
+      finalFormulation: "Formulation finale",
+      coachingAnswerFallback: "Réponse de coaching (formulation finale non renseignée)",
+      downloadHtmlPdf: "Télécharger le dossier HTML · Imprimer en PDF",
+      exportIncompleteDossier: "Exporter le dossier incomplet",
+    };
+  }
+
+  return {
+    newConversation: "New conversation",
+    loadingWorkspace: "Preparing Founder workspace...",
+    authRequiredTitle: "Sign-in required for Founder",
+    authRequiredBody: "Sign in to recover your Founder files, continue your guided framing and export your final document.",
+    login: "Sign in",
+    loginNewTab: "Open Founder sign-in in a new tab",
+    backGeneral: "Back to general mode",
+    history: "Founder history",
+    newFolder: "New Founder file",
+    yourConversations: "Your conversations",
+    expandHistory: "Expand history",
+    collapseHistory: "Collapse history",
+    activeFolder: "Active file",
+    founderFolder: "Founder file",
+    archive: "Archive",
+    generalMode: "General mode",
+    framingBadge: "Guided business framing workspace",
+    framingBody: "In 6 steps, Founder helps you clarify your target customer, problem, offer, pricing, revenue model and sales pitch, then turn it into a structured exportable project file.",
+    bravo: "Congratulations!",
+    stepsDone: "All 6 steps are validated. Your file is ready.",
+    finalFolder: "Final file",
+    revisionTitle: "Revision mode",
+    revisionBody: "Edit your answers below and regenerate to refine them, or revalidate the current version directly.",
+    starterBadge: "ChatLAYA Founder",
+    starterTitle1: "Frame your project.",
+    starterTitle2: "Leave with an actionable file.",
+    starterBody: "An AI coach guides you step by step to clarify your customer, problem, offer, pricing, business model and sales pitch.",
+    deliverableTitle: "The sellable deliverable",
+    deliverableBody: "A project file written in the user's own words, exportable and presentable to a partner, team or investor.",
+    startingPoint: "Starting point",
+    startingTitle: "Describe your project in a few sentences.",
+    startingBody: "Give the idea, the target customer, what you sell or what you want to launch. Founder will turn that into a framing journey.",
+    startingPlaceholder: "Example: I want to sell high-performance laptops to students and young professionals with installment payments...",
+    preparingFraming: "Preparing your framing...",
+    startFraming: "Start framing",
+    loginToStart: "Sign in to start",
+    createAccount: "Create an account",
+    introAfterStart: "After that, this introduction disappears and you work step by step with the coach.",
+    secureReturn: "Secure sign-in, then direct return to ChatLAYA Founder.",
+    founderThinking: "ChatLAYA is thinking",
+    finalizeTitle: "Finalize the framing",
+    validated: "validated",
+    readyVersion: "ready version",
+    toWrite: "to write",
+    yourFeedback: "Your feedback or additions (optional)",
+    feedbackPlaceholder: "Example: keep this idea, but clarify that I mainly target service SMEs; also add the time-saving and cost-reduction angle.",
+    feedbackHelp: "If you add nothing, Founder assumes you validate the framing and drafts the final version directly.",
+    preparingDoc: "Founder is preparing the document...",
+    rewriteFinal: "Rewrite the full final version",
+    writeFinal: "Write the full final version",
+    preparingFullDoc: "Preparing a complete document",
+    preparingFullDocBody: "For a stronger result, Founder may take 2 to 3 minutes to analyze, structure and polish the dossier version.",
+    dossierVersion: "Dossier version",
+    exportNote: "used in the final export",
+    dossierPlaceholder: "The final version written by Founder will appear here. You can still edit it before validation.",
+    noUsableAnswer: "- No usable user answer for this step.",
+    close: "Close",
+    closeHistory: "Close history",
+    noFounderFiles: "No Founder files yet.",
+    optional: "optional",
+    generating: "Generating...",
+    refineWithChatlaya: "Refine with ChatLAYA",
+    generateWithChatlaya: "Generate with ChatLAYA",
+    cancel: "Cancel",
+    generatingAnother: "Generation is running on another step...",
+    previousVersion: "See previous version",
+    chatlayaAnalysis: "ChatLAYA analysis",
+    inProgress: "In progress...",
+    copyAction: "Copy",
+    copied: "Copied!",
+    revalidateForDossier: "Revalidate for the dossier",
+    validateForDossier: "Validate for the dossier",
+    dossierVersionValidated: "Dossier version validated",
+    editThisStep: "Edit this step",
+    exportDossier: "Export dossier",
+    emptyStatePrefix: "Fill in the fields above, then click",
+    synthesisBack: "Back",
+    synthesisTitle: "Final project dossier",
+    synthesisProjectOf: "{name}'s project",
+    synthesisConsolidated: "Your consolidated dossier",
+    exportPdf: "Export PDF",
+    exportIncomplete: "Export ({count} incomplete section{plural})",
+    noFormulationWarning: "{count} section{plural} without wording — the exported document will show empty spaces there.",
+    noFormulationSections: "Sections: {sections}. Coaching content will not be included.",
+    exportAnyway: "Export anyway",
+    noFinalFormulation: "{count} section{plural} without final wording",
+    noFinalFormulationBody: "{sections} — these sections will appear as unfinished in the exported document. Coaching content will not be included. Return to each step to write your own wording.",
+    synthesisIntroBadge: "Project dossier — complete synthesis",
+    synthesisIntroBody: "{count} validated section{plural}. This document presents your framed project. Click Export PDF to generate the premium dossier.",
+    optionalStep: "Optional",
+    finalFormulation: "Final wording",
+    coachingAnswerFallback: "Coaching answer (final wording not provided)",
+    downloadHtmlPdf: "Download HTML dossier · Print to PDF",
+    exportIncompleteDossier: "Export incomplete dossier",
+  };
+}
+
 // ─── Prompt builders ────────────────────────────────────────────────────────
 
-function buildPrompt(moduleId: string, inputs: Record<string, string>, ws: WorkspaceData): string {
+function buildPrompt(
+  locale: string,
+  moduleId: string,
+  inputs: Record<string, string>,
+  ws: WorkspaceData,
+  docLabels: Record<string, { title: string; tagline: string }>,
+): string {
   const get = (id: string) => {
     const s = ws[id];
     if (!s) return "";
@@ -269,68 +597,41 @@ function buildPrompt(moduleId: string, inputs: Record<string, string>, ws: Works
   const bizModel = get("business_model");
 
   const short = (s: string, n = 200) => (s.length > n ? s.slice(0, n) + "…" : s);
-  const founderDiagnosticMarker = `CHATLAYA_FOUNDER_GUIDED_DIAGNOSTIC\nÉtape Founder : ${DOC_LABELS[moduleId]?.title ?? moduleId}\n\n`;
+  const founderDiagnosticMarker = founderIsEnglish(locale)
+    ? `CHATLAYA_FOUNDER_GUIDED_DIAGNOSTIC\nFounder step: ${docLabels[moduleId]?.title ?? moduleId}\n\n`
+    : `CHATLAYA_FOUNDER_GUIDED_DIAGNOSTIC\nÉtape Founder : ${docLabels[moduleId]?.title ?? moduleId}\n\n`;
 
   switch (moduleId) {
     case "client":
-      return founderDiagnosticMarker + (
-        `Je travaille sur : ${inputs.activite || "(non précisé)"}. ` +
-        `Mon client cible selon moi est : ${inputs.client_idee || "(non précisé)"}. ` +
-        `Aide-moi à définir clairement mon client cible : qui il est vraiment, ses caractéristiques principales, ce qui le motive à acheter, et comment le trouver concrètement. Sois précis et actionnable.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `I am working on: ${inputs.activite || "(not specified)"}. My target customer, as I see it, is: ${inputs.client_idee || "(not specified)"}. Help me define my target customer clearly: who they really are, their main characteristics, what motivates them to buy and how to find them concretely. Be precise and actionable.`
+        : `Je travaille sur : ${inputs.activite || "(non précisé)"}. Mon client cible selon moi est : ${inputs.client_idee || "(non précisé)"}. Aide-moi à définir clairement mon client cible : qui il est vraiment, ses caractéristiques principales, ce qui le motive à acheter, et comment le trouver concrètement. Sois précis et actionnable.`);
     case "probleme":
-      return founderDiagnosticMarker + (
-        `Mon client cible est : ${client || "(non défini)"}. ` +
-        `Je pense résoudre ce problème : ${inputs.probleme_idee || "(non précisé)"}. ` +
-        `Aide-moi à formuler clairement ce problème : en quoi c'est douloureux pour le client, ce qu'il perd ou rate sans solution, et pourquoi ce problème vaut la peine d'être résolu. Sois concret.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `My target customer is: ${client || "(not defined)"}. I believe I solve this problem: ${inputs.probleme_idee || "(not specified)"}. Help me formulate this problem clearly: why it is painful for the customer, what they lose or miss without a solution, and why this problem is worth solving. Be concrete.`
+        : `Mon client cible est : ${client || "(non défini)"}. Je pense résoudre ce problème : ${inputs.probleme_idee || "(non précisé)"}. Aide-moi à formuler clairement ce problème : en quoi c'est douloureux pour le client, ce qu'il perd ou rate sans solution, et pourquoi ce problème vaut la peine d'être résolu. Sois concret.`);
     case "offre":
-      return founderDiagnosticMarker + (
-        `Mon client ${client ? `est : ${short(client)}` : "(défini à l'étape précédente)"}. ` +
-        `${probleme ? `Le problème qu'il rencontre : ${short(probleme)}. ` : ""}` +
-        `Mon offre est : ${inputs.offre_detail || "(non précisée)"}. ` +
-        `Le client gagne ou évite : ${inputs.gain_client || "(non précisé)"}. ` +
-        `Aide-moi à structurer une proposition de valeur claire et percutante : ce que je propose, pour qui, pourquoi c'est différent, et le bénéfice concret. En 3 à 5 points actionnables.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `My customer ${client ? `is: ${short(client)}` : "(defined in the previous step)"}. ${probleme ? `Their problem is: ${short(probleme)}. ` : ""}My offer is: ${inputs.offre_detail || "(not specified)"}. The customer gains or avoids: ${inputs.gain_client || "(not specified)"}. Help me structure a clear and compelling value proposition: what I offer, for whom, why it is different and the concrete benefit. In 3 to 5 actionable points.`
+        : `Mon client ${client ? `est : ${short(client)}` : "(défini à l'étape précédente)"}. ${probleme ? `Le problème qu'il rencontre : ${short(probleme)}. ` : ""}Mon offre est : ${inputs.offre_detail || "(non précisée)"}. Le client gagne ou évite : ${inputs.gain_client || "(non précisé)"}. Aide-moi à structurer une proposition de valeur claire et percutante : ce que je propose, pour qui, pourquoi c'est différent, et le bénéfice concret. En 3 à 5 points actionnables.`);
     case "prix":
-      return founderDiagnosticMarker + (
-        `${offre ? `Mon offre : ${short(offre)}. ` : ""}` +
-        `Mon client : ${short(client || "(défini précédemment)")}. ` +
-        `Je pense facturer : ${inputs.modele_prix || "(non précisé)"}` +
-        `${inputs.niveau_prix ? `, avec un niveau de prix de : ${inputs.niveau_prix}` : ""}. ` +
-        `Aide-moi à valider ma stratégie de prix : est-ce cohérent avec la valeur apportée, quelles questions je dois me poser, et comment tester mon prix rapidement.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `${offre ? `My offer: ${short(offre)}. ` : ""}My customer: ${short(client || "(defined previously)")}. I plan to charge: ${inputs.modele_prix || "(not specified)"}${inputs.niveau_prix ? `, with a price level of: ${inputs.niveau_prix}` : ""}. Help me validate my pricing strategy: is it consistent with the value delivered, what questions should I ask myself and how can I test the price quickly?`
+        : `${offre ? `Mon offre : ${short(offre)}. ` : ""}Mon client : ${short(client || "(défini précédemment)")}. Je pense facturer : ${inputs.modele_prix || "(non précisé)"}${inputs.niveau_prix ? `, avec un niveau de prix de : ${inputs.niveau_prix}` : ""}. Aide-moi à valider ma stratégie de prix : est-ce cohérent avec la valeur apportée, quelles questions je dois me poser, et comment tester mon prix rapidement.`);
     case "business_model":
-      return founderDiagnosticMarker + (
-        `${offre ? `Mon offre : ${short(offre)}. ` : ""}` +
-        `${client ? `Mon client : ${short(client)}. ` : ""}` +
-        `${prix ? `Mon prix : ${short(prix)}. ` : ""}` +
-        `Je génère des revenus via : ${inputs.revenus || "(non précisé)"}. ` +
-        `Aide-moi à structurer mon business model : flux de revenus principaux, coûts clés à anticiper, et comment le rendre plus solide ou scalable.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `${offre ? `My offer: ${short(offre)}. ` : ""}${client ? `My customer: ${short(client)}. ` : ""}${prix ? `My pricing: ${short(prix)}. ` : ""}I generate revenue through: ${inputs.revenus || "(not specified)"}. Help me structure my business model: main revenue streams, key costs to anticipate and how to make it more robust or scalable.`
+        : `${offre ? `Mon offre : ${short(offre)}. ` : ""}${client ? `Mon client : ${short(client)}. ` : ""}${prix ? `Mon prix : ${short(prix)}. ` : ""}Je génère des revenus via : ${inputs.revenus || "(non précisé)"}. Aide-moi à structurer mon business model : flux de revenus principaux, coûts clés à anticiper, et comment le rendre plus solide ou scalable.`);
     case "vente":
-      return founderDiagnosticMarker + (
-        `${offre ? `Mon offre : ${short(offre, 120)}. ` : ""}` +
-        `${client ? `Mon client : ${short(client, 100)}. ` : ""}` +
-        `${probleme ? `Son problème : ${short(probleme, 100)}. ` : ""}` +
-        `Je vends via : ${inputs.canal || "mes canaux habituels"}. ` +
-        `Aide-moi à transformer ce cadrage en pitch et message de vente convaincant adapté à ${inputs.canal || "ce canal"}. ` +
-        `Il doit clarifier la promesse, capter l'attention, montrer la valeur, lever les objections et appeler à l'action. Donne une base de pitch et 2 à 3 variantes courtes.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `${offre ? `My offer: ${short(offre, 120)}. ` : ""}${client ? `My customer: ${short(client, 100)}. ` : ""}${probleme ? `Their problem: ${short(probleme, 100)}. ` : ""}I sell through: ${inputs.canal || "my usual channels"}. Help me turn this framing into a convincing pitch and sales message adapted to ${inputs.canal || "that channel"}. It must clarify the promise, grab attention, show value, handle objections and call to action. Give me a core pitch and 2 to 3 short variants.`
+        : `${offre ? `Mon offre : ${short(offre, 120)}. ` : ""}${client ? `Mon client : ${short(client, 100)}. ` : ""}${probleme ? `Son problème : ${short(probleme, 100)}. ` : ""}Je vends via : ${inputs.canal || "mes canaux habituels"}. Aide-moi à transformer ce cadrage en pitch et message de vente convaincant adapté à ${inputs.canal || "ce canal"}. Il doit clarifier la promesse, capter l'attention, montrer la valeur, lever les objections et appeler à l'action. Donne une base de pitch et 2 à 3 variantes courtes.`);
     case "business_plan":
-      return founderDiagnosticMarker + (
-        `Voici le résumé de mon projet :\n` +
-        `- Client cible : ${client || "(à compléter)"}\n` +
-        `- Problème résolu : ${short(probleme || "(à définir)")}\n` +
-        `- Offre : ${short(offre || "(à structurer)")}\n` +
-        `- Prix : ${short(prix || "(à définir)")}\n` +
-        `- Business model : ${short(bizModel || "(à structurer)")}\n\n` +
-        `Aide-moi à rédiger un business plan simple et exploitable sur ${inputs.horizon || "12 mois"}` +
-        `${inputs.objectifs ? ` avec ces objectifs : ${inputs.objectifs}` : ""}. ` +
-        `Garde-le pratique, pas académique : vision, marché cible, offre et valeur, modèle économique, plan d'action prioritaire, indicateurs clés.`
-      );
+      return founderDiagnosticMarker + (founderIsEnglish(locale)
+        ? `Here is the summary of my project:\n- Target customer: ${client || "(to complete)"}\n- Problem solved: ${short(probleme || "(to define)")}\n- Offer: ${short(offre || "(to structure)")}\n- Pricing: ${short(prix || "(to define)")}\n- Business model: ${short(bizModel || "(to structure)")}\n\nHelp me write a simple and actionable business plan over ${inputs.horizon || "12 months"}${inputs.objectifs ? ` with these goals: ${inputs.objectifs}` : ""}. Keep it practical, not academic: vision, target market, offer and value, business model, priority action plan, key indicators.`
+        : `Voici le résumé de mon projet :\n- Client cible : ${client || "(à compléter)"}\n- Problème résolu : ${short(probleme || "(à définir)")}\n- Offre : ${short(offre || "(à structurer)")}\n- Prix : ${short(prix || "(à définir)")}\n- Business model : ${short(bizModel || "(à structurer)")}\n\nAide-moi à rédiger un business plan simple et exploitable sur ${inputs.horizon || "12 mois"}${inputs.objectifs ? ` avec ces objectifs : ${inputs.objectifs}` : ""}. Garde-le pratique, pas académique : vision, marché cible, offre et valeur, modèle économique, plan d'action prioritaire, indicateurs clés.`);
     default:
-      return "Aide-moi sur cette étape de mon projet.";
+      return founderIsEnglish(locale) ? "Help me on this step of my project." : "Aide-moi sur cette étape de mon projet.";
   }
 }
 
@@ -343,10 +644,95 @@ function formatInputsForPrompt(mod: ModuleDef, inputs: Record<string, string>): 
     })
     .filter(Boolean);
 
-  return lines.length ? lines.join("\n") : "- Aucune réponse utilisateur exploitable pour cette étape.";
+  return lines.length ? lines.join("\n") : founderUi(founderIsEnglish(mod.label) ? "en" : "fr").noUsableAnswer;
 }
 
-function finalDraftStructure(moduleId: string, docTitle: string): string {
+function finalDraftStructure(locale: string, moduleId: string, docTitle: string): string {
+  if (founderIsEnglish(locale)) {
+    const structures: Record<string, string> = {
+      client:
+        `Expected structure, matching the depth of the validated example:\n` +
+        `${docTitle}: [specific segment]\n\n` +
+        `Target Customer Profile and Characteristics\n` +
+        `Buying Motivation and Core Pain Points\n` +
+        `Offer Positioning and Perceived Value\n` +
+        `Discovery Strategy and Acquisition Channels\n` +
+        `Lead Qualification Criteria\n` +
+        `Nuances and Pitfalls to Avoid\n` +
+        `Value Proposition Synthesis`,
+      probleme:
+        `Expected structure, with the same depth as a premium section:\n` +
+        `${docTitle}: [core pain]\n\n` +
+        `Nature of the Customer Problem\n` +
+        `Operational and Economic Consequences\n` +
+        `Urgency and Cost of Inaction\n` +
+        `Segments Most Exposed to this Pain\n` +
+        `Field Validation Signals\n` +
+        `Risks of Poor Framing\n` +
+        `Pain-to-Solve Synthesis`,
+      offre:
+        `Expected structure, with real dossier logic:\n` +
+        `${docTitle}: [main promise]\n\n` +
+        `Offer Definition\n` +
+        `Concrete Customer Benefits\n` +
+        `Differentiation and Perceived Value\n` +
+        `Offer Components\n` +
+        `Proof, Guarantees or Reassurance Elements\n` +
+        `Commercial Clarity Conditions\n` +
+        `Value Proposition Synthesis`,
+      prix:
+        `Expected structure, oriented toward business decisions:\n` +
+        `${docTitle}: [pricing logic]\n\n` +
+        `Recommended Pricing Logic\n` +
+        `Link Between Price and Perceived Value\n` +
+        `Cost and Margin Assumptions\n` +
+        `Possible Billing Options\n` +
+        `Price Testing Method\n` +
+        `Pricing Risks to Avoid\n` +
+        `Pricing Strategy Synthesis`,
+      business_model:
+        `Expected structure, like a readable investor section:\n` +
+        `${docTitle}: [selected model]\n\n` +
+        `Overall Business Model Logic\n` +
+        `Priority Revenue Sources\n` +
+        `Key Costs and Required Resources\n` +
+        `Value Creation and Capture Mechanics\n` +
+        `Scalability and Leverage Effects\n` +
+        `Assumptions to Validate\n` +
+        `Business Model Synthesis`,
+      vente:
+        `Expected structure, ready for commercial use:\n` +
+        `${docTitle}: [sales angle]\n\n` +
+        `Main Commercial Angle\n` +
+        `Promise to Communicate\n` +
+        `Core Sales Message\n` +
+        `Conviction Arguments\n` +
+        `Channels and Usage Situations\n` +
+        `Likely Objections and Responses\n` +
+        `Commercial Narrative Synthesis`,
+      business_plan:
+        `Expected structure, concise but substantial:\n` +
+        `${docTitle}: [horizon and priority]\n\n` +
+        `Project Vision and Goal\n` +
+        `Target Market and Problem Solved\n` +
+        `Offer, Value and Positioning\n` +
+        `Business Model and Revenue Assumptions\n` +
+        `Priority Action Plan\n` +
+        `Tracking Indicators\n` +
+        `Executive Plan Synthesis`,
+    };
+
+    return structures[moduleId] ?? (
+      `Expected structure:\n` +
+      `${docTitle}\n\n` +
+      `Context\n` +
+      `Analysis\n` +
+      `Business Implications\n` +
+      `Validation Criteria\n` +
+      `Synthesis`
+    );
+  }
+
   const structures: Record<string, string> = {
     client:
       `Structure attendue, en reprenant le niveau de profondeur de l'exemple validé :\n` +
@@ -431,24 +817,40 @@ function finalDraftStructure(moduleId: string, docTitle: string): string {
   );
 }
 
-function buildFinalDraftPrompt(moduleId: string, state: ModuleState, ws: WorkspaceData): string {
-  const mod = MODULES.find((item) => item.id === moduleId);
-  const docLabel = DOC_LABELS[moduleId] ?? { title: mod?.label ?? "Section dossier", tagline: "" };
-  const expectedStructure = finalDraftStructure(moduleId, docLabel.title);
-  const priorContext = MODULES
+function buildFinalDraftPrompt(
+  locale: string,
+  moduleId: string,
+  state: ModuleState,
+  ws: WorkspaceData,
+  modules: ModuleDef[],
+  docLabels: Record<string, { title: string; tagline: string }>,
+): string {
+  const mod = modules.find((item) => item.id === moduleId);
+  const docLabel = docLabels[moduleId] ?? { title: mod?.label ?? (founderIsEnglish(locale) ? "Dossier section" : "Section dossier"), tagline: "" };
+  const expectedStructure = finalDraftStructure(locale, moduleId, docLabel.title);
+  const priorContext = modules
     .filter((item) => item.id !== moduleId)
     .map((item) => {
       const itemState = ws[item.id];
       const content = itemState?.retention?.trim() || itemState?.output?.trim();
       if (!content) return "";
-      const label = DOC_LABELS[item.id]?.title ?? item.label;
+      const label = docLabels[item.id]?.title ?? item.label;
       const shortContent = content.length > 900 ? `${content.slice(0, 900)}…` : content;
       return `## ${label}\n${shortContent}`;
     })
     .filter(Boolean)
     .join("\n\n");
 
-  return (
+  return founderIsEnglish(locale) ? (
+    `You are ChatLAYA Founder. You must write the FINAL DOSSIER VERSION for this step: "${docLabel.title}".\n\n` +
+    `Role of the final text: ${docLabel.tagline || "a section usable in a project dossier"}.\n\n` +
+    `Initial user answers:\n${mod ? formatInputsForPrompt(mod, state.inputs) : "(module not found)"}\n\n` +
+    `ChatLAYA diagnostic / framing to consider:\n${state.output?.trim() || "(no diagnostic available)"}\n\n` +
+    `User feedback, corrections or additions:\n${state.finalFeedback?.trim() || "(no additions: the user validates the proposed framing)"}\n\n` +
+    `${priorContext ? `Context already framed in the other steps:\n${priorContext}\n\n` : ""}` +
+    `${expectedStructure}\n\n` +
+    `Writing instruction: produce only the final version to place in the dossier. Do not coach, do not ask questions, do not say "here is". This version must be strong enough to be sold as part of a real premium project dossier: dense, clear and actionable. Do not write a summary. Write a full section with at least 5 to 8 paragraphs or structured blocks depending on the material available. Develop the business logic, criteria, implications, nuances and validation points that matter. Follow the expected structure above with clean headings on separate lines. Rephrase with substance, precision and business coherence. Do not use visible Markdown. Never end with a transition sentence like "the next step is..." or a question. Never artificially shorten the answer: a version that is too short is considered a failure.`
+  ) : (
     `Tu es ChatLAYA Founder. Tu dois rédiger la VERSION FINALE DU DOSSIER pour cette étape : "${docLabel.title}".\n\n` +
     `Rôle du texte final : ${docLabel.tagline || "section utilisable dans un dossier projet"}.\n\n` +
     `Réponses initiales de l'utilisateur :\n${mod ? formatInputsForPrompt(mod, state.inputs) : "(module introuvable)"}\n\n` +
@@ -645,6 +1047,7 @@ function RetentionBlock({
   onGenerateFinal,
   generatingFinal,
   validated,
+  locale = "fr",
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -653,7 +1056,9 @@ function RetentionBlock({
   onGenerateFinal: () => void;
   generatingFinal: boolean;
   validated: boolean;
+  locale?: string;
 }) {
+  const copy = founderUi(locale);
   const isFilled = Boolean(value.trim());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -671,20 +1076,20 @@ function RetentionBlock({
   }, [generatingFinal]);
 
   const progressSteps = [
-    "J'analyse le diagnostic et vos ajouts",
-    "Je structure les idées en version dossier",
-    "Je peaufine le fond, la clarté et les nuances",
-    "Je nettoie la formulation finale",
+    founderIsEnglish(locale) ? "I analyze the diagnostic and your additions" : "J'analyse le diagnostic et vos ajouts",
+    founderIsEnglish(locale) ? "I structure the ideas into dossier form" : "Je structure les idées en version dossier",
+    founderIsEnglish(locale) ? "I refine the substance, clarity and nuance" : "Je peaufine le fond, la clarté et les nuances",
+    founderIsEnglish(locale) ? "I clean up the final wording" : "Je nettoie la formulation finale",
   ];
   const activeProgressStep = elapsedSeconds < 25 ? 0 : elapsedSeconds < 80 ? 1 : elapsedSeconds < 140 ? 2 : 3;
   const progressMessage =
     elapsedSeconds < 25
-      ? "Je suis en train d'identifier les points les plus importants à conserver."
+      ? (founderIsEnglish(locale) ? "I am identifying the most important points to preserve." : "Je suis en train d'identifier les points les plus importants à conserver.")
       : elapsedSeconds < 80
-        ? "Je transforme le cadrage en document structuré, lisible et exploitable."
+        ? (founderIsEnglish(locale) ? "I am turning the framing into a structured, readable and actionable document." : "Je transforme le cadrage en document structuré, lisible et exploitable.")
         : elapsedSeconds < 140
-          ? "Je peaufine les formulations pour obtenir un rendu plus professionnel."
-          : "Patientez encore un instant, la version finale est presque prête.";
+          ? (founderIsEnglish(locale) ? "I am polishing the wording for a more professional result." : "Je peaufine les formulations pour obtenir un rendu plus professionnel.")
+          : (founderIsEnglish(locale) ? "One moment more, the final version is almost ready." : "Patientez encore un instant, la version finale est presque prête.");
   const progressPercent = Math.min(92, Math.max(12, Math.round((elapsedSeconds / 180) * 100)));
 
   return (
@@ -693,26 +1098,26 @@ function RetentionBlock({
         <div className="flex items-center gap-2">
           <PenLine className="h-3.5 w-3.5 text-[#B8963E]" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-[#8A6A20]">
-            Finalisation du cadrage
+            {copy.finalizeTitle}
           </span>
         </div>
         <span className="rounded-full bg-white/70 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-[#B8963E] ring-1 ring-[#E7DED0]">
-          {validated ? "validée" : isFilled ? "version prête" : "à rédiger"}
+          {validated ? copy.validated : isFilled ? copy.readyVersion : copy.toWrite}
         </span>
       </div>
       <div>
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#B8963E]">
-          Votre avis ou vos ajouts (optionnel)
+          {copy.yourFeedback}
         </p>
         <textarea
           value={feedback}
           onChange={(e) => onFeedbackChange(e.target.value)}
-          placeholder="Ex : garde cette idée, mais précise que je cible surtout les PME de services ; ajoute aussi l'angle gain de temps et réduction des coûts."
+          placeholder={copy.feedbackPlaceholder}
           rows={3}
           className="w-full resize-none rounded-xl border border-[#E7DED0] bg-white/70 px-3.5 py-3 text-sm leading-relaxed text-[#101015] placeholder:text-[#C8B88A]/80 focus:border-[#B8963E] focus:outline-none"
         />
         <p className="mt-2 text-[11px] leading-relaxed text-[#6F6A60]">
-          Si vous n'ajoutez rien, Founder considère que vous validez le cadrage et rédige directement la version finale.
+          {copy.feedbackHelp}
         </p>
       </div>
       <button
@@ -722,15 +1127,15 @@ function RetentionBlock({
         className="inline-flex items-center gap-2 rounded-full bg-[#101015] px-5 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Sparkles className="h-3.5 w-3.5" />
-        {generatingFinal ? "Founder prépare le document…" : isFilled ? "Re-rédiger la version finale complète" : "Rédiger la version finale complète"}
+        {generatingFinal ? copy.preparingDoc : isFilled ? copy.rewriteFinal : copy.writeFinal}
       </button>
       {generatingFinal ? (
         <div className="rounded-2xl border border-[#E7DED0] bg-white/80 p-4 shadow-[0_12px_35px_rgba(184,150,62,0.08)]">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-sm font-bold text-[#101015]">Préparation d'un document complet</p>
+              <p className="text-sm font-bold text-[#101015]">{copy.preparingFullDoc}</p>
               <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
-                Pour un meilleur rendu, Founder peut prendre 2 à 3 minutes afin de bien analyser, structurer et peaufiner la version dossier.
+                {copy.preparingFullDocBody}
               </p>
             </div>
             <span className="shrink-0 rounded-full bg-[#F0E6CC] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#8A6A20]">
@@ -773,13 +1178,13 @@ function RetentionBlock({
       ) : null}
       <div className="rounded-xl border border-[#E7DED0] bg-white/70 p-3.5">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8A6A20]">Version dossier</p>
-          <span className="text-[9px] font-medium italic text-[#B8963E]/70">sera utilisée dans l'export final</span>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8A6A20]">{copy.dossierVersion}</p>
+          <span className="text-[9px] font-medium italic text-[#B8963E]/70">{copy.exportNote}</span>
         </div>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="La version finale rédigée par Founder apparaîtra ici. Vous pourrez encore la modifier avant validation."
+          placeholder={copy.dossierPlaceholder}
           rows={12}
           className="min-h-[320px] w-full resize-y bg-transparent text-sm leading-relaxed text-[#101015] placeholder:text-[#C8B88A]/80 focus:outline-none"
         />
@@ -790,21 +1195,24 @@ function RetentionBlock({
 
 // ─── localStorage ─────────────────────────────────────────────────────────────
 
-function storageKey(cid: string) { return `kx-founder-ws-${cid}`; }
-function loadWs(cid: string): WorkspaceData {
-  try { const raw = localStorage.getItem(storageKey(cid)); if (raw) return JSON.parse(raw) as WorkspaceData; } catch {}
+function storageKey(projectId: string) { return `kx-founder-ws-${projectId}`; }
+function loadWs(projectId: string): WorkspaceData {
+  try {
+    const raw = localStorage.getItem(storageKey(projectId));
+    if (raw) return JSON.parse(raw) as WorkspaceData;
+  } catch {}
   return {};
 }
-function saveWs(cid: string, data: WorkspaceData) {
-  try { localStorage.setItem(storageKey(cid), JSON.stringify(data)); } catch {}
+function saveWs(projectId: string, data: WorkspaceData) {
+  try { localStorage.setItem(storageKey(projectId), JSON.stringify(data)); } catch {}
 }
 function defaultMs(): ModuleState { return { inputs: {}, output: null, status: "empty" }; }
 function getMs(ws: WorkspaceData, id: string): ModuleState { return ws[id] ?? defaultMs(); }
-function normalizeTitle(value?: string | null) { return value?.trim() || "Nouvelle conversation"; }
-function formatConversationDate(value?: string | null) {
+function normalizeTitle(value?: string | null, locale = "fr") { return value?.trim() || founderUi(locale).newConversation; }
+function formatConversationDate(value?: string | null, locale = "fr") {
   if (!value) return "";
   try {
-    return new Intl.DateTimeFormat("fr-FR", {
+    return new Intl.DateTimeFormat(founderIsEnglish(locale) ? "en-US" : "fr-FR", {
       day: "2-digit",
       month: "short",
       hour: "2-digit",
@@ -815,23 +1223,121 @@ function formatConversationDate(value?: string | null) {
   }
 }
 
+function getOrCreateFounderGuestId(): string {
+  const existing = localStorage.getItem(FOUNDER_GUEST_ID_KEY)?.trim();
+  if (existing) return existing;
+  const nextValue = `founder_guest_${crypto.randomUUID()}`;
+  localStorage.setItem(FOUNDER_GUEST_ID_KEY, nextValue);
+  return nextValue;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" ? value as Record<string, unknown> : {};
+}
+
+function readWorkspaceData(project: FounderProject): WorkspaceData {
+  const projectData = asRecord(project.project_data);
+  const nestedWorkspace = asRecord(projectData.workspace);
+  const directWorkspace = MODULES.some((module) => module.id in projectData) ? projectData : nestedWorkspace;
+  const baseWorkspace = Object.keys(directWorkspace).length ? directWorkspace : loadWs(project.id);
+  return baseWorkspace as WorkspaceData;
+}
+
+function readStarterProject(project: FounderProject): string {
+  const projectData = asRecord(project.project_data);
+  if (typeof projectData.starter_project === "string") return projectData.starter_project;
+  if (typeof projectData.starterProject === "string") return projectData.starterProject;
+  const workspace = readWorkspaceData(project);
+  return typeof workspace.client?.inputs?.activite === "string" ? workspace.client.inputs.activite : "";
+}
+
+function readActiveModuleId(project: FounderProject, workspace: WorkspaceData): string {
+  const projectData = asRecord(project.project_data);
+  const savedActiveModuleId = typeof projectData.active_module_id === "string" ? projectData.active_module_id : null;
+  if (savedActiveModuleId && MODULES.some((module) => module.id === savedActiveModuleId)) {
+    return savedActiveModuleId;
+  }
+  const fromStep = project.current_step ? FOUNDER_MODULE_ID_BY_STEP[project.current_step] : null;
+  if (fromStep) return fromStep;
+  const firstIncomplete = MODULES.find((module) => {
+    const state = workspace[module.id];
+    return !state || state.status !== "completed";
+  });
+  return firstIncomplete?.id ?? MODULES[0].id;
+}
+
+function buildFounderProjectTitle(starterProject: string, workspace: WorkspaceData, locale: string, fallback?: string | null): string {
+  const firstLine = starterProject.trim()
+    || workspace.client?.inputs?.activite?.trim()
+    || workspace.client?.inputs?.client_idee?.trim()
+    || fallback?.trim()
+    || "";
+  return normalizeTitle(firstLine.slice(0, 120), locale) || FOUNDER_DEFAULT_PROJECT_TITLE;
+}
+
+function buildFounderProjectData(starterProject: string, workspace: WorkspaceData, activeModuleId: string): Record<string, unknown> {
+  return {
+    starter_project: starterProject,
+    active_module_id: activeModuleId,
+    workspace,
+  };
+}
+
+function buildFounderCurrentStep(activeModuleId: string, workspace: WorkspaceData): string {
+  const requiredModuleIds = MODULES.filter((module) => !module.optional).map((module) => module.id);
+  const allRequiredCompleted = requiredModuleIds.every((moduleId) => getMs(workspace, moduleId).status === "completed");
+  if (allRequiredCompleted) return "completed";
+  return FOUNDER_STEP_BY_MODULE_ID[activeModuleId] || "point_de_depart";
+}
+
+function buildWorkspaceFromBrief(brief: string): WorkspaceData {
+  if (!brief.trim()) return {};
+  return {
+    client: {
+      ...defaultMs(),
+      inputs: { activite: brief.trim() },
+      status: "in_progress",
+    },
+  };
+}
+
+function mergeFounderProjectList(items: FounderProject[], nextProject: FounderProject): FounderProject[] {
+  const merged = [nextProject, ...items.filter((item) => item.id !== nextProject.id && !item.archived)];
+  return merged.sort((left, right) => {
+    const leftTime = Date.parse(left.updated_at || left.created_at || "") || 0;
+    const rightTime = Date.parse(right.updated_at || right.created_at || "") || 0;
+    return rightTime - leftTime;
+  });
+}
+
 // ─── GeneratingCard ───────────────────────────────────────────────────────────
 
-const GENERATING_MSGS = [
-  "Je mobilise le corpus Fondateur…",
-  "J'analyse votre situation sous tous les angles…",
-  "Je structure une réponse adaptée à votre projet…",
-  "Je peaufine pour que ce soit vraiment utile…",
-  "Presque là — je finalise pour vous…",
-];
+function getGeneratingMessages(locale: string) {
+  return founderIsEnglish(locale)
+    ? [
+        "I’m activating the Founder corpus...",
+        "I’m analyzing your situation from every angle...",
+        "I’m structuring a response tailored to your project...",
+        "I’m polishing it to make it genuinely useful...",
+        "Almost there — I’m finalizing it for you...",
+      ]
+    : [
+        "Je mobilise le corpus Fondateur…",
+        "J'analyse votre situation sous tous les angles…",
+        "Je structure une réponse adaptée à votre projet…",
+        "Je peaufine pour que ce soit vraiment utile…",
+        "Presque là — je finalise pour vous…",
+      ];
+}
 
-function GeneratingCard({ firstName }: { firstName?: string }) {
+function GeneratingCard({ firstName, locale }: { firstName?: string; locale: string }) {
+  const messages = getGeneratingMessages(locale);
   const [phase, setPhase] = useState(0);
   useEffect(() => {
     setPhase(0);
-    const id = setInterval(() => setPhase((p) => (p + 1) % GENERATING_MSGS.length), 2800);
+    const id = setInterval(() => setPhase((p) => (p + 1) % messages.length), 2800);
     return () => clearInterval(id);
-  }, []);
+  }, [messages]);
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#E7DED0] bg-white px-5 py-4 shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
       <div className="flex items-center gap-2.5">
@@ -842,10 +1348,10 @@ function GeneratingCard({ firstName }: { firstName?: string }) {
             />
           ))}
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">ChatLAYA réfléchit</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">{founderUi(locale).founderThinking}</span>
       </div>
       <p key={phase} className="kx-thinking-msg text-sm leading-relaxed text-[#3A3530]">
-        {firstName ? GENERATING_MSGS[phase] : GENERATING_MSGS[phase]}
+        {firstName ? messages[phase] : messages[phase]}
       </p>
       <div className="h-[3px] w-full overflow-hidden rounded-full bg-[#F0E6CC]">
         <div className="kx-thinking-scan h-full w-1/3 rounded-full bg-gradient-to-r from-[#B8963E] via-[#D4AE5C] to-[#B8963E]" />
@@ -896,9 +1402,10 @@ function buildSectionHeadline(label: string): string {
   return `${escapeHtml(words.slice(0, mid).join(" "))}<br>${escapeHtml(words.slice(mid).join(" "))}`;
 }
 
-function buildEditorialContentHtml(retention: string, docLabel: { title: string; tagline: string }, index: number): string {
+function buildEditorialContentHtml(retention: string, docLabel: { title: string; tagline: string }, index: number, locale: string): string {
   const paragraphs = splitExportParagraphs(retention);
   if (!paragraphs.length) return "";
+  const isEnglish = founderIsEnglish(locale);
 
   const intro = paragraphs[0];
   const rest = paragraphs.slice(1);
@@ -918,7 +1425,7 @@ function buildEditorialContentHtml(retention: string, docLabel: { title: string;
 
   const calloutHtml = lead
     ? `<div class="callout">
-        <div class="callout-label">Synthèse stratégique</div>
+        <div class="callout-label">${isEnglish ? "Strategic summary" : "Synthèse stratégique"}</div>
         <p>${inlineToHtml(lead)}</p>
       </div>`
     : "";
@@ -934,7 +1441,7 @@ function buildEditorialContentHtml(retention: string, docLabel: { title: string;
     if (group.length === 2 && groupIndex === 0) {
       return `<div class="two-col">
         ${group.map((item, cardIndex) => `<div class="card">
-          <div class="card-title">${cardIndex === 0 ? "Point d'appui" : "Angle de validation"}</div>
+          <div class="card-title">${cardIndex === 0 ? (isEnglish ? "Leverage point" : "Point d'appui") : (isEnglish ? "Validation angle" : "Angle de validation")}</div>
           <p>${inlineToHtml(item)}</p>
         </div>`).join("")}
       </div>`;
@@ -951,13 +1458,13 @@ function buildEditorialContentHtml(retention: string, docLabel: { title: string;
       return `<div class="pillars">
         ${group.slice(0, 3).map((item, itemIndex) => `<div class="pillar">
           <div class="pillar-num">${itemIndex + 1}</div>
-          <div class="pillar-title">Pilier ${itemIndex + 1}</div>
+          <div class="pillar-title">${isEnglish ? "Pillar" : "Pilier"} ${itemIndex + 1}</div>
           <p>${inlineToHtml(item)}</p>
         </div>`).join("")}
       </div>`;
     }
     return `<div class="block">
-      <div class="block-title">${groupIndex === 0 ? "Développement" : "Précision complémentaire"}</div>
+      <div class="block-title">${groupIndex === 0 ? (isEnglish ? "Development" : "Développement") : (isEnglish ? "Additional detail" : "Précision complémentaire")}</div>
       ${group.map((item) => `<p>${inlineToHtml(item)}</p>`).join("")}
     </div>`;
   }).join("");
@@ -965,8 +1472,9 @@ function buildEditorialContentHtml(retention: string, docLabel: { title: string;
   return `${firstHtml}${calloutHtml}${detailHtml}`;
 }
 
-function generateHtmlExport(ws: WorkspaceData, modules: ModuleDef[], firstName?: string): string {
-  const date = new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+function generateHtmlExport(locale: string, ws: WorkspaceData, modules: ModuleDef[], docLabels: Record<string, { title: string; tagline: string }>, firstName?: string): string {
+  const copy = founderUi(locale);
+  const date = new Date().toLocaleDateString(founderIsEnglish(locale) ? "en-US" : "fr-FR", { year: "numeric", month: "long", day: "numeric" });
   const completed = modules.filter((m) => getMs(ws, m.id).status === "completed");
   const requiredTotal = modules.filter((m) => !m.optional).length;
 
@@ -975,31 +1483,31 @@ function generateHtmlExport(ws: WorkspaceData, modules: ModuleDef[], firstName?:
   const missingFormulation = completed.filter((m) => !m.optional && !getMs(ws, m.id).retention?.trim());
   const isDossierComplete = requiredWithFormulation === requiredTotal;
 
-  const displayName = firstName?.trim() || "Projet Founder";
+  const displayName = firstName?.trim() || (founderIsEnglish(locale) ? "Founder Project" : "Projet Founder");
   const exportSections = completed.length ? completed : modules.filter((m) => getMs(ws, m.id).retention?.trim());
   const coverPills = exportSections.slice(0, 6).map((mod) => {
-    const label = DOC_LABELS[mod.id] ?? { title: mod.label, tagline: mod.tagline };
+    const label = docLabels[mod.id] ?? { title: mod.label, tagline: mod.tagline };
     return `<span class="section-pill">${escapeHtml(label.title)}</span>`;
   }).join("");
 
   // Incomplete document banner — shown when required sections lack user formulation
   const incompleteHtml = missingFormulation.length > 0 ? `
   <div class="alert-box export-alert">
-    <div class="alert-title">Dossier incomplet</div>
-    <p>${missingFormulation.length} section${missingFormulation.length > 1 ? "s" : ""} sans formulation rédigée : <strong>${missingFormulation.map((m) => escapeHtml(DOC_LABELS[m.id]?.title ?? m.label)).join(", ")}</strong>. Ces sections apparaissent comme non finalisées ci-dessous.</p>
+    <div class="alert-title">${founderIsEnglish(locale) ? "Incomplete dossier" : "Dossier incomplet"}</div>
+    <p>${copy.noFormulationWarning.replace("{count}", String(missingFormulation.length)).replaceAll("{plural}", missingFormulation.length > 1 ? "s" : "")} <strong>${missingFormulation.map((m) => escapeHtml(docLabels[m.id]?.title ?? m.label)).join(", ")}</strong>.</p>
   </div>` : "";
 
   // Section bodies — STRICT: only user formulation, never AI coaching output
   const sections = exportSections.map((mod, idx) => {
     const mws = getMs(ws, mod.id);
-    const docLabel = DOC_LABELS[mod.id] ?? { title: mod.label, tagline: mod.tagline };
+    const docLabel = docLabels[mod.id] ?? { title: mod.label, tagline: mod.tagline };
     const retention = getDocContent(mws);
     const sectionNumber = String(idx + 1).padStart(2, "0");
 
-    const contentHtml = retention ? buildEditorialContentHtml(retention, docLabel, idx) : `
+    const contentHtml = retention ? buildEditorialContentHtml(retention, docLabel, idx, locale) : `
         <div class="alert-box">
-          <div class="alert-title">Formulation non rédigée</div>
-          <p>Cette section a été analysée en mode coaching, mais sa version dossier finale n'a pas encore été rédigée. Le contenu coaching n'est pas inclus dans ce document.</p>
+          <div class="alert-title">${founderIsEnglish(locale) ? "Wording not drafted" : "Formulation non rédigée"}</div>
+          <p>${founderIsEnglish(locale) ? "This section was analyzed in coaching mode, but its final dossier wording has not yet been written. Coaching content is not included in this document." : "Cette section a été analysée en mode coaching, mais sa version dossier finale n'a pas encore été rédigée. Le contenu coaching n'est pas inclus dans ce document."}</p>
         </div>`;
 
     return `
@@ -1018,7 +1526,7 @@ function generateHtmlExport(ws: WorkspaceData, modules: ModuleDef[], firstName?:
   }).join("\n");
 
   const toc = exportSections.map((mod, idx) => {
-    const docLabel = DOC_LABELS[mod.id] ?? { title: mod.label, tagline: mod.tagline };
+    const docLabel = docLabels[mod.id] ?? { title: mod.label, tagline: mod.tagline };
     const sectionNumber = String(idx + 1).padStart(2, "0");
     return `<a href="#s${sectionNumber}" class="toc-item">
         <div class="toc-item-num">${sectionNumber}</div>
@@ -1030,11 +1538,11 @@ function generateHtmlExport(ws: WorkspaceData, modules: ModuleDef[], firstName?:
   }).join("\n");
 
   return `<!DOCTYPE html>
-<html lang="fr">
+<html lang="${founderIsEnglish(locale) ? "en" : "fr"}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dossier Projet${firstName ? ` · ${firstName}` : ""} — KORYXA Founder</title>
+<title>${founderIsEnglish(locale) ? "Project dossier" : "Dossier Projet"}${firstName ? ` · ${firstName}` : ""} — KORYXA Founder</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1536,37 +2044,37 @@ function generateHtmlExport(ws: WorkspaceData, modules: ModuleDef[], firstName?:
 </style>
 </head>
 <body>
-<button class="print-action" onclick="window.print()">IMPRIMER · PDF</button>
+<button class="print-action" onclick="window.print()">${founderIsEnglish(locale) ? "PRINT · PDF" : "IMPRIMER · PDF"}</button>
 
 <div class="cover">
   <div class="cover-header">
-    <div class="brand-mark">KORYXA · MODE FONDATEUR</div>
+    <div class="brand-mark">KORYXA · ${founderIsEnglish(locale) ? "FOUNDER MODE" : "MODE FONDATEUR"}</div>
     <div class="cover-meta">
-      <div>Outil · ChatLAYA Founder</div>
-      <div>Date · ${date}</div>
-      <div>Sections · ${requiredWithFormulation} / ${requiredTotal} rédigées</div>
+      <div>${founderIsEnglish(locale) ? "Tool" : "Outil"} · ChatLAYA Founder</div>
+      <div>${founderIsEnglish(locale) ? "Date" : "Date"} · ${date}</div>
+      <div>${founderIsEnglish(locale) ? "Sections" : "Sections"} · ${requiredWithFormulation} / ${requiredTotal} ${founderIsEnglish(locale) ? "drafted" : "rédigées"}</div>
     </div>
   </div>
 
   <div class="cover-center">
-    <div class="cover-tag">Dossier Projet Confidentiel</div>
+    <div class="cover-tag">${founderIsEnglish(locale) ? "Confidential project dossier" : "Dossier Projet Confidentiel"}</div>
     <div class="cover-title"><em>${escapeHtml(displayName.split(/\s+/)[0] || "Projet")}</em>${displayName.split(/\s+/).length > 1 ? `<br>${escapeHtml(displayName.split(/\s+/).slice(1).join(" "))}` : ""}</div>
-    <div class="cover-subtitle">Synthèse de cadrage business · ChatLAYA Founder</div>
+    <div class="cover-subtitle">${founderIsEnglish(locale) ? "Business framing synthesis · ChatLAYA Founder" : "Synthèse de cadrage business · ChatLAYA Founder"}</div>
     <div class="cover-divider"></div>
     <p class="cover-desc">
-      Ce dossier présente le cadrage stratégique généré avec ChatLAYA Founder : client idéal, problème central, offre, prix, modèle économique, pitch commercial et plan d'action.
+      ${founderIsEnglish(locale) ? "This dossier presents the strategic framing generated with ChatLAYA Founder: ideal customer, core problem, offer, pricing, business model, sales pitch and action plan." : "Ce dossier présente le cadrage stratégique généré avec ChatLAYA Founder : client idéal, problème central, offre, prix, modèle économique, pitch commercial et plan d'action."}
     </p>
   </div>
 
   <div class="cover-footer">
-    <div class="cover-footer-left">${isDossierComplete ? "DOCUMENT CONFIDENTIEL" : "BROUILLON DE TRAVAIL"}</div>
+    <div class="cover-footer-left">${isDossierComplete ? (founderIsEnglish(locale) ? "CONFIDENTIAL DOCUMENT" : "DOCUMENT CONFIDENTIEL") : (founderIsEnglish(locale) ? "WORKING DRAFT" : "BROUILLON DE TRAVAIL")}</div>
     <div class="sections-list">${coverPills}</div>
   </div>
 </div>
 
 <div class="toc-page">
   <div class="toc-inner">
-    <div class="toc-label">Sommaire du Dossier</div>
+    <div class="toc-label">${founderIsEnglish(locale) ? "Dossier contents" : "Sommaire du Dossier"}</div>
     <div class="toc-grid">${toc}</div>
   </div>
 </div>
@@ -1582,11 +2090,11 @@ ${incompleteHtml}
 <div class="doc-footer">
   <div>
     <div class="footer-brand">KORYXA</div>
-    <div style="font-family:'DM Mono',monospace; font-size:11px; color:#444; letter-spacing:0.05em; margin-top:8px;">MODE FONDATEUR · ChatLAYA Founder</div>
+    <div style="font-family:'DM Mono',monospace; font-size:11px; color:#444; letter-spacing:0.05em; margin-top:8px;">${founderIsEnglish(locale) ? "FOUNDER MODE" : "MODE FONDATEUR"} · ChatLAYA Founder</div>
   </div>
   <div class="footer-info">
-    <div>Document Confidentiel</div>
-    <div>${escapeHtml(displayName)} · Dossier Projet</div>
+    <div>${founderIsEnglish(locale) ? "Confidential document" : "Document Confidentiel"}</div>
+    <div>${escapeHtml(displayName)} · ${founderIsEnglish(locale) ? "Project dossier" : "Dossier Projet"}</div>
     <div>${date}</div>
   </div>
 </div>
@@ -1599,12 +2107,15 @@ ${incompleteHtml}
 interface SynthesisViewProps {
   ws: WorkspaceData;
   modules: ModuleDef[];
+  locale: string;
+  docLabels: Record<string, { title: string; tagline: string }>;
   firstName?: string;
   onBack: () => void;
   onExport: () => void;
 }
 
-function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisViewProps) {
+function SynthesisView({ ws, modules, locale, docLabels, firstName, onBack, onExport }: SynthesisViewProps) {
+  const copy = founderUi(locale);
   const [exportConfirm, setExportConfirm] = useState(false);
   const completed = modules.filter((m) => getMs(ws, m.id).status === "completed");
   // Only required sections matter for export readiness
@@ -1622,12 +2133,12 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-[#6F6A60] transition hover:bg-white/80 hover:text-[#101015]"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
-            Retour
+            {copy.synthesisBack}
           </button>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">Dossier projet final</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">{copy.synthesisTitle}</p>
             <p className="text-sm font-bold text-[#101015]">
-              {firstName ? `Projet de ${firstName}` : "Votre dossier consolidé"}
+              {firstName ? copy.synthesisProjectOf.replace("{name}", firstName) : copy.synthesisConsolidated}
             </p>
           </div>
           <button
@@ -1636,7 +2147,7 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition active:scale-[0.98] ${isExportReady ? "bg-[#101015] ring-1 ring-[#B8963E]/30 hover:bg-[#1A1A20]" : "bg-amber-500 hover:bg-amber-600"}`}
           >
             <Download className="h-3.5 w-3.5" />
-            {isExportReady ? "Exporter PDF" : `Exporter (${withoutFormulation.length} section${withoutFormulation.length > 1 ? "s" : ""} incomplète${withoutFormulation.length > 1 ? "s" : ""})`}
+            {isExportReady ? copy.exportPdf : copy.exportIncomplete.replace("{count}", String(withoutFormulation.length)).replaceAll("{plural}", withoutFormulation.length > 1 ? "s" : "")}
           </button>
         </div>
       </div>
@@ -1648,20 +2159,20 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#B8963E]" />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-[#3A3020]">
-                {withoutFormulation.length} section{withoutFormulation.length > 1 ? "s" : ""} sans formulation — le document exporté affichera des espaces vides à ces endroits.
+                {copy.noFormulationWarning.replace("{count}", String(withoutFormulation.length)).replaceAll("{plural}", withoutFormulation.length > 1 ? "s" : "")}
               </p>
               <p className="mt-0.5 text-[11px] text-[#6F4E20]">
-                Sections : {withoutFormulation.map((m) => DOC_LABELS[m.id]?.title ?? m.label).join(", ")}. Le contenu coaching ne sera pas inclus.
+                {copy.noFormulationSections.replace("{sections}", withoutFormulation.map((m) => docLabels[m.id]?.title ?? m.label).join(", "))}
               </p>
             </div>
             <div className="flex shrink-0 gap-2">
               <button type="button" onClick={() => setExportConfirm(false)}
                 className="rounded-lg px-3 py-1.5 text-xs font-medium text-[#8A6A20] transition hover:bg-[#F0E6CC]">
-                Annuler
+                {copy.cancel}
               </button>
               <button type="button" onClick={() => { setExportConfirm(false); onExport(); }}
                 className="rounded-lg bg-[#101015] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#1A1A20]">
-                Exporter quand même
+                {copy.exportAnyway}
               </button>
             </div>
           </div>
@@ -1679,12 +2190,10 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#B8963E]" />
                 <div>
                   <p className="text-xs font-semibold text-[#3A3020]">
-                    {withoutFormulation.length} section{withoutFormulation.length > 1 ? "s" : ""} sans formulation finale
+                    {copy.noFinalFormulation.replace("{count}", String(withoutFormulation.length)).replaceAll("{plural}", withoutFormulation.length > 1 ? "s" : "")}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-[#6F4E20]">
-                    <span className="font-medium">{withoutFormulation.map((m) => m.label).join(", ")}</span>
-                    {" "}— ces sections apparaîtront comme non finalisées dans le document exporté. Le contenu coaching n'y sera pas inclus.
-                    Retournez dans chaque étape pour rédiger votre formulation propre.
+                    {copy.noFinalFormulationBody.replace("{sections}", withoutFormulation.map((m) => docLabels[m.id]?.title ?? m.label).join(", "))}
                   </p>
                 </div>
               </div>
@@ -1693,10 +2202,9 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
 
           {/* Intro */}
           <div className="mb-8 rounded-2xl border border-[#E7DED0] bg-gradient-to-br from-[#FFFCF7] to-[#F7F4EE] px-5 py-5">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">Dossier Projet — Synthèse complète</p>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">{copy.synthesisIntroBadge}</p>
             <p className="text-sm leading-relaxed text-[#6F6A60]">
-              {completed.length} section{completed.length > 1 ? "s" : ""} validée{completed.length > 1 ? "s" : ""}.{" "}
-              Ce document présente votre projet cadré. Cliquez <strong className="font-semibold text-[#8A6A20]">Exporter PDF</strong> pour générer le dossier premium.
+              {copy.synthesisIntroBody.replace("{count}", String(completed.length)).replaceAll("{plural}", completed.length > 1 ? "s" : "")}
             </p>
           </div>
 
@@ -1705,7 +2213,7 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
             {completed.map((mod, modIdx) => {
               const mws = getMs(ws, mod.id);
               const Icon = mod.icon;
-              const docLabel = DOC_LABELS[mod.id] ?? { title: mod.label, tagline: mod.tagline };
+              const docLabel = docLabels[mod.id] ?? { title: mod.label, tagline: mod.tagline };
               const hasRetention = !!mws.retention?.trim();
               return (
                 <div key={mod.id}>
@@ -1717,13 +2225,13 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F6A60]">
-                        Étape {mod.step}{mod.optional ? " · Optionnelle" : ""}
+                        {founderIsEnglish(locale) ? `Step ${mod.step}${mod.optional ? ` · ${copy.optionalStep}` : ""}` : `Étape ${mod.step}${mod.optional ? ` · ${copy.optionalStep}` : ""}`}
                       </p>
                       <p className="text-sm font-bold text-[#101015]">{docLabel.title}</p>
                     </div>
                     <div className="kx-founder-validated flex items-center gap-1.5 rounded-full bg-[#F0E6CC]/70 px-3 py-1 text-[11px] font-semibold text-[#8A6A20] ring-1 ring-[#E7DED0]">
                       <Check className="h-3 w-3" />
-                      Validée
+                      {copy.validated}
                     </div>
                   </div>
 
@@ -1731,14 +2239,14 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
                   {hasRetention ? (
                     <div className="rounded-xl border border-[#E7DED0] bg-[#FFFCF7]/60 p-5">
                       <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
-                        Formulation finale
+                        {copy.finalFormulation}
                       </p>
                       <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#101015]">{mws.retention}</p>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE]/40 p-5">
                       <p className="mb-2 text-[10px] font-medium text-[#6F6A60]">
-                        Réponse de coaching (formulation finale non renseignée)
+                        {copy.coachingAnswerFallback}
                       </p>
                       <FounderOutput content={mws.output!} />
                     </div>
@@ -1755,7 +2263,7 @@ function SynthesisView({ ws, modules, firstName, onBack, onExport }: SynthesisVi
               className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-md transition active:scale-[0.98] ${isExportReady ? "bg-[#101015] ring-1 ring-[#B8963E]/30 hover:bg-[#1A1A20]" : "bg-amber-500 hover:bg-amber-600"}`}
             >
               <Download className="h-4 w-4" />
-              {isExportReady ? "Télécharger le dossier HTML · Imprimer en PDF" : "Exporter le dossier incomplet"}
+              {isExportReady ? copy.downloadHtmlPdf : copy.exportIncompleteDossier}
             </button>
           </div>
 
@@ -1784,7 +2292,10 @@ interface FounderWorkspaceProps {
 }
 
 function FounderAccountButton({ firstName }: { firstName?: string }) {
-  const label = firstName ? "Ouvrir l'espace Founder" : "Se connecter a Founder";
+  const locale = useLocale();
+  const label = firstName
+    ? founderIsEnglish(locale) ? "Open Founder workspace" : "Ouvrir l'espace Founder"
+    : founderIsEnglish(locale) ? "Sign in to Founder" : "Se connecter a Founder";
   const href = resolveFounderLoginHref();
 
   return (
@@ -1805,17 +2316,18 @@ export default function FounderWorkspace({
   loginHref,
   signupHref,
   authRequired = false,
-  conversations = [],
-  selectedConversationId,
-  historyLoading = false,
   onSelectConversation,
-  onCreateConversation,
-  onArchiveConversation,
   onExit,
 }: FounderWorkspaceProps) {
+  const locale = useLocale();
+  const copy = founderUi(locale);
+  const founderModules = localizeModules(locale);
+  const founderDocLabels = localizeDocLabels(locale);
+  const requiredFounderModules = founderModules.filter((m) => !m.optional);
   const effectiveLoginHref = resolveFounderLoginHref(loginHref);
   const effectiveSignupHref = resolveFounderSignupHref(signupHref);
-  const [activeId, setActiveId] = useState(MODULES[0].id);
+  const { user } = useAuth();
+  const [activeId, setActiveId] = useState(founderModules[0].id);
   const [ws, setWs] = useState<WorkspaceData>({});
   const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
   const [starterProject, setStarterProject] = useState("");
@@ -1827,28 +2339,147 @@ export default function FounderWorkspace({
   const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false);
   const [historyCollapsed, setHistoryCollapsed] = useState(false);
   const [briefStarting, setBriefStarting] = useState(false);
+  const [guestId, setGuestId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<FounderProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectActionId, setProjectActionId] = useState<string | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const hydrateRef = useRef(false);
+  const lastSavedSnapshotRef = useRef("");
+  const currentProject = useMemo(
+    () => projects.find((project) => project.id === selectedProjectId) ?? null,
+    [projects, selectedProjectId],
+  );
+  const owner = useMemo<FounderProjectOwner | null>(() => {
+    if (user?.id) return { userId: user.id };
+    if (guestId) return { guestId };
+    return null;
+  }, [guestId, user?.id]);
+  const currentConversationId = currentProject
+    ? currentProject.conversation_id ?? null
+    : conversationId ?? null;
 
-  useEffect(() => {
-    setWorkspaceLoaded(false);
-    if (!conversationId) {
+  const applyProjectToWorkspace = useCallback((project: FounderProject | null) => {
+    hydrateRef.current = true;
+    if (!project) {
+      setSelectedProjectId(null);
       setWs({});
+      setStarterProject("");
+      setActiveId(founderModules[0].id);
+      lastSavedSnapshotRef.current = "";
       setWorkspaceLoaded(true);
       return;
     }
-    const stored = loadWs(conversationId);
-    setWs(stored);
-    setStarterProject((stored.client?.inputs?.activite ?? "").trim());
-    const firstIncomplete = MODULES.find((m) => { const s = stored[m.id]; return !s || s.status !== "completed"; });
-    setActiveId(firstIncomplete?.id ?? MODULES[0].id);
+
+    const nextWorkspace = readWorkspaceData(project);
+    const nextStarterProject = readStarterProject(project);
+    const nextActiveId = readActiveModuleId(project, nextWorkspace);
+    setSelectedProjectId(project.id);
+    setWs(nextWorkspace);
+    setStarterProject(nextStarterProject);
+    setActiveId(nextActiveId);
+    saveWs(project.id, nextWorkspace);
+    lastSavedSnapshotRef.current = JSON.stringify({
+      title: buildFounderProjectTitle(nextStarterProject, nextWorkspace, locale, project.title),
+      current_step: buildFounderCurrentStep(nextActiveId, nextWorkspace),
+      project_data: buildFounderProjectData(nextStarterProject, nextWorkspace, nextActiveId),
+    });
     setWorkspaceLoaded(true);
-  }, [conversationId]);
+  }, [founderModules, locale]);
+
+  const syncConversationSelection = useCallback((project: FounderProject) => {
+    if (project.conversation_id && onSelectConversation && project.conversation_id !== conversationId) {
+      onSelectConversation(project.conversation_id);
+    }
+  }, [conversationId, onSelectConversation]);
+
+  const loadFounderProject = useCallback(async (projectId: string) => {
+    if (!owner) return null;
+    const project = await getFounderProject(projectId, owner);
+    setProjects((prev) => mergeFounderProjectList(prev, project));
+    applyProjectToWorkspace(project);
+    syncConversationSelection(project);
+    return project;
+  }, [applyProjectToWorkspace, owner, syncConversationSelection]);
+
+  const reloadFounderProjects = useCallback(async (preferredProjectId?: string | null) => {
+    if (!owner) return;
+    setProjectsLoading(true);
+    setError(null);
+    try {
+      const items = (await listFounderProjects(owner)).filter((item) => !item.archived);
+      setProjects(items);
+      const fallbackProjectId =
+        preferredProjectId
+        || selectedProjectId
+        || items.find((item) => item.conversation_id && item.conversation_id === conversationId)?.id
+        || items[0]?.id
+        || null;
+      if (fallbackProjectId) {
+        await loadFounderProject(fallbackProjectId);
+      } else {
+        applyProjectToWorkspace(null);
+      }
+    } catch (err) {
+      setProjects([]);
+      applyProjectToWorkspace(null);
+      setError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setProjectsLoading(false);
+      hydrateRef.current = false;
+    }
+  }, [applyProjectToWorkspace, conversationId, loadFounderProject, owner, selectedProjectId]);
 
   useEffect(() => {
-    if (!conversationId || !workspaceLoaded) return;
-    saveWs(conversationId, ws);
-  }, [conversationId, workspaceLoaded, ws]);
+    try {
+      setGuestId(getOrCreateFounderGuestId());
+    } catch {
+      setGuestId(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    setWorkspaceLoaded(false);
+    if (!owner) return;
+    void reloadFounderProjects();
+  }, [owner, reloadFounderProjects]);
+
+  useEffect(() => {
+    if (!currentProject || !workspaceLoaded) return;
+    saveWs(currentProject.id, ws);
+  }, [currentProject, workspaceLoaded, ws]);
+
+  useEffect(() => {
+    if (!currentProject || !owner || !workspaceLoaded || hydrateRef.current) {
+      if (hydrateRef.current) {
+        hydrateRef.current = false;
+      }
+      return;
+    }
+
+    const nextPayload = {
+      title: buildFounderProjectTitle(starterProject, ws, locale, currentProject.title),
+      current_step: buildFounderCurrentStep(activeId, ws),
+      project_data: buildFounderProjectData(starterProject, ws, activeId),
+    };
+    const nextSnapshot = JSON.stringify(nextPayload);
+    if (nextSnapshot === lastSavedSnapshotRef.current) return;
+
+    const timeout = window.setTimeout(() => {
+      void updateFounderProject(currentProject.id, nextPayload, owner)
+        .then((project) => {
+          lastSavedSnapshotRef.current = nextSnapshot;
+          setProjects((prev) => mergeFounderProjectList(prev, project));
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : "Erreur inattendue.");
+        });
+    }, 700);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeId, currentProject, locale, owner, starterProject, workspaceLoaded, ws]);
   useEffect(() => { contentRef.current?.scrollTo({ top: 0, behavior: "smooth" }); }, [activeId]);
   useEffect(() => () => { streamAbortRef.current?.abort(); }, []);
 
@@ -1882,27 +2513,55 @@ export default function FounderWorkspace({
     });
   }
 
-  function startFounderFromBrief() {
-    if (!conversationId) {
-      window.location.assign(effectiveLoginHref);
-      return;
+  async function createNewFounderProject(brief = "") {
+    if (!owner || projectActionId) return null;
+    setProjectActionId("creating");
+    setError(null);
+    const trimmedBrief = brief.trim();
+    const initialWorkspace = buildWorkspaceFromBrief(trimmedBrief);
+    const initialActiveId = trimmedBrief ? "client" : founderModules[0].id;
+    try {
+      const project = await createFounderProject({
+        ...owner,
+        conversation_id: conversationId,
+        title: buildFounderProjectTitle(trimmedBrief, initialWorkspace, locale, null),
+        current_step: trimmedBrief ? buildFounderCurrentStep(initialActiveId, initialWorkspace) : "point_de_depart",
+        project_data: buildFounderProjectData(trimmedBrief, initialWorkspace, initialActiveId),
+      });
+      setProjects((prev) => mergeFounderProjectList(prev, project));
+      applyProjectToWorkspace(project);
+      syncConversationSelection(project);
+      return project;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inattendue.");
+      return null;
+    } finally {
+      setProjectActionId(null);
     }
+  }
+
+  async function startFounderFromBrief() {
     const brief = starterProject.trim();
     if (!brief || briefStarting) return;
     setBriefStarting(true);
-    setTimeout(() => {
-      setActiveId("client");
-      updateInput("client", "activite", brief);
+    try {
+      if (!currentProject) {
+        await createNewFounderProject(brief);
+      } else {
+        setActiveId("client");
+        updateInput("client", "activite", brief);
+      }
       contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      setBriefStarting(false);
-    }, 1500);
+    } finally {
+      window.setTimeout(() => setBriefStarting(false), 1500);
+    }
   }
 
   async function generate(moduleId: string) {
-    if (!conversationId || generating || finalizing) return;
+    if (!currentConversationId || generating || finalizing) return;
 
     const current = getMs(ws, moduleId);
-    const prompt = buildPrompt(moduleId, current.inputs, ws);
+      const prompt = buildPrompt(locale, moduleId, current.inputs, ws, founderDocLabels);
 
     setError(null);
     setGenerating(moduleId);
@@ -1918,7 +2577,7 @@ export default function FounderWorkspace({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ conversation_id: conversationId, message: prompt }),
+        body: JSON.stringify({ conversation_id: currentConversationId, message: prompt }),
         signal: ctrl.signal,
       });
 
@@ -1968,11 +2627,11 @@ export default function FounderWorkspace({
   }
 
   async function draftFinal(moduleId: string) {
-    if (!conversationId || generating || finalizing) return;
+    if (!currentConversationId || generating || finalizing) return;
 
     const current = getMs(ws, moduleId);
     if (!current.output?.trim()) return;
-    const prompt = buildFinalDraftPrompt(moduleId, current, ws);
+    const prompt = buildFinalDraftPrompt(locale, moduleId, current, ws, founderModules, founderDocLabels);
 
     setError(null);
     setFinalizing(moduleId);
@@ -1991,7 +2650,7 @@ export default function FounderWorkspace({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ conversation_id: conversationId, message: prompt }),
+        body: JSON.stringify({ conversation_id: currentConversationId, message: prompt }),
         signal: ctrl.signal,
       });
 
@@ -2047,8 +2706,8 @@ export default function FounderWorkspace({
     const retention = current.retention?.trim();
     if (!retention) return;
     updateMs(moduleId, { status: "completed", retention });
-    const idx = MODULES.findIndex((m) => m.id === moduleId);
-    const next = MODULES[idx + 1];
+    const idx = founderModules.findIndex((m) => m.id === moduleId);
+    const next = founderModules[idx + 1];
     if (next) setActiveId(next.id);
   }
 
@@ -2066,7 +2725,7 @@ export default function FounderWorkspace({
   }
 
   function exportToHtml() {
-    const html = generateHtmlExport(ws, MODULES, firstName);
+    const html = generateHtmlExport(locale, ws, founderModules, founderDocLabels, firstName);
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const w = window.open(url, "_blank");
@@ -2080,7 +2739,7 @@ export default function FounderWorkspace({
     }
   }
 
-  const activeModule = MODULES.find((m) => m.id === activeId) ?? MODULES[0];
+  const activeModule = founderModules.find((m) => m.id === activeId) ?? founderModules[0];
   const activeMs = getMs(ws, activeId);
   const isGenerating = generating === activeId;
   const isFinalizing = finalizing === activeId;
@@ -2097,23 +2756,51 @@ export default function FounderWorkspace({
   );
   const showStarterPanel = workspaceLoaded && !hasWorkspaceContent && !generating && !finalizing;
 
-  const completedCount = REQUIRED_MODULES.filter((m) => getMs(ws, m.id).status === "completed").length;
-  const allDone = completedCount === REQUIRED_MODULES.length;
+  const completedCount = requiredFounderModules.filter((m) => getMs(ws, m.id).status === "completed").length;
+  const allDone = completedCount === requiredFounderModules.length;
 
-  const activeIdx = MODULES.findIndex((m) => m.id === activeId);
-  const nextModule = activeIdx < MODULES.length - 1 ? MODULES[activeIdx + 1] : null;
-  const historyItems = conversations.filter((item) => item.assistant_mode === "launch_structure_sell");
-  const visibleHistory = historyItems.length ? historyItems : conversations;
+  const activeIdx = founderModules.findIndex((m) => m.id === activeId);
+  const nextModule = activeIdx < founderModules.length - 1 ? founderModules[activeIdx + 1] : null;
+  const visibleHistory: FounderConversation[] = projects.map((project) => ({
+    conversation_id: project.id,
+    title: project.title,
+    created_at: project.created_at || undefined,
+    updated_at: project.updated_at || undefined,
+    archived: project.archived,
+    assistant_mode: "launch_structure_sell",
+  }));
 
-  function selectHistoryConversation(nextConversationId: string) {
+  async function selectHistoryConversation(nextConversationId: string) {
     setMobileHistoryOpen(false);
-    onSelectConversation?.(nextConversationId);
+    setError(null);
+    try {
+      await loadFounderProject(nextConversationId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inattendue.");
+    }
   }
 
-  function archiveHistoryConversation(nextConversationId: string) {
-    onArchiveConversation?.(nextConversationId);
-    if (selectedConversationId === nextConversationId) {
-      setMobileHistoryOpen(false);
+  async function archiveHistoryConversation(nextConversationId: string) {
+    if (!owner || projectActionId) return;
+    setProjectActionId(nextConversationId);
+    setError(null);
+    try {
+      await archiveFounderProject(nextConversationId, owner);
+      const remaining = projects.filter((project) => project.id !== nextConversationId);
+      setProjects(remaining);
+      if (selectedProjectId === nextConversationId) {
+        const nextSelectedId = remaining[0]?.id || null;
+        if (nextSelectedId) {
+          await loadFounderProject(nextSelectedId);
+        } else {
+          applyProjectToWorkspace(null);
+        }
+        setMobileHistoryOpen(false);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setProjectActionId(null);
     }
   }
 
@@ -2121,7 +2808,7 @@ export default function FounderWorkspace({
     return (
       <main className="flex h-full min-h-0 items-center justify-center overflow-hidden">
         <div className="rounded-3xl border border-[#E7DED0] bg-[#FFFCF7]/90 px-6 py-4 text-sm font-medium text-[#6F6A60] shadow-[0_18px_48px_rgba(16,16,21,0.08)]">
-          Préparation de l&apos;espace Founder...
+          {copy.loadingWorkspace}
         </div>
       </main>
     );
@@ -2134,9 +2821,9 @@ export default function FounderWorkspace({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0E6CC] ring-1 ring-[#E7DED0]">
             <UserRound className="h-5 w-5 text-[#B8963E]" />
           </div>
-          <p className="text-base font-semibold text-[#101015]">Connexion requise pour Founder</p>
+          <p className="text-base font-semibold text-[#101015]">{copy.authRequiredTitle}</p>
           <p className="mt-2 text-sm leading-relaxed text-[#6F6A60]">
-            Connectez-vous pour retrouver vos dossiers Founder, continuer votre cadrage guidé et exporter votre document final.
+            {copy.authRequiredBody}
           </p>
           <div className="mt-5 flex flex-col items-center gap-3">
             {effectiveLoginHref ? (
@@ -2145,7 +2832,7 @@ export default function FounderWorkspace({
                   href={effectiveLoginHref}
                   className="inline-flex items-center justify-center rounded-full bg-[#101015] px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20]"
                 >
-                  Se connecter
+                  {copy.login}
                 </a>
                 <a
                   href={effectiveLoginHref}
@@ -2153,7 +2840,7 @@ export default function FounderWorkspace({
                   rel="noopener noreferrer"
                   className="text-xs font-medium text-[#8A6A20] underline underline-offset-4 transition hover:text-[#101015]"
                 >
-                  Ouvrir la connexion Founder dans un nouvel onglet
+                  {copy.loginNewTab}
                 </a>
               </div>
             ) : null}
@@ -2162,7 +2849,7 @@ export default function FounderWorkspace({
               onClick={onExit}
               className="text-xs text-slate-400 transition hover:text-slate-600"
             >
-              Revenir au mode général
+              {copy.backGeneral}
             </button>
           </div>
         </div>
@@ -2174,7 +2861,7 @@ export default function FounderWorkspace({
   if (showSynthesis) {
     return (
       <main className="h-full min-h-0 overflow-hidden">
-        <SynthesisView ws={ws} modules={MODULES} firstName={firstName} onBack={() => setShowSynthesis(false)} onExport={exportToHtml} />
+          <SynthesisView ws={ws} modules={founderModules} locale={locale} docLabels={founderDocLabels} firstName={firstName} onBack={() => setShowSynthesis(false)} onExport={exportToHtml} />
       </main>
     );
   }
@@ -2189,18 +2876,18 @@ export default function FounderWorkspace({
                 type="button"
                 onClick={() => setHistoryCollapsed(false)}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E7DED0] bg-white text-[#6F6A60] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC] hover:text-[#8A6A20]"
-                title="Agrandir l'historique"
-                aria-label="Agrandir l'historique"
+                title={copy.expandHistory}
+                aria-label={copy.expandHistory}
               >
                 <PanelLeftOpen className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                onClick={() => onCreateConversation?.()}
-                disabled={!onCreateConversation}
+                onClick={() => void createNewFounderProject()}
+                disabled={!owner || projectActionId === "creating"}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#101015] text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] disabled:cursor-not-allowed disabled:opacity-50"
-                title="Nouveau dossier Founder"
-                aria-label="Nouveau dossier Founder"
+                title={copy.newFolder}
+                aria-label={copy.newFolder}
               >
                 <MessageSquarePlus className="h-4 w-4" />
               </button>
@@ -2208,9 +2895,9 @@ export default function FounderWorkspace({
           ) : (
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">Historique Founder</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">{copy.history}</p>
                 <p className="mt-0.5 truncate text-sm font-semibold text-[#101015]">
-                  {firstName ? `Dossiers de ${firstName}` : "Vos conversations"}
+                  {firstName ? (founderIsEnglish(locale) ? `${firstName}'s files` : `Dossiers de ${firstName}`) : copy.yourConversations}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -2218,12 +2905,12 @@ export default function FounderWorkspace({
                   type="button"
                   onClick={() => {
                     setMobileHistoryOpen(false);
-                    onCreateConversation?.();
+                    void createNewFounderProject();
                   }}
-                  disabled={!onCreateConversation}
+                  disabled={!owner || projectActionId === "creating"}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#101015] text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] disabled:cursor-not-allowed disabled:opacity-50"
-                  title="Nouveau dossier Founder"
-                  aria-label="Nouveau dossier Founder"
+                  title={copy.newFolder}
+                  aria-label={copy.newFolder}
                 >
                   <MessageSquarePlus className="h-4 w-4" />
                 </button>
@@ -2231,8 +2918,8 @@ export default function FounderWorkspace({
                   type="button"
                   onClick={() => setHistoryCollapsed(true)}
                   className="hidden h-9 w-9 items-center justify-center rounded-xl border border-[#E7DED0] bg-white text-[#6F6A60] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC] hover:text-[#8A6A20] lg:inline-flex"
-                  title="Réduire l'historique"
-                  aria-label="Réduire l'historique"
+                  title={copy.collapseHistory}
+                  aria-label={copy.collapseHistory}
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -2240,8 +2927,8 @@ export default function FounderWorkspace({
                   type="button"
                   onClick={() => setMobileHistoryOpen(false)}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#E7DED0] bg-white text-[#6F6A60] transition hover:bg-[#F0E6CC] hover:text-[#8A6A20] lg:hidden"
-                  title="Fermer"
-                  aria-label="Fermer l'historique"
+                  title={copy.close}
+                  aria-label={copy.closeHistory}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -2251,22 +2938,22 @@ export default function FounderWorkspace({
         </div>
 
         <div className={`min-h-0 flex-1 overflow-y-auto ${collapsed ? "w-full px-2 py-2" : "px-2 py-2"}`}>
-          {historyLoading ? (
+          {projectsLoading ? (
             Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className={`mb-1.5 animate-pulse rounded-xl bg-[#F0E6CC]/60 ${collapsed ? "mx-auto h-10 w-10" : "h-[68px]"}`} />
             ))
           ) : visibleHistory.length === 0 ? (
             collapsed ? (
-              <div className="mx-auto mt-2 h-10 w-10 rounded-xl border border-dashed border-[#E7DED0]" title="Aucun dossier Founder" />
+              <div className="mx-auto mt-2 h-10 w-10 rounded-xl border border-dashed border-[#E7DED0]" title={copy.noFounderFiles} />
             ) : (
               <div className="rounded-xl border border-dashed border-[#E7DED0] px-3 py-4 text-xs text-[#6F6A60]">
-                Aucun dossier Founder pour le moment.
+                {copy.noFounderFiles}
               </div>
             )
           ) : (
             visibleHistory.map((conversation) => {
-              const active = conversation.conversation_id === selectedConversationId;
-              const title = normalizeTitle(conversation.title);
+              const active = conversation.conversation_id === selectedProjectId;
+              const title = normalizeTitle(conversation.title, locale);
               if (collapsed) {
                 return (
                   <button
@@ -2299,21 +2986,21 @@ export default function FounderWorkspace({
                       {title}
                     </p>
                     <p className="mt-1 text-[10px] text-[#6F6A60]">
-                      {formatConversationDate(conversation.updated_at || conversation.created_at) || "Nouveau dossier"}
+                      {formatConversationDate(conversation.updated_at || conversation.created_at, locale) || copy.newFolder}
                     </p>
                   </button>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <span className="rounded-full bg-[#F7F4EE] px-2 py-1 text-[10px] font-medium text-[#6F6A60] ring-1 ring-[#E7DED0]">
-                      {active ? "Dossier actif" : "Dossier Founder"}
+                      {active ? copy.activeFolder : copy.founderFolder}
                     </span>
                     <button
                       type="button"
-                      onClick={() => archiveHistoryConversation(conversation.conversation_id)}
-                      disabled={!onArchiveConversation}
+                      onClick={() => void archiveHistoryConversation(conversation.conversation_id)}
+                      disabled={!owner || !!projectActionId}
                       className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium text-[#6F6A60] transition hover:bg-[#F7F4EE] hover:text-[#101015] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Archive className="h-3 w-3" />
-                      Archiver
+                      {copy.archive}
                     </button>
                   </div>
                 </div>
@@ -2330,10 +3017,10 @@ export default function FounderWorkspace({
               ? "mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-[#E7DED0] text-[#6F6A60] transition hover:border-[#B8963E]/30 hover:bg-[#F0E6CC] hover:text-[#8A6A20]"
               : "w-full rounded-xl border border-[#E7DED0] px-3 py-2 text-[11px] font-medium text-[#6F6A60] transition hover:border-[#B8963E]/30 hover:bg-[#F0E6CC] hover:text-[#8A6A20]"
             }
-            title="Mode général"
-            aria-label="Mode général"
+            title={copy.generalMode}
+            aria-label={copy.generalMode}
           >
-            {collapsed ? <ChevronLeft className="h-4 w-4" /> : "← Mode général"}
+            {collapsed ? <ChevronLeft className="h-4 w-4" /> : `← ${copy.generalMode}`}
           </button>
         </div>
       </div>
@@ -2366,7 +3053,7 @@ export default function FounderWorkspace({
               type="button"
               onClick={() => setMobileHistoryOpen(true)}
               className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E7DED0] bg-white text-[#6F6A60] transition hover:border-[#B8963E]/30 hover:bg-[#F0E6CC] hover:text-[#8A6A20] lg:hidden"
-              title="Historique Founder"
+              title={copy.history}
             >
               <Menu className="h-4 w-4" />
             </button>
@@ -2381,7 +3068,7 @@ export default function FounderWorkspace({
               {activeMs.status === "completed" ? (
                 <div className="kx-founder-validated hidden items-center gap-1.5 rounded-full bg-[#F0E6CC]/70 px-3 py-1 text-[11px] font-semibold text-[#8A6A20] ring-1 ring-[#E7DED0] lg:inline-flex">
                   <Check className="h-3 w-3" />
-                  Validée
+                  {copy.validated}
                 </div>
               ) : null}
               <FounderAccountButton firstName={firstName} />
@@ -2389,7 +3076,7 @@ export default function FounderWorkspace({
           </div>
           <div className="mt-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="inline-flex items-center gap-1 rounded-full border border-[#E8E0CC] bg-white/60 p-1.5 shadow-[0_2px_8px_rgba(26,24,20,0.06)] backdrop-blur-sm">
-            {MODULES.map((m) => {
+            {founderModules.map((m) => {
               const mws = getMs(ws, m.id);
               const isCurrent = m.id === activeId;
               const isDone = mws.status === "completed";
@@ -2434,24 +3121,24 @@ export default function FounderWorkspace({
                   <div className="mb-5">
                     <div className="inline-flex items-center gap-2 rounded-full border border-[#E7DED0] bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#8A6A20] shadow-sm">
                       <Sparkles className="kx-founder-sparkle h-3.5 w-3.5 text-[#B8963E]" />
-                      ChatLAYA Founder
+                      {copy.starterBadge}
                     </div>
                   </div>
 
                   <div className="max-w-2xl">
                     <h2 className="text-[30px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#1A1814] [font-family:var(--font-fraunces,Georgia,serif)] sm:text-[38px]">
-                      Cadrez votre projet.
+                      {copy.starterTitle1}
                       <span className="block bg-gradient-to-r from-[#D4B26A] via-[#B8963E] to-[#8A6A20] bg-clip-text text-transparent">
-                        Repartez avec un dossier exploitable.
+                        {copy.starterTitle2}
                       </span>
                     </h2>
                     <p className="mt-4 max-w-xl text-[15px] leading-7 text-[#6F6A60]">
-                      Un coach IA vous accompagne étape par étape pour clarifier votre client, votre problème, votre offre, votre prix, votre modèle économique et votre pitch commercial.
+                      {copy.starterBody}
                     </p>
                   </div>
 
                   <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
-                    {REQUIRED_MODULES.map((mod, i) => {
+                    {requiredFounderModules.map((mod, i) => {
                       const Icon = mod.icon;
                       return (
                         <motion.div
@@ -2480,9 +3167,9 @@ export default function FounderWorkspace({
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-[#101015]">Le livrable vendu</p>
+                        <p className="text-sm font-bold text-[#101015]">{copy.deliverableTitle}</p>
                         <p className="mt-1 text-sm leading-6 text-[#6F6A60]">
-                          Un dossier projet rédigé dans les mots de l'utilisateur, exportable et présentable à un partenaire, une équipe ou un investisseur.
+                          {copy.deliverableBody}
                         </p>
                       </div>
                     </div>
@@ -2491,12 +3178,12 @@ export default function FounderWorkspace({
 
                 <div className="kx-grain flex flex-col justify-between rounded-[28px] border border-[#E8E0CC] bg-[#FFFCF7] p-5 shadow-[var(--shadow-md)] sm:p-6">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6F6A60]">Point de départ</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#6F6A60]">{copy.startingPoint}</p>
                     <h3 className="mt-2 text-xl font-semibold tracking-[-0.01em] text-[#1A1814] [font-family:var(--font-fraunces,Georgia,serif)]">
-                      Décrivez votre projet en quelques phrases.
+                      {copy.startingTitle}
                     </h3>
                     <p className="mt-2 text-sm leading-6 text-[#6F6A60]">
-                      Donnez l'idée, le client visé, ce que vous vendez ou ce que vous voulez lancer. Founder transformera ça en parcours de cadrage.
+                      {copy.startingBody}
                     </p>
 
                     <textarea
@@ -2504,7 +3191,7 @@ export default function FounderWorkspace({
                       onChange={(event) => setStarterProject(event.target.value)}
                       rows={7}
                       disabled={briefStarting}
-                      placeholder="Ex : Je veux vendre des PC portables performants aux étudiants et jeunes professionnels avec paiement échelonné..."
+                      placeholder={copy.startingPlaceholder}
                       className={`mt-5 w-full resize-y rounded-2xl border-2 border-[#E8E0CC] bg-white/80 px-5 py-5 text-base italic leading-7 text-[#1A1814] placeholder:not-italic placeholder:text-[#9A9484] transition-all duration-200 focus:border-[#B8924A] focus:bg-white focus:outline-none focus:shadow-[0_0_0_4px_rgba(184,146,74,0.12)] min-h-[200px] ${briefStarting ? "opacity-40 cursor-not-allowed" : ""}`}
                     />
                   </div>
@@ -2521,35 +3208,35 @@ export default function FounderWorkspace({
                           <svg className="h-4 w-4 animate-spin text-[#B8963E]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
                           </svg>
-                          Préparation de votre cadrage…
+                          {copy.preparingFraming}
                         </>
                       ) : (
                         <>
-                          {conversationId ? "Commencer le cadrage" : "Se connecter pour commencer"}
+                          {copy.startFraming}
                           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                         </>
                       )}
                     </button>
-                    {!conversationId ? (
+                    {!user?.id ? (
                       <div className="grid gap-2 sm:grid-cols-2">
                         <a
                           href={effectiveLoginHref}
                           className="inline-flex items-center justify-center rounded-2xl border border-[#B8963E]/40 bg-white px-4 py-3 text-sm font-bold text-[#8A6A20] transition hover:border-[#B8963E]/70 hover:bg-[#F0E6CC]"
                         >
-                          Se connecter
+                          {copy.login}
                         </a>
                         <a
                           href={effectiveSignupHref}
                           className="inline-flex items-center justify-center rounded-2xl border border-[#E7DED0] bg-white px-4 py-3 text-sm font-bold text-[#101015] transition hover:border-[#B8963E]/30 hover:bg-[#F7F4EE]"
                         >
-                          Créer un compte
+                          {copy.createAccount}
                         </a>
                       </div>
                     ) : null}
                     <p className="text-center text-xs leading-5 text-[#6F6A60]">
-                      {conversationId
-                        ? "Ensuite, cette intro disparaît et vous travaillez étape par étape avec le coach."
-                        : "Connexion securisee, puis retour direct sur ChatLAYA Founder."}
+                      {user?.id
+                        ? copy.introAfterStart
+                        : copy.secureReturn}
                     </p>
                   </div>
                 </div>
@@ -2560,9 +3247,9 @@ export default function FounderWorkspace({
             {/* Product intro — visible only on a fresh workspace */}
             {completedCount === 0 && !hasWorkspaceContent && !activeMs.output && !isGenerating ? (
               <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE] px-4 py-4">
-                <p className="text-xs font-semibold text-[#3A3530]">Espace de cadrage business guidé</p>
+                <p className="text-xs font-semibold text-[#3A3530]">{copy.framingBadge}</p>
                 <p className="mt-1 text-xs leading-5 text-[#6F6A60]">
-                  En 6 étapes, Founder vous aide à clarifier votre client cible, votre problème, votre offre, votre prix, votre modèle de revenus et votre pitch commercial — et à rédiger un dossier projet structuré, exportable à la fin du parcours.
+                  {copy.framingBody}
                 </p>
               </div>
             ) : null}
@@ -2575,13 +3262,13 @@ export default function FounderWorkspace({
                     <Check className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-[#101015]">{firstName ? `Bravo ${firstName} !` : "Félicitations !"}</p>
-                    <p className="text-xs text-[#6F6A60]">Les 6 étapes sont validées. Votre dossier est prêt.</p>
+                    <p className="text-sm font-bold text-[#101015]">{firstName ? `${copy.bravo} ${firstName}!` : copy.bravo}</p>
+                    <p className="text-xs text-[#6F6A60]">{copy.stepsDone}</p>
                   </div>
                   <button type="button" onClick={() => setShowSynthesis(true)}
                     className="flex shrink-0 items-center gap-2 rounded-full bg-[#101015] px-4 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20]">
                     <BookOpen className="h-3.5 w-3.5" />
-                    Dossier final
+                    {copy.finalFolder}
                   </button>
                 </div>
               </div>
@@ -2592,10 +3279,10 @@ export default function FounderWorkspace({
               <div className="rounded-xl border border-[#E7DED0] bg-[#F0E6CC]/40 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <RotateCcw className="h-3.5 w-3.5 shrink-0 text-[#B8963E]" />
-                  <p className="text-xs font-semibold text-[#3A3020]">Mode révision</p>
+                  <p className="text-xs font-semibold text-[#3A3020]">{copy.revisionTitle}</p>
                 </div>
                 <p className="mt-0.5 text-[11px] leading-relaxed text-[#6F4E20]">
-                  Modifiez vos réponses ci-dessous et régénérez pour affiner, ou revalidez directement la version existante.
+                  {copy.revisionBody}
                 </p>
               </div>
             ) : null}
@@ -2606,7 +3293,7 @@ export default function FounderWorkspace({
                 <div key={field.id}>
                   <label className="mb-1.5 block text-xs font-semibold text-[#101015]">
                     {field.label}
-                    {field.optional ? <span className="ml-1.5 font-normal text-[#6F6A60]">(optionnel)</span> : null}
+                    {field.optional ? <span className="ml-1.5 font-normal text-[#6F6A60]">({copy.optional})</span> : null}
                   </label>
                   {field.type === "textarea" ? (
                     <textarea value={activeMs.inputs[field.id] ?? ""} onChange={(e) => updateInput(activeId, field.id, e.target.value)}
@@ -2626,19 +3313,19 @@ export default function FounderWorkspace({
             {/* Generate button */}
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={() => void generate(activeId)}
-                disabled={!!generating || !!finalizing || !conversationId}
+                disabled={!!generating || !!finalizing || !currentConversationId}
                 className="flex items-center gap-2 rounded-full bg-[#101015] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(16,16,21,0.18)] ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
                 <Sparkles className="h-3.5 w-3.5 text-[#B8963E]" />
-                {isGenerating ? "Génération en cours…" : activeMs.output ? "Peaufiner avec ChatLAYA" : "Générer avec ChatLAYA"}
+                {isGenerating ? copy.generating : activeMs.output ? copy.refineWithChatlaya : copy.generateWithChatlaya}
               </button>
               {isGenerating ? (
                 <button type="button" onClick={() => streamAbortRef.current?.abort()}
                   className="text-xs text-[#6F6A60] transition hover:text-[#101015]">
-                  Annuler
+                  {copy.cancel}
                 </button>
               ) : null}
               {!isGenerating && generating && generating !== activeId ? (
-                <span className="text-[11px] text-[#6F6A60]">Génération en cours sur une autre étape…</span>
+                <span className="text-[11px] text-[#6F6A60]">{copy.generatingAnother}</span>
               ) : null}
             </div>
 
@@ -2646,7 +3333,7 @@ export default function FounderWorkspace({
             {isGenerating && !activeMs.output && activeMs.previousOutput ? (
               <details className="rounded-xl border border-[#E7DED0]">
                 <summary className="cursor-pointer rounded-xl px-4 py-2.5 text-xs font-medium text-[#6F6A60] hover:bg-[#F7F4EE]">
-                  Voir la version précédente
+                  {copy.previousVersion}
                 </summary>
                 <div className="px-4 pb-4 pt-2 opacity-60">
                   <FounderOutput content={activeMs.previousOutput} />
@@ -2655,7 +3342,7 @@ export default function FounderWorkspace({
             ) : null}
 
             {/* Generating animation */}
-            {isGenerating && !activeMs.output ? <GeneratingCard firstName={firstName} /> : null}
+            {isGenerating && !activeMs.output ? <GeneratingCard firstName={firstName} locale={locale} /> : null}
 
             {/* AI output (coaching layer) */}
             {activeMs.output ? (
@@ -2664,15 +3351,15 @@ export default function FounderWorkspace({
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#101015]">
                     <span className="text-[8px] font-bold text-[#B8963E]">L</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">Analyse ChatLAYA</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">{copy.chatlayaAnalysis}</span>
                   {isGenerating ? (
-                    <span className="ml-auto animate-pulse text-[10px] text-[#6F6A60]">En cours…</span>
+                    <span className="ml-auto animate-pulse text-[10px] text-[#6F6A60]">{copy.inProgress}</span>
                   ) : (
                     <button type="button" onClick={() => copyOutput(activeId, activeMs.output!)}
                       className="ml-auto flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] text-[#6F6A60] opacity-0 transition-all hover:bg-[#F7F4EE] hover:text-[#101015] group-hover:opacity-100"
-                      title="Copier">
+                      title={copy.copyAction}>
                       {copiedOutput === activeId ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                      {copiedOutput === activeId ? "Copié !" : "Copier"}
+                      {copiedOutput === activeId ? copy.copied : copy.copyAction}
                     </button>
                   )}
                 </div>
@@ -2690,6 +3377,7 @@ export default function FounderWorkspace({
                 onGenerateFinal={() => void draftFinal(activeId)}
                 generatingFinal={isFinalizing}
                 validated={activeMs.status === "completed"}
+                locale={locale}
               />
             ) : null}
 
@@ -2701,19 +3389,19 @@ export default function FounderWorkspace({
                     disabled={!canValidateActive}
                     className="flex items-center gap-2 rounded-full bg-[#101015] px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45">
                     <Check className="h-3.5 w-3.5" />
-                    {isRevision ? "Revalider pour le dossier" : "Valider pour le dossier"}
+                    {isRevision ? copy.revalidateForDossier : copy.validateForDossier}
                   </button>
                 ) : (
                   <div className="kx-founder-validated flex items-center gap-2 rounded-full bg-[#F0E6CC]/60 px-4 py-2 text-sm font-semibold text-[#8A6A20] ring-1 ring-[#E7DED0]">
                     <Check className="h-3.5 w-3.5" />
-                    Version dossier validée
+                    {copy.dossierVersionValidated}
                   </div>
                 )}
                 {activeMs.status === "completed" ? (
                   <button type="button" onClick={() => reopen(activeId)}
                     className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] px-4 py-2 text-sm font-medium text-[#6F6A60] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 hover:text-[#8A6A20]">
                     <RotateCcw className="h-3.5 w-3.5" />
-                    Modifier cette étape
+                    {copy.editThisStep}
                   </button>
                 ) : null}
                 {nextModule ? (
@@ -2727,7 +3415,7 @@ export default function FounderWorkspace({
                   <button type="button" onClick={exportToHtml}
                     className="ml-auto flex items-center gap-2 rounded-full bg-[#101015] px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98]">
                     <Download className="h-3.5 w-3.5 text-[#B8963E]" />
-                    Exporter le dossier
+                    {copy.exportDossier}
                   </button>
                 )}
               </div>
@@ -2738,8 +3426,8 @@ export default function FounderWorkspace({
               <div className="rounded-2xl border border-dashed border-[#E7DED0] px-5 py-6 text-center">
                 <p className="text-sm font-semibold text-[#3A3530]">{activeModule.tagline}</p>
                 <p className="mt-1 text-xs leading-6 text-[#6F6A60]">
-                  Renseignez les champs ci-dessus puis cliquez sur{" "}
-                  <span className="font-semibold text-[#B8963E]">Générer avec ChatLAYA</span>.
+                  {copy.emptyStatePrefix}{" "}
+                  <span className="font-semibold text-[#B8963E]">{copy.generateWithChatlaya}</span>.
                 </p>
               </div>
             ) : null}
