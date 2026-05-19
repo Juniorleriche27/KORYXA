@@ -77,6 +77,32 @@ def _normalize_problem_report(row: dict[str, Any] | None) -> dict[str, Any] | No
     return row
 
 
+def _normalize_founder_project(row: dict[str, Any] | None) -> dict[str, Any] | None:
+    if row is None:
+        return None
+    for key in ("id", "user_id", "conversation_id"):
+        if row.get(key) is not None:
+            row[key] = str(row[key])
+    row["_id"] = row.get("id")
+    project_data = row.get("project_data")
+    if isinstance(project_data, str):
+        try:
+            row["project_data"] = json.loads(project_data)
+        except Exception:
+            row["project_data"] = {}
+    elif project_data is None:
+        row["project_data"] = {}
+    opencloud_workspace = row.get("opencloud_workspace")
+    if isinstance(opencloud_workspace, str):
+        try:
+            row["opencloud_workspace"] = json.loads(opencloud_workspace)
+        except Exception:
+            row["opencloud_workspace"] = {}
+    elif opencloud_workspace is None:
+        row["opencloud_workspace"] = {}
+    return row
+
+
 async def get_latest_active_conversation(*, user_id: str | None, guest_id: str | None) -> dict[str, Any] | None:
     pool = _get_pool_or_raise()
     where_sql, params = _owner_where_clause(user_id=user_id, guest_id=guest_id)
@@ -462,3 +488,251 @@ async def create_problem_report(
             json.dumps(raw_payload or {}, default=str),
         )
     return _normalize_problem_report(_record_to_dict(row)) or {}
+
+
+async def create_founder_project(
+    *,
+    user_id: str | None,
+    guest_id: str | None,
+    conversation_id: str | None,
+    title: str,
+    current_step: str,
+    project_data: dict[str, Any] | None,
+    now: datetime,
+) -> dict[str, Any]:
+    pool = _get_pool_or_raise()
+    project_id = str(uuid4())
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+        insert into app.chatlaya_founder_projects(
+          id, user_id, guest_id, conversation_id, title, status, current_step, project_data, created_at, updated_at
+        )
+        values ($1::uuid, $2::uuid, $3, $4::uuid, $5, 'draft', $6, $7::jsonb, $8, $9)
+        returning
+          id::text as id,
+          user_id::text as user_id,
+          guest_id,
+          conversation_id::text as conversation_id,
+          title,
+          status,
+          current_step,
+          project_data,
+          opencloud_root_folder,
+          opencloud_project_folder,
+          opencloud_project_path,
+          opencloud_workspace,
+          last_opencloud_sync_at,
+          created_at,
+          updated_at;
+        """,
+            project_id,
+            user_id,
+            guest_id,
+            conversation_id,
+            title,
+            current_step,
+            json.dumps(project_data or {}, default=str),
+            now,
+            now,
+        )
+    return _normalize_founder_project(_record_to_dict(row)) or {}
+
+
+async def get_founder_project(
+    *,
+    project_id: str,
+    user_id: str | None,
+    guest_id: str | None,
+) -> dict[str, Any] | None:
+    pool = _get_pool_or_raise()
+    where_sql, params = _owner_where_clause(user_id=user_id, guest_id=guest_id, start_index=2)
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f"""
+        select
+          id::text as id,
+          user_id::text as user_id,
+          guest_id,
+          conversation_id::text as conversation_id,
+          title,
+          status,
+          current_step,
+          project_data,
+          opencloud_root_folder,
+          opencloud_project_folder,
+          opencloud_project_path,
+          opencloud_workspace,
+          last_opencloud_sync_at,
+          created_at,
+          updated_at
+        from app.chatlaya_founder_projects
+        where id = $1::uuid
+          and {where_sql}
+        limit 1;
+        """,
+            project_id,
+            *params,
+        )
+    return _normalize_founder_project(_record_to_dict(row))
+
+
+async def list_founder_projects(
+    *,
+    user_id: str | None,
+    guest_id: str | None,
+    limit: int,
+    offset: int,
+) -> list[dict[str, Any]]:
+    pool = _get_pool_or_raise()
+    where_sql, params = _owner_where_clause(user_id=user_id, guest_id=guest_id)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            f"""
+        select
+          id::text as id,
+          user_id::text as user_id,
+          guest_id,
+          conversation_id::text as conversation_id,
+          title,
+          status,
+          current_step,
+          project_data,
+          opencloud_root_folder,
+          opencloud_project_folder,
+          opencloud_project_path,
+          opencloud_workspace,
+          last_opencloud_sync_at,
+          created_at,
+          updated_at
+        from app.chatlaya_founder_projects
+        where {where_sql}
+          and status <> 'archived'
+        order by updated_at desc
+        limit ${len(params) + 1} offset ${len(params) + 2};
+        """,
+            *params,
+            limit,
+            offset,
+        )
+    return [_normalize_founder_project(_record_to_dict(row)) for row in rows if row]
+
+
+async def update_founder_project_opencloud_workspace(
+    *,
+    project_id: str,
+    user_id: str | None,
+    guest_id: str | None,
+    opencloud_root_folder: str | None,
+    opencloud_project_folder: str | None,
+    opencloud_project_path: str | None,
+    opencloud_workspace: dict[str, Any] | None,
+    synced_at: datetime,
+) -> dict[str, Any] | None:
+    pool = _get_pool_or_raise()
+    where_sql, params = _owner_where_clause(user_id=user_id, guest_id=guest_id, start_index=8)
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f"""
+        update app.chatlaya_founder_projects
+        set opencloud_root_folder = $1,
+            opencloud_project_folder = $2,
+            opencloud_project_path = $3,
+            opencloud_workspace = $4::jsonb,
+            last_opencloud_sync_at = $5,
+            updated_at = $6
+        where id = $7::uuid
+          and {where_sql}
+        returning
+          id::text as id,
+          user_id::text as user_id,
+          guest_id,
+          conversation_id::text as conversation_id,
+          title,
+          status,
+          current_step,
+          project_data,
+          opencloud_root_folder,
+          opencloud_project_folder,
+          opencloud_project_path,
+          opencloud_workspace,
+          last_opencloud_sync_at,
+          created_at,
+          updated_at;
+        """,
+            opencloud_root_folder,
+            opencloud_project_folder,
+            opencloud_project_path,
+            json.dumps(opencloud_workspace or {}, default=str),
+            synced_at,
+            synced_at,
+            project_id,
+            *params,
+        )
+    return _normalize_founder_project(_record_to_dict(row))
+
+
+async def update_founder_project_data(
+    *,
+    project_id: str,
+    user_id: str | None,
+    guest_id: str | None,
+    title: str | None,
+    current_step: str | None,
+    status: str | None,
+    project_data: dict[str, Any] | None,
+    updated_at: datetime,
+) -> dict[str, Any] | None:
+    pool = _get_pool_or_raise()
+    assignments: list[str] = []
+    values: list[Any] = []
+
+    if title is not None:
+        values.append(title)
+        assignments.append(f"title = ${len(values)}")
+    if current_step is not None:
+        values.append(current_step)
+        assignments.append(f"current_step = ${len(values)}")
+    if status is not None:
+        values.append(status)
+        assignments.append(f"status = ${len(values)}")
+    if project_data is not None:
+        values.append(json.dumps(project_data or {}, default=str))
+        assignments.append(f"project_data = ${len(values)}::jsonb")
+
+    values.append(updated_at)
+    assignments.append(f"updated_at = ${len(values)}")
+
+    project_id_index = len(values) + 1
+    where_sql, params = _owner_where_clause(user_id=user_id, guest_id=guest_id, start_index=project_id_index + 1)
+    values.append(project_id)
+    values.extend(params)
+
+    pool = _get_pool_or_raise()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f"""
+        update app.chatlaya_founder_projects
+        set {", ".join(assignments)}
+        where id = ${project_id_index}::uuid
+          and {where_sql}
+        returning
+          id::text as id,
+          user_id::text as user_id,
+          guest_id,
+          conversation_id::text as conversation_id,
+          title,
+          status,
+          current_step,
+          project_data,
+          opencloud_root_folder,
+          opencloud_project_folder,
+          opencloud_project_path,
+          opencloud_workspace,
+          last_opencloud_sync_at,
+          created_at,
+          updated_at;
+        """,
+            *values,
+        )
+    return _normalize_founder_project(_record_to_dict(row))
