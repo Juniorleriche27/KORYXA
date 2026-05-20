@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useLocale } from "next-intl";
 import {
   Users, Target, Package, DollarSign, BarChart2, MessageCircle, FileText,
   Check, RotateCcw, ArrowRight, X, Sparkles, ChevronLeft,
@@ -2292,7 +2291,7 @@ interface FounderWorkspaceProps {
 }
 
 function FounderAccountButton({ firstName }: { firstName?: string }) {
-  const locale = useLocale();
+  const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const label = firstName
     ? founderIsEnglish(locale) ? "Open Founder workspace" : "Ouvrir l'espace Founder"
     : founderIsEnglish(locale) ? "Sign in to Founder" : "Se connecter a Founder";
@@ -2319,7 +2318,7 @@ export default function FounderWorkspace({
   onSelectConversation,
   onExit,
 }: FounderWorkspaceProps) {
-  const locale = useLocale();
+  const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const copy = founderUi(locale);
   const founderModules = localizeModules(locale);
   const founderDocLabels = localizeDocLabels(locale);
