@@ -17,9 +17,11 @@ import {
   listFounderProjects,
   runFounderCadrageAgent,
   runFounderClientProblemAgent,
+  runFounderOfferValueAgent,
   updateFounderProject,
   type FounderCadrageAnalysis,
   type FounderClientProblemAnalysis,
+  type FounderOfferValueAnalysis,
   type FounderProject,
 } from "@/lib/api-client/chatlaya-founder";
 
@@ -2927,6 +2929,411 @@ function FounderClientProblemBlock({ analysis, loading, error, locale, onRun }: 
   );
 }
 
+// ─── Offre & Valeur IA ──────────────────────────────────────────────────────
+
+const OFFER_VALUE_SCORE_KEYS = [
+  "offer_clarity", "value_strength", "differentiation", "trust_readiness", "testability",
+] as const;
+
+const OFFER_VALUE_SCORE_LABELS_FR: Record<string, string> = {
+  offer_clarity: "Clarté de l'offre",
+  value_strength: "Force de valeur",
+  differentiation: "Différenciation",
+  trust_readiness: "Confiance",
+  testability: "Testabilité",
+};
+const OFFER_VALUE_SCORE_LABELS_EN: Record<string, string> = {
+  offer_clarity: "Offer clarity",
+  value_strength: "Value strength",
+  differentiation: "Differentiation",
+  trust_readiness: "Trust readiness",
+  testability: "Testability",
+};
+
+type FounderOfferValueBlockProps = {
+  analysis: FounderOfferValueAnalysis | null;
+  loading: boolean;
+  error: string | null;
+  locale: string;
+  onRun: () => void;
+};
+
+function FounderOfferValueBlock({ analysis, loading, error, locale, onRun }: FounderOfferValueBlockProps) {
+  const isEnglish = founderIsEnglish(locale);
+  const scoreLabels = isEnglish ? OFFER_VALUE_SCORE_LABELS_EN : OFFER_VALUE_SCORE_LABELS_FR;
+  const scores = analysis?.scores;
+  const nba = analysis?.next_best_action;
+  const vp = analysis?.value_proposition;
+  const offer = analysis?.offer;
+  const cf = analysis?.customer_fit;
+
+  return (
+    <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] p-5 shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#101015]">
+            <Package className="h-3.5 w-3.5 text-[#B8963E]" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+              {isEnglish ? "Offer & Value IA" : "Offre & Valeur IA"}
+            </p>
+            {analysis ? (
+              <p className="text-[10px] text-[#6F6A60]">
+                {isEnglish ? "Last analysis available" : "Dernière analyse disponible"}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onRun}
+          disabled={loading}
+          className="flex shrink-0 items-center gap-2 rounded-full bg-[#101015] px-4 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <svg className="h-3 w-3 animate-spin text-[#B8963E]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+              </svg>
+              {isEnglish ? "Analysing…" : "Analyse en cours…"}
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 text-[#B8963E]" />
+              {analysis
+                ? (isEnglish ? "Regenerate" : "Régénérer")
+                : (isEnglish ? "Analyse offer & value" : "Analyser offre & valeur")}
+            </>
+          )}
+        </button>
+      </div>
+
+      {error ? (
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {error}
+        </div>
+      ) : null}
+
+      {analysis ? (
+        <div className="space-y-4">
+          {/* Global score */}
+          {typeof scores?.global === "number" ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[#101015]">
+                  {isEnglish ? "Global score" : "Score global"}
+                </span>
+                <span className="text-lg font-bold text-[#B8963E]">
+                  {scores.global}
+                  <span className="text-xs font-normal text-[#6F6A60]">/100</span>
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, scores.global))}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {/* Score cards */}
+          {scores && OFFER_VALUE_SCORE_KEYS.some((k) => typeof scores[k] === "number") ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {OFFER_VALUE_SCORE_KEYS.map((key) => {
+                const scoreVal = scores[key];
+                if (typeof scoreVal !== "number") return null;
+                return (
+                  <div key={key} className="rounded-xl border border-[#E7DED0] bg-white px-3 py-2">
+                    <p className="text-[10px] font-medium text-[#6F6A60]">{scoreLabels[key]}</p>
+                    <p className="mt-0.5 text-sm font-bold text-[#101015]">
+                      {scoreVal}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+                    </p>
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
+                      <div
+                        className="h-full rounded-full bg-[#B8963E] transition-all duration-700"
+                        style={{ width: `${Math.min(100, Math.max(0, scoreVal))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {/* Proposition de valeur */}
+          {vp && (vp.promise || vp.target_result || vp.main_benefits?.length || vp.differentiation || vp.proof_needed?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Value proposition" : "Proposition de valeur"}
+              </p>
+              <dl className="space-y-2">
+                {vp.promise ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Promise" : "Promesse"}</dt>
+                    <dd className="text-[#6F6A60]">{vp.promise}</dd>
+                  </div>
+                ) : null}
+                {vp.target_result ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Target result" : "Résultat cible"}</dt>
+                    <dd className="text-[#6F6A60]">{vp.target_result}</dd>
+                  </div>
+                ) : null}
+                {vp.differentiation ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Differentiation" : "Différenciation"}</dt>
+                    <dd className="text-[#6F6A60]">{vp.differentiation}</dd>
+                  </div>
+                ) : null}
+                {vp.main_benefits?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Main benefits" : "Bénéfices principaux"}</dt>
+                    <ul className="space-y-0.5">
+                      {vp.main_benefits.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {vp.proof_needed?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Proof needed" : "Preuves nécessaires"}</dt>
+                    <ul className="space-y-0.5">
+                      {vp.proof_needed.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Offre */}
+          {offer && (offer.main_offer || offer.entry_offer || offer.premium_offer || offer.deliverables?.length || offer.conditions?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Offer" : "Offre"}
+              </p>
+              <dl className="space-y-2">
+                {offer.main_offer ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Main offer" : "Offre principale"}</dt>
+                    <dd className="text-[#6F6A60]">{offer.main_offer}</dd>
+                  </div>
+                ) : null}
+                {offer.entry_offer ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Entry offer" : "Offre d'appel"}</dt>
+                    <dd className="text-[#6F6A60]">{offer.entry_offer}</dd>
+                  </div>
+                ) : null}
+                {offer.premium_offer ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Premium offer" : "Offre premium"}</dt>
+                    <dd className="text-[#6F6A60]">{offer.premium_offer}</dd>
+                  </div>
+                ) : null}
+                {offer.deliverables?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Deliverables" : "Livrables"}</dt>
+                    <ul className="space-y-0.5">
+                      {offer.deliverables.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {offer.conditions?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Conditions" : "Conditions"}</dt>
+                    <ul className="space-y-0.5">
+                      {offer.conditions.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Adéquation client */}
+          {cf && (cf.pains_addressed?.length || cf.gains_created?.length || cf.objections?.length || cf.trust_builders?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Customer fit" : "Adéquation client"}
+              </p>
+              <dl className="space-y-2">
+                {cf.pains_addressed?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Pains addressed" : "Douleurs traitées"}</dt>
+                    <ul className="space-y-0.5">
+                      {cf.pains_addressed.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {cf.gains_created?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Gains created" : "Gains créés"}</dt>
+                    <ul className="space-y-0.5">
+                      {cf.gains_created.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {cf.objections?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Objections" : "Objections"}</dt>
+                    <ul className="space-y-0.5">
+                      {cf.objections.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {cf.trust_builders?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Trust builders" : "Éléments de confiance"}</dt>
+                    <ul className="space-y-0.5">
+                      {cf.trust_builders.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Forces / Risques */}
+          {(analysis.strengths?.length || analysis.risks?.length) ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {analysis.strengths?.length ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                    {isEnglish ? "Strengths" : "Forces"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.strengths.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {analysis.risks?.length ? (
+                <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                    {isEnglish ? "Risks" : "Risques"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.risks.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
+                        <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Informations manquantes */}
+          {analysis.missing_information?.length ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE] px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "Missing information" : "Informations manquantes"}
+              </p>
+              <ul className="space-y-1">
+                {analysis.missing_information.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[#6F6A60]">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Prochaine meilleure action */}
+          {nba && (nba.title || nba.why || nba.how || nba.expected_output) ? (
+            <div className="rounded-xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F0E6CC]/40 to-white px-4 py-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Next best action" : "Prochaine meilleure action"}
+              </p>
+              {nba.title ? <p className="text-sm font-bold text-[#101015]">{nba.title}</p> : null}
+              {nba.why ? (
+                <p className="mt-1.5 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Why: " : "Pourquoi : "}</span>
+                  {nba.why}
+                </p>
+              ) : null}
+              {nba.how ? (
+                Array.isArray(nba.how) ? (
+                  <div className="mt-1">
+                    <p className="text-xs font-semibold text-[#3A3530]">{isEnglish ? "How:" : "Comment :"}</p>
+                    <ol className="mt-1 space-y-0.5">
+                      {nba.how.map((step, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-[#6F6A60]">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#F0E6CC] text-[9px] font-bold text-[#8A6A20]">{i + 1}</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                    <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
+                    {nba.how}
+                  </p>
+                )
+              ) : null}
+              {nba.expected_output ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Expected output: " : "Résultat attendu : "}</span>
+                  {nba.expected_output}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : !loading && !error ? (
+        <p className="text-xs text-[#6F6A60]">
+          {isEnglish
+            ? "No analysis yet. Click \"Analyse offer & value\" to start."
+            : "Aucune analyse disponible. Cliquez sur « Analyser offre & valeur » pour démarrer."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function FounderAccountButton({ firstName }: { firstName?: string }) {
   const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const label = firstName
@@ -2986,6 +3393,9 @@ export default function FounderWorkspace({
   const [clientProblemLoading, setClientProblemLoading] = useState(false);
   const [clientProblemError, setClientProblemError] = useState<string | null>(null);
   const [clientProblemAnalysis, setClientProblemAnalysis] = useState<FounderClientProblemAnalysis | null>(null);
+  const [offerValueLoading, setOfferValueLoading] = useState(false);
+  const [offerValueError, setOfferValueError] = useState<string | null>(null);
+  const [offerValueAnalysis, setOfferValueAnalysis] = useState<FounderOfferValueAnalysis | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hydrateRef = useRef(false);
@@ -3192,6 +3602,41 @@ export default function FounderWorkspace({
       setClientProblemError(err instanceof Error ? err.message : "Erreur inattendue.");
     } finally {
       setClientProblemLoading(false);
+    }
+  }
+
+  // Load existing offer-value analysis from project_data when switching projects
+  useEffect(() => {
+    setOfferValueError(null);
+    if (!currentProject) { setOfferValueAnalysis(null); return; }
+    const agentData = asRecord(asRecord(currentProject.project_data).agent_offer_value_v1);
+    const existing = agentData.analysis;
+    setOfferValueAnalysis(existing && typeof existing === "object" ? existing as FounderOfferValueAnalysis : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProject?.id]);
+
+  async function runOfferValueAgent() {
+    if (!currentProject || !owner || offerValueLoading) return;
+    setOfferValueLoading(true);
+    setOfferValueError(null);
+    try {
+      const response = await runFounderOfferValueAgent(currentProject.id, owner, {
+        instruction: "Analyse la proposition de valeur, l'offre principale et propose une version plus claire, testable et vendable.",
+        auto_update: true,
+      });
+      setOfferValueAnalysis(response.analysis);
+      if (response.project && owner) {
+        try {
+          const refreshed = await getFounderProject(currentProject.id, owner);
+          setProjects((prev) => mergeFounderProjectList(prev, refreshed));
+        } catch {
+          // Non-critical: project data already saved server-side
+        }
+      }
+    } catch (err) {
+      setOfferValueError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setOfferValueLoading(false);
     }
   }
 
@@ -4018,6 +4463,17 @@ export default function FounderWorkspace({
                 error={clientProblemError}
                 locale={locale}
                 onRun={() => void runClientProblemAgent()}
+              />
+            ) : null}
+
+            {/* Offre & Valeur IA */}
+            {currentProject ? (
+              <FounderOfferValueBlock
+                analysis={offerValueAnalysis}
+                loading={offerValueLoading}
+                error={offerValueError}
+                locale={locale}
+                onRun={() => void runOfferValueAgent()}
               />
             ) : null}
 

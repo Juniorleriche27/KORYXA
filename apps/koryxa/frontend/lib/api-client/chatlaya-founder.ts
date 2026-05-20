@@ -263,6 +263,88 @@ export async function runFounderClientProblemAgent(
   return response;
 }
 
+export type FounderOfferValueValueProposition = {
+  promise?: string | null;
+  target_result?: string | null;
+  main_benefits?: string[] | null;
+  differentiation?: string | null;
+  proof_needed?: string[] | null;
+};
+
+export type FounderOfferValueOffer = {
+  main_offer?: string | null;
+  entry_offer?: string | null;
+  premium_offer?: string | null;
+  deliverables?: string[] | null;
+  conditions?: string[] | null;
+};
+
+export type FounderOfferValueCustomerFit = {
+  pains_addressed?: string[] | null;
+  gains_created?: string[] | null;
+  objections?: string[] | null;
+  trust_builders?: string[] | null;
+};
+
+export type FounderOfferValueScores = {
+  offer_clarity?: number | null;
+  value_strength?: number | null;
+  differentiation?: number | null;
+  trust_readiness?: number | null;
+  testability?: number | null;
+  global?: number | null;
+};
+
+export type FounderOfferValueNextBestAction = {
+  title?: string | null;
+  why?: string | null;
+  how?: string[] | string | null;
+  expected_output?: string | null;
+};
+
+export type FounderOfferValueAnalysis = {
+  value_proposition?: FounderOfferValueValueProposition | null;
+  offer?: FounderOfferValueOffer | null;
+  customer_fit?: FounderOfferValueCustomerFit | null;
+  scores?: FounderOfferValueScores | null;
+  strengths?: string[] | null;
+  risks?: string[] | null;
+  missing_information?: string[] | null;
+  recommended_next_step?: string | null;
+  next_best_action?: FounderOfferValueNextBestAction | null;
+};
+
+export type FounderOfferValueAgentResponse = {
+  ok: boolean;
+  project_id: string;
+  agent: string;
+  analysis: FounderOfferValueAnalysis;
+  suggested_project_data_patch?: Record<string, unknown> | null;
+  project?: unknown | null;
+};
+
+export async function runFounderOfferValueAgent(
+  projectId: string,
+  owner: FounderOwner,
+  payload?: {
+    instruction?: string | null;
+    auto_update?: boolean;
+  },
+): Promise<FounderOfferValueAgentResponse> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<FounderOfferValueAgentResponse>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/agent/offer-value?${params.toString()}`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        instruction: payload?.instruction ?? null,
+        auto_update: payload?.auto_update ?? false,
+      }),
+    },
+  );
+  return response;
+}
+
 export async function archiveFounderProject(projectId: string, owner: FounderOwner): Promise<FounderProject> {
   const params = resolveOwner(owner);
   const response = await requestJson<{ project?: unknown }>(
