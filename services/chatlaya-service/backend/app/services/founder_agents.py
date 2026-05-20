@@ -67,6 +67,12 @@ _DEFAULT_DIAGNOSIS = {
     "sales": "Le canal d'acquisition et le message de vente doivent etre rendus plus operationnels.",
     "execution": "Le projet a besoin d'un plan d'action court terme avec priorites et sorties attendues.",
 }
+_CLIENT_PROBLEM_SCORE_KEYS = (
+    "client_precision",
+    "problem_intensity",
+    "market_accessibility",
+    "validation_readiness",
+)
 
 
 def _now_iso() -> str:
@@ -637,6 +643,392 @@ async def run_founder_cadrage_v1(
         "agent_cadrage_v1": {
             "agent": "founder_cadrage_v1",
             "label": "Founder Diagnostic & Orientation Agent V1",
+            "version": 1,
+            "source": source,
+            "generated_at": _now_iso(),
+            "instruction": _clean_text(instruction) or None,
+            "analysis": analysis,
+        }
+    }
+    return analysis, patch
+
+
+def _infer_target_segment(workspace_signals: dict[str, str], joined_text: str) -> str:
+    if workspace_signals.get("client"):
+        return _truncate(workspace_signals["client"], 180)
+    if _contains_any(joined_text, ("pme", "tpe", "entreprise", "business")):
+        return "PME/TPE locales avec besoin concret et budget limite."
+    if _contains_any(joined_text, ("jeune", "women", "femme", "mother", "etudiant", "student")):
+        return "Segment individuel local, accessible via reseaux de proximite et mobile."
+    return "Segment prioritaire encore a confirmer sur le terrain."
+
+
+def _infer_ability_to_pay(joined_text: str, business_type: str) -> str:
+    if _contains_any(joined_text, ("mobile money", "cash", "petit budget", "budget limite", "versement", "acompte")):
+        return "Pouvoir d'achat contraint, avec preference probable pour cash, mobile money ou paiement fractionne."
+    if business_type in {"service", "training", "coaching"}:
+        return "Capacite de paiement a valider via offres simples, acompte ou format d'entree de gamme."
+    if business_type in {"commerce", "import_export"}:
+        return "Capacite de paiement sensible au cash disponible, a la rotation et a la confiance commerciale."
+    return "Capacite de paiement encore floue et a tester rapidement."
+
+
+def _infer_access_channel(workspace_signals: dict[str, str], joined_text: str) -> str:
+    vente_signal = workspace_signals.get("vente", "")
+    if vente_signal:
+        return _truncate(vente_signal, 180)
+    if _contains_any(joined_text, ("whatsapp", "facebook", "instagram", "bouche a oreille", "terrain", "marche", "diaspora")):
+        return "WhatsApp, bouche-a-oreille, groupes locaux ou marche physique semblent etre les canaux les plus accessibles."
+    return "Canal d'acces client encore a prioriser entre digital leger et terrain."
+
+
+def _infer_pain_level(problem_signal: str, joined_text: str) -> int:
+    if not problem_signal:
+        return 30
+    level = 55 if len(problem_signal) >= 40 else 40
+    if _contains_any(joined_text, ("urgent", "perte", "douleur", "bloque", "frustration", "revenus", "manque de confiance")):
+        level += 20
+    if _contains_any(joined_text, ("quotidien", "chaque semaine", "frequent", "souvent")):
+        level += 10
+    return _clamp_score(level)
+
+
+def _infer_frequency(problem_signal: str, joined_text: str) -> str:
+    if _contains_any(problem_signal + " " + joined_text, ("quotidien", "daily", "chaque jour")):
+        return "quotidienne"
+    if _contains_any(problem_signal + " " + joined_text, ("chaque semaine", "hebdo", "weekly", "souvent", "frequent")):
+        return "frequente"
+    if problem_signal:
+        return "reguliere mais encore a quantifier"
+    return "non documentee"
+
+
+def _build_problem_consequences(problem_signal: str, joined_text: str) -> list[str]:
+    consequences: list[str] = []
+    if _contains_any(problem_signal + " " + joined_text, ("revenus", "vente", "commandes")):
+        consequences.append("Perte de revenus ou difficulte a convertir les premiers clients.")
+    if _contains_any(problem_signal + " " + joined_text, ("confiance", "credibilite", "preuve")):
+        consequences.append("Faible confiance client et cycle de vente rallonge.")
+    if _contains_any(problem_signal + " " + joined_text, ("materiel", "stock", "logistique", "livraison")):
+        consequences.append("Execution ralentie par les contraintes de materiel ou de distribution.")
+    if not consequences:
+        consequences.append("Le client risque de continuer avec des solutions imparfaites ou informelles.")
+    return consequences[:4]
+
+
+def _build_current_alternatives(joined_text: str, business_type: str) -> list[str]:
+    alternatives: list[str] = []
+    if _contains_any(joined_text, ("whatsapp", "facebook", "groupe", "bouche a oreille")):
+        alternatives.append("Solutions informelles via WhatsApp, groupes Facebook ou bouche-a-oreille.")
+    if business_type in {"training", "coaching", "service"}:
+        alternatives.append("Prestataires ou formateurs locaux deja connus par le reseau de proximite.")
+    if business_type in {"commerce", "import_export"}:
+        alternatives.append("Approvisionnement traditionnel via marche physique ou grossiste habituel.")
+    if business_type == "digital_product":
+        alternatives.append("Contenus gratuits, tutoriels ou ressources partagees localement.")
+    if not alternatives:
+        alternatives.append("Le client se debrouille probablement avec des alternatives manuelles ou peu structurees.")
+    return alternatives[:4]
+
+
+def _build_client_problem_scores(
+    workspace_signals: dict[str, str],
+    joined_text: str,
+    pain_level: int,
+) -> dict[str, int]:
+    client_precision = _score_from_signal(workspace_signals.get("client", ""), (18, 45, 72))
+    problem_clarity = _score_from_signal(workspace_signals.get("probleme", ""), (16, 42, 70))
+    market_accessibility = 35
+    if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "facebook", "instagram", "terrain", "marche", "diaspora")):
+        market_accessibility += 25
+    if _contains_any(joined_text, ("mobile money", "cash", "petit budget", "petits budgets")):
+        market_accessibility += 10
+    validation_readiness = 22
+    if _contains_any(joined_text, ("test", "pilote", "feedback", "preuve", "interview", "prospect", "commande")):
+        validation_readiness += 28
+    scores = {
+        "client_precision": _clamp_score(client_precision),
+        "problem_intensity": _clamp_score(pain_level),
+        "market_accessibility": _clamp_score(market_accessibility),
+        "validation_readiness": _clamp_score(validation_readiness),
+    }
+    scores["global"] = round(sum(scores[key] for key in _CLIENT_PROBLEM_SCORE_KEYS) / len(_CLIENT_PROBLEM_SCORE_KEYS))
+    return scores
+
+
+def _build_critical_assumptions(
+    workspace_signals: dict[str, str],
+    joined_text: str,
+) -> list[str]:
+    assumptions: list[str] = []
+    if not workspace_signals.get("client"):
+        assumptions.append("Le segment cible choisi est vraiment prioritaire et accessible rapidement.")
+    else:
+        assumptions.append("Le segment client decrit ressent bien le probleme avec assez d'urgence pour agir.")
+    assumptions.append("Le client est pret a payer pour une solution meilleure que ses alternatives actuelles.")
+    if _contains_any(joined_text, ("mobile money", "cash")):
+        assumptions.append("Le mode de paiement disponible ne bloquera pas la conversion initiale.")
+    else:
+        assumptions.append("Le mode de paiement reel du client reste compatible avec l'offre proposee.")
+    if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "terrain")):
+        assumptions.append("Le canal d'acces choisi permet d'obtenir rapidement des conversations terrain utiles.")
+    else:
+        assumptions.append("Le projet saura atteindre 5 a 10 prospects reels sans cout d'acquisition trop eleve.")
+    return assumptions[:5]
+
+
+def _build_field_questions(
+    target_segment: str,
+    problem_signal: str,
+) -> list[str]:
+    questions = [
+        f"Dans votre quotidien, quel est aujourd'hui le probleme le plus couteux ou frustrant lie a: {target_segment} ?",
+        "Comment gerez-vous ce probleme aujourd'hui, avec quelles limites concretes ?",
+        "Qu'est-ce que ce probleme vous coute en argent, temps, energie ou opportunites ratees ?",
+        "A quel moment seriez-vous pret a payer pour une solution plus fiable ou plus simple ?",
+        "Quel canal vous met le plus en confiance pour acheter ou tester une nouvelle offre ?",
+    ]
+    if problem_signal:
+        questions.append(f"Quand ce probleme apparait-il le plus souvent: { _truncate(problem_signal, 120) } ?")
+    return questions[:6]
+
+
+def _build_people_to_contact(joined_text: str, business_type: str) -> list[str]:
+    people = [
+        "5 prospects reels du segment prioritaire contactés via WhatsApp ou appel.",
+        "2 personnes ayant deja achete une alternative actuelle ou un service voisin.",
+        "1 relai de confiance local: vendeur, coach, leader de groupe, association ou animateur communautaire.",
+    ]
+    if _contains_any(joined_text, ("diaspora",)):
+        people.append("2 membres de diaspora lies au besoin ou au pouvoir d'achat cible.")
+    if business_type in {"commerce", "import_export"}:
+        people.append("2 vendeurs ou grossistes du marche physique pour comprendre prix, rotation et blocages.")
+    return people[:5]
+
+
+def _build_validation_method(joined_text: str) -> str:
+    if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "terrain")):
+        return "Entretiens terrain courts plus tests WhatsApp de message, offre et prix sur 5 a 10 prospects reels."
+    return "Entretiens semi-structures avec prospects reels, puis test rapide d'offre et de prix sur un canal prioritaire."
+
+
+def _build_success_criteria() -> list[str]:
+    return [
+        "Au moins 5 prospects du meme segment confirment ressentir le probleme.",
+        "Au moins 3 prospects decrivent des consequences fortes ou un cout clair de l'inaction.",
+        "Au moins 2 prospects acceptent un prochain pas concret: essai, rendez-vous, precommande ou paiement test.",
+        "Un canal d'acces ressort comme prioritaire avec un message qui declenche des reponses.",
+    ]
+
+
+def build_deterministic_client_problem_analysis(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> dict[str, Any]:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = _as_dict(project.get("project_data"))
+    workspace_signals = _extract_workspace_signals(project_data)
+    instruction_text = _clean_text(instruction)
+    business_type = _infer_business_type(_tokenize(title, instruction_text, " ".join(workspace_signals.values())), " ".join([title, instruction_text, *workspace_signals.values()]).lower())
+    joined_text = " ".join(
+        part for part in [
+            title,
+            instruction_text,
+            json.dumps(project_data, ensure_ascii=True, default=str),
+            " ".join(workspace_signals.values()),
+        ] if part
+    ).lower()
+    target_segment = _infer_target_segment(workspace_signals, joined_text)
+    problem_signal = workspace_signals.get("probleme", "")
+    pain_level = _infer_pain_level(problem_signal, joined_text)
+    scores = _build_client_problem_scores(workspace_signals, joined_text, pain_level)
+    profile = (
+        "Profil encore a preciser en termes d'activite, niveau de revenu, habitudes d'achat et contraintes quotidiennes."
+        if not workspace_signals.get("client")
+        else "Prospect cible decrit avec des indices de contexte local, budget sensible et besoin d'une solution pratique."
+    )
+    context = (
+        "Contexte d'achat probablement influence par confiance, petits budgets, bouche-a-oreille et paiement flexible."
+        if _contains_any(joined_text, ("whatsapp", "mobile money", "cash", "petit budget", "bouche a oreille", "marche"))
+        else "Contexte d'usage a documenter sur le terrain avant de figer l'offre."
+    )
+    analysis = {
+        "target_client": {
+            "segment": target_segment,
+            "profile": profile,
+            "context": context,
+            "ability_to_pay": _infer_ability_to_pay(joined_text, business_type),
+            "access_channel": _infer_access_channel(workspace_signals, joined_text),
+        },
+        "problem": {
+            "main_problem": _truncate(problem_signal or "Le probleme principal n'est pas encore formule avec assez de precision pour etre teste.", 220),
+            "pain_level": pain_level,
+            "frequency": _infer_frequency(problem_signal, joined_text),
+            "consequences": _build_problem_consequences(problem_signal, joined_text),
+            "current_alternatives": _build_current_alternatives(joined_text, business_type),
+        },
+        "validation": {
+            "critical_assumptions": _build_critical_assumptions(workspace_signals, joined_text),
+            "field_questions": _build_field_questions(target_segment, problem_signal),
+            "people_to_contact": _build_people_to_contact(joined_text, business_type),
+            "validation_method": _build_validation_method(joined_text),
+            "success_criteria": _build_success_criteria(),
+        },
+        "scores": scores,
+        "strengths": [
+            "Le projet dispose deja d'une base client/probleme exploitable pour aller sur le terrain." if workspace_signals.get("client") or workspace_signals.get("probleme") else "Le projet peut encore pivoter facilement avant d'investir lourdement.",
+            "Les canaux legers comme WhatsApp ou bouche-a-oreille peuvent accelerer la collecte de retours terrain." if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "terrain")) else "Le projet peut encore choisir un canal de validation simple et peu couteux.",
+        ][:2],
+        "risks": [
+            "Le segment prioritaire reste trop large ou melange plusieurs profils differents." if not workspace_signals.get("client") else "La cible existe mais doit etre encore resserree autour d'un cas d'usage prioritaire.",
+            "Le probleme risque d'etre jugé interessant mais pas assez urgent pour declencher un achat test.",
+            "Les alternatives actuelles du client peuvent sembler 'suffisamment bonnes' si la valeur n'est pas mieux articulee.",
+        ][:3],
+        "missing_information": [
+            "Le moment exact ou le probleme devient urgent pour le client.",
+            "Le budget reel disponible et le mode de paiement prefere.",
+            "La preuve qu'au moins un segment repond positivement a un message concret.",
+        ][:3],
+        "recommended_next_step": "Reserrer le segment client et valider sur le terrain si le probleme est assez frequent, douloureux et solvable commercialement.",
+        "next_best_action": {
+            "title": "Mener 5 entretiens terrain client-probleme sur un segment unique",
+            "why": "Avant d'optimiser l'offre, il faut verifier que le bon client ressent un probleme urgent et qu'il est accessible via un canal simple.",
+            "how": [
+                "Choisir un seul segment prioritaire pour 7 jours.",
+                "Contacter 5 prospects reels via WhatsApp, appel ou rencontre directe.",
+                "Poser les questions terrain sans pitcher trop tot la solution.",
+                "Noter mot pour mot les douleurs, alternatives et objections de paiement.",
+                "Comparer les reponses pour voir si un motif recurrent emerge.",
+            ],
+            "expected_output": "Un segment plus net, un probleme principal confirme ou invalide, et une priorite claire pour l'offre.",
+        },
+    }
+    return analysis
+
+
+def _normalize_target_client(value: Any, fallback: dict[str, Any]) -> dict[str, str]:
+    payload = _as_dict(value)
+    return {
+        "segment": _truncate(payload.get("segment") or fallback["segment"], 180),
+        "profile": _truncate(payload.get("profile") or fallback["profile"], 220),
+        "context": _truncate(payload.get("context") or fallback["context"], 220),
+        "ability_to_pay": _truncate(payload.get("ability_to_pay") or fallback["ability_to_pay"], 220),
+        "access_channel": _truncate(payload.get("access_channel") or fallback["access_channel"], 180),
+    }
+
+
+def _normalize_problem_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "main_problem": _truncate(payload.get("main_problem") or fallback["main_problem"], 220),
+        "pain_level": _clamp_score(payload.get("pain_level", fallback["pain_level"])),
+        "frequency": _truncate(payload.get("frequency") or fallback["frequency"], 80),
+        "consequences": _coerce_string_list(payload.get("consequences"), limit=5) or fallback["consequences"],
+        "current_alternatives": _coerce_string_list(payload.get("current_alternatives"), limit=5) or fallback["current_alternatives"],
+    }
+
+
+def _normalize_validation_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "critical_assumptions": _coerce_string_list(payload.get("critical_assumptions"), limit=6) or fallback["critical_assumptions"],
+        "field_questions": _coerce_string_list(payload.get("field_questions"), limit=7) or fallback["field_questions"],
+        "people_to_contact": _coerce_string_list(payload.get("people_to_contact"), limit=6) or fallback["people_to_contact"],
+        "validation_method": _truncate(payload.get("validation_method") or fallback["validation_method"], 220),
+        "success_criteria": _coerce_string_list(payload.get("success_criteria"), limit=6) or fallback["success_criteria"],
+    }
+
+
+def _normalize_client_problem_scores(value: Any, fallback: dict[str, Any]) -> dict[str, int]:
+    payload = _as_dict(value)
+    scores = {key: _clamp_score(payload.get(key, fallback[key])) for key in _CLIENT_PROBLEM_SCORE_KEYS}
+    scores["global"] = round(sum(scores[key] for key in _CLIENT_PROBLEM_SCORE_KEYS) / len(_CLIENT_PROBLEM_SCORE_KEYS))
+    return scores
+
+
+def _normalize_client_problem_analysis(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    normalized = {
+        "target_client": _normalize_target_client(payload.get("target_client"), fallback["target_client"]),
+        "problem": _normalize_problem_block(payload.get("problem"), fallback["problem"]),
+        "validation": _normalize_validation_block(payload.get("validation"), fallback["validation"]),
+        "scores": _normalize_client_problem_scores(payload.get("scores"), fallback["scores"]),
+        "strengths": _coerce_string_list(payload.get("strengths"), limit=6) or fallback["strengths"],
+        "risks": _coerce_string_list(payload.get("risks"), limit=6) or fallback["risks"],
+        "missing_information": _coerce_string_list(payload.get("missing_information"), limit=6) or fallback["missing_information"],
+        "recommended_next_step": _truncate(payload.get("recommended_next_step") or fallback["recommended_next_step"], 260),
+        "next_best_action": _normalize_next_best_action(payload.get("next_best_action"), fallback["next_best_action"]),
+    }
+    normalized["scores"]["global"] = round(
+        sum(normalized["scores"][key] for key in _CLIENT_PROBLEM_SCORE_KEYS) / len(_CLIENT_PROBLEM_SCORE_KEYS)
+    )
+    return normalized
+
+
+def _build_client_problem_llm_prompt(project: dict[str, Any], instruction: str | None, fallback: dict[str, Any]) -> str:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = json.dumps(_as_dict(project.get("project_data")), ensure_ascii=True, default=str)
+    opencloud_project_path = _clean_text(project.get("opencloud_project_path")) or "N/A"
+    instruction_block = _clean_text(instruction) or "Aucune instruction additionnelle."
+    fallback_json = json.dumps(fallback, ensure_ascii=True, default=str)
+    return (
+        "Tu es founder_client_problem_v1 pour ChatLAYA Founder.\n"
+        "Tu n'es pas un chatbot. Tu produis un diagnostic structuré client/probleme pour un Founder Builder OS.\n"
+        "Retourne UNIQUEMENT un JSON valide, sans markdown ni texte autour.\n"
+        "Integre si pertinent les realites africaines/locales: WhatsApp, mobile money, cash, confiance client, petits budgets, distribution locale, marches physiques, bouche-a-oreille, diaspora, informalite.\n"
+        "Schema JSON attendu:\n"
+        "{"
+        "\"target_client\": {\"segment\": string, \"profile\": string, \"context\": string, \"ability_to_pay\": string, \"access_channel\": string},"
+        "\"problem\": {\"main_problem\": string, \"pain_level\": 0, \"frequency\": string, \"consequences\": [string], \"current_alternatives\": [string]},"
+        "\"validation\": {\"critical_assumptions\": [string], \"field_questions\": [string], \"people_to_contact\": [string], \"validation_method\": string, \"success_criteria\": [string]},"
+        "\"scores\": {\"client_precision\": 0, \"problem_intensity\": 0, \"market_accessibility\": 0, \"validation_readiness\": 0, \"global\": 0},"
+        "\"strengths\": [string],"
+        "\"risks\": [string],"
+        "\"missing_information\": [string],"
+        "\"recommended_next_step\": string,"
+        "\"next_best_action\": {\"title\": string, \"why\": string, \"how\": [string], \"expected_output\": string}"
+        "}\n"
+        "Contraintes:\n"
+        "- scores entre 0 et 100\n"
+        "- diagnostic concret, terrain, orienté validation client\n"
+        "- pas de secret ni detail interne\n"
+        f"Instruction additionnelle: {instruction_block}\n"
+        f"Titre: {title}\n"
+        f"OpenCloud path: {opencloud_project_path}\n"
+        f"Project data JSON: {project_data}\n"
+        f"Fallback deterministic reference: {fallback_json}\n"
+    )
+
+
+async def run_founder_client_problem_v1(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    fallback = build_deterministic_client_problem_analysis(project, instruction=instruction)
+    analysis = fallback
+    source = "deterministic"
+    try:
+        prompt = _build_client_problem_llm_prompt(project, instruction, fallback)
+        raw_response = await asyncio.to_thread(
+            generate_answer,
+            prompt,
+            None,
+            None,
+            90,
+            1200,
+        )
+        candidate = _extract_json_payload(raw_response)
+        if candidate:
+            analysis = _normalize_client_problem_analysis(candidate, fallback)
+            source = "llm"
+    except Exception:
+        analysis = fallback
+        source = "deterministic"
+
+    patch = {
+        "agent_client_problem_v1": {
+            "agent": "founder_client_problem_v1",
+            "label": "Founder Client & Problem Agent V1",
             "version": 1,
             "source": source,
             "generated_at": _now_iso(),
