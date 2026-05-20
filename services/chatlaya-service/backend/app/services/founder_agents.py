@@ -73,6 +73,13 @@ _CLIENT_PROBLEM_SCORE_KEYS = (
     "market_accessibility",
     "validation_readiness",
 )
+_OFFER_VALUE_SCORE_KEYS = (
+    "offer_clarity",
+    "value_strength",
+    "differentiation",
+    "trust_readiness",
+    "testability",
+)
 
 
 def _now_iso() -> str:
@@ -1029,6 +1036,402 @@ async def run_founder_client_problem_v1(
         "agent_client_problem_v1": {
             "agent": "founder_client_problem_v1",
             "label": "Founder Client & Problem Agent V1",
+            "version": 1,
+            "source": source,
+            "generated_at": _now_iso(),
+            "instruction": _clean_text(instruction) or None,
+            "analysis": analysis,
+        }
+    }
+    return analysis, patch
+
+
+def _build_offer_promise(workspace_signals: dict[str, str], joined_text: str) -> str:
+    offer_signal = workspace_signals.get("offre", "")
+    problem_signal = workspace_signals.get("probleme", "")
+    if offer_signal:
+        return _truncate(offer_signal, 220)
+    if problem_signal:
+        return _truncate(
+            f"Aider le client a resoudre plus simplement ce probleme: {problem_signal}",
+            220,
+        )
+    if _contains_any(joined_text, ("whatsapp", "mobile money", "cash")):
+        return "Offrir une solution simple, rassurante et facile a adopter dans un contexte local et mobile."
+    return "Promesse commerciale encore a clarifier autour d'un resultat client concret."
+
+
+def _build_target_result(workspace_signals: dict[str, str], joined_text: str) -> str:
+    if workspace_signals.get("probleme"):
+        return "Faire gagner du temps, reduire la friction et ameliorer le resultat concret du client."
+    if _contains_any(joined_text, ("vente", "revenus", "commande")):
+        return "Aider le client a vendre plus facilement et avec plus de confiance."
+    return "Transformer un besoin flou en resultat concret, visible et mesurable."
+
+
+def _build_main_benefits(joined_text: str, workspace_signals: dict[str, str]) -> list[str]:
+    benefits: list[str] = []
+    if _contains_any(joined_text, ("temps", "rapide", "simple", "automatique")):
+        benefits.append("Gain de temps et reduction des taches manuelles.")
+    if _contains_any(joined_text, ("vente", "revenus", "commande", "conversion")):
+        benefits.append("Meilleure conversion ou augmentation du chiffre d'affaires.")
+    if _contains_any(joined_text, ("confiance", "preuve", "fiable")):
+        benefits.append("Renforcement de la confiance client au moment de l'achat.")
+    if _contains_any(joined_text, ("cash", "mobile money", "petit budget")):
+        benefits.append("Adoption plus facile grace a une offre compatible avec les budgets locaux.")
+    if not benefits and workspace_signals.get("offre"):
+        benefits.append("Resultat client plus clair et plus simple a expliquer.")
+    if not benefits:
+        benefits.append("Valeur percue encore a rendre plus concrete pour le client.")
+    return benefits[:4]
+
+
+def _build_differentiation(workspace_signals: dict[str, str], joined_text: str, business_type: str) -> str:
+    if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "distribution locale", "marche")):
+        return "La difference potentielle vient d'une execution locale, legere et adaptee aux habitudes reelles du client."
+    if business_type in {"service", "coaching", "training"}:
+        return "La differenciation doit combiner accompagnement concret, simplicite d'acces et resultat rapidement visible."
+    if workspace_signals.get("offre"):
+        return "L'offre est amorcee mais sa differenciation doit encore etre comparee aux alternatives actuelles."
+    return "La differenciation n'est pas encore assez explicite pour justifier un choix clair du client."
+
+
+def _build_proof_needed(joined_text: str) -> list[str]:
+    proof = [
+        "Temoignages ou retours terrain de premiers utilisateurs.",
+        "Cas concret montrant le avant/apres pour le client.",
+    ]
+    if _contains_any(joined_text, ("whatsapp", "facebook", "instagram")):
+        proof.append("Captures ou messages WhatsApp montrant l'interet reel du segment cible.")
+    if _contains_any(joined_text, ("cash", "mobile money", "paiement")):
+        proof.append("Preuve qu'un client accepte un paiement test ou un acompte.")
+    return proof[:4]
+
+
+def _build_main_offer(workspace_signals: dict[str, str], promise: str) -> str:
+    offer_signal = workspace_signals.get("offre", "")
+    if offer_signal:
+        return _truncate(offer_signal, 180)
+    return _truncate(f"Offre principale centree sur cette promesse: {promise}", 180)
+
+
+def _build_entry_offer(joined_text: str) -> str:
+    if _contains_any(joined_text, ("petit budget", "budget limite", "cash", "mobile money")):
+        return "Offre d'appel simple, a faible risque, payable en cash ou mobile money."
+    return "Offre d'appel courte et simple pour faciliter le premier test client."
+
+
+def _build_premium_offer(business_type: str) -> str:
+    if business_type in {"service", "agency", "coaching", "training"}:
+        return "Version premium avec accompagnement renforce, personnalisation et suivi plus pousse."
+    return "Version premium avec plus de personnalisation, rapidite et garantie de resultat."
+
+
+def _build_deliverables(workspace_signals: dict[str, str], joined_text: str) -> list[str]:
+    deliverables: list[str] = []
+    if workspace_signals.get("offre"):
+        deliverables.append("Livrable principal clairement relie a la promesse de valeur.")
+    if _contains_any(joined_text, ("whatsapp", "support", "suivi")):
+        deliverables.append("Suivi client leger via WhatsApp ou canal direct.")
+    if _contains_any(joined_text, ("formation", "coaching", "service")):
+        deliverables.append("Guide, session ou prestation orientee resultat.")
+    if _contains_any(joined_text, ("produit", "commerce", "livraison")):
+        deliverables.append("Produit ou service livre avec conditions simples et lisibles.")
+    if not deliverables:
+        deliverables.append("Livrables encore a preciser en termes de format, delai et resultat.")
+    return deliverables[:4]
+
+
+def _build_offer_conditions(joined_text: str) -> list[str]:
+    conditions: list[str] = []
+    if _contains_any(joined_text, ("cash", "mobile money")):
+        conditions.append("Paiement possible en cash ou mobile money selon le contexte client.")
+    if _contains_any(joined_text, ("whatsapp", "appel", "terrain")):
+        conditions.append("Activation et suivi possibles via WhatsApp, appel ou contact direct.")
+    conditions.append("Conditions d'execution et delais doivent rester simples a expliquer.")
+    return conditions[:4]
+
+
+def _build_pains_addressed(problem_signal: str, joined_text: str) -> list[str]:
+    pains: list[str] = []
+    if problem_signal:
+        pains.append(_truncate(problem_signal, 160))
+    if _contains_any(joined_text, ("perte", "vente", "commande", "revenus")):
+        pains.append("Perte de revenus ou opportunites commerciales.")
+    if _contains_any(joined_text, ("temps", "suivi", "manuel", "desordre")):
+        pains.append("Friction operationnelle et perte de temps dans l'execution.")
+    if not pains:
+        pains.append("Douleur client encore a relier plus clairement a une consequence concrete.")
+    return pains[:4]
+
+
+def _build_gains_created(joined_text: str) -> list[str]:
+    gains: list[str] = []
+    if _contains_any(joined_text, ("vente", "revenus", "commande")):
+        gains.append("Plus de ventes ou meilleure conversion.")
+    if _contains_any(joined_text, ("confiance", "preuve")):
+        gains.append("Plus de confiance au moment de l'achat.")
+    if _contains_any(joined_text, ("temps", "simple", "rapide")):
+        gains.append("Execution plus simple et plus rapide.")
+    if _contains_any(joined_text, ("cash", "mobile money", "petit budget")):
+        gains.append("Adoption plus facile grace a un format compatible avec le terrain.")
+    if not gains:
+        gains.append("Resultat percu encore a rendre plus visible et plus desirables.")
+    return gains[:4]
+
+
+def _build_offer_objections(joined_text: str, business_type: str) -> list[str]:
+    objections = [
+        "Le client peut douter que le resultat promis soit vraiment atteignable.",
+        "Le prix peut sembler eleve si la preuve et la confiance restent faibles.",
+    ]
+    if _contains_any(joined_text, ("cash", "mobile money", "petit budget")):
+        objections.append("Le client peut vouloir commencer par une offre d'appel tres faible risque.")
+    if business_type in {"digital_product", "saas"}:
+        objections.append("Le client peut craindre une solution trop complexe ou pas assez locale.")
+    return objections[:4]
+
+
+def _build_trust_builders(joined_text: str) -> list[str]:
+    trust = [
+        "Temoignages courts ou preuve sociale issue du meme segment.",
+        "Demonstration simple du resultat attendu avant achat complet.",
+    ]
+    if _contains_any(joined_text, ("whatsapp", "bouche a oreille")):
+        trust.append("Recommandation par un relai de confiance ou via bouche-a-oreille.")
+    if _contains_any(joined_text, ("cash", "mobile money")):
+        trust.append("Paiement flexible ou acompte pour reduire le risque percu.")
+    return trust[:4]
+
+
+def _build_offer_value_scores(
+    workspace_signals: dict[str, str],
+    joined_text: str,
+) -> dict[str, int]:
+    offer_clarity = _score_from_signal(workspace_signals.get("offre", ""), (16, 42, 72))
+    value_strength = 30
+    if workspace_signals.get("probleme"):
+        value_strength += 18
+    if _contains_any(joined_text, ("resultat", "benefice", "gain", "revenus", "temps")):
+        value_strength += 18
+    differentiation = 22
+    if _contains_any(joined_text, ("whatsapp", "mobile money", "cash", "local", "distribution", "bouche a oreille")):
+        differentiation += 24
+    trust_readiness = 20
+    if _contains_any(joined_text, ("temoignage", "preuve", "confiance", "garantie", "essai")):
+        trust_readiness += 24
+    testability = 24
+    if _contains_any(joined_text, ("offre d'appel", "pilote", "test", "essai", "precommande", "whatsapp")):
+        testability += 26
+    scores = {
+        "offer_clarity": _clamp_score(offer_clarity),
+        "value_strength": _clamp_score(value_strength),
+        "differentiation": _clamp_score(differentiation),
+        "trust_readiness": _clamp_score(trust_readiness),
+        "testability": _clamp_score(testability),
+    }
+    scores["global"] = round(sum(scores[key] for key in _OFFER_VALUE_SCORE_KEYS) / len(_OFFER_VALUE_SCORE_KEYS))
+    return scores
+
+
+def build_deterministic_offer_value_analysis(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> dict[str, Any]:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = _as_dict(project.get("project_data"))
+    workspace_signals = _extract_workspace_signals(project_data)
+    instruction_text = _clean_text(instruction)
+    joined_text = " ".join(
+        part for part in [
+            title,
+            instruction_text,
+            json.dumps(project_data, ensure_ascii=True, default=str),
+            " ".join(workspace_signals.values()),
+        ] if part
+    ).lower()
+    business_type = _infer_business_type(
+        _tokenize(title, instruction_text, " ".join(workspace_signals.values())),
+        joined_text,
+    )
+    promise = _build_offer_promise(workspace_signals, joined_text)
+    problem_signal = workspace_signals.get("probleme", "")
+    scores = _build_offer_value_scores(workspace_signals, joined_text)
+    analysis = {
+        "value_proposition": {
+            "promise": promise,
+            "target_result": _build_target_result(workspace_signals, joined_text),
+            "main_benefits": _build_main_benefits(joined_text, workspace_signals),
+            "differentiation": _build_differentiation(workspace_signals, joined_text, business_type),
+            "proof_needed": _build_proof_needed(joined_text),
+        },
+        "offer": {
+            "main_offer": _build_main_offer(workspace_signals, promise),
+            "entry_offer": _build_entry_offer(joined_text),
+            "premium_offer": _build_premium_offer(business_type),
+            "deliverables": _build_deliverables(workspace_signals, joined_text),
+            "conditions": _build_offer_conditions(joined_text),
+        },
+        "customer_fit": {
+            "pains_addressed": _build_pains_addressed(problem_signal, joined_text),
+            "gains_created": _build_gains_created(joined_text),
+            "objections": _build_offer_objections(joined_text, business_type),
+            "trust_builders": _build_trust_builders(joined_text),
+        },
+        "scores": scores,
+        "strengths": [
+            "L'offre peut s'appuyer sur un angle local et concret pour etre plus credible." if _contains_any(joined_text, ("whatsapp", "mobile money", "cash", "local")) else "Le projet peut encore construire une offre tres simple avant de la complexifier.",
+            "Une offre d'appel peut reduire fortement la friction de premier achat." if _contains_any(joined_text, ("petit budget", "cash", "mobile money")) else "Le projet peut structurer une offre d'appel pour tester la traction rapidement.",
+        ][:2],
+        "risks": [
+            "La promesse reste peut-etre trop generale pour declencher un achat rapide.",
+            "Sans preuve sociale ou demonstration, la confiance client peut rester insuffisante.",
+            "L'offre risque de manquer de differenciation si elle ressemble trop aux alternatives informelles.",
+        ][:3],
+        "missing_information": [
+            "Le format d'offre exact qui convertit le mieux en premier achat.",
+            "La preuve concrete qui rassure le plus le segment cible.",
+            "Les objections prioritaires qui bloquent vraiment la decision de paiement.",
+        ][:3],
+        "recommended_next_step": "Transformer la promesse en offre testable, simple a expliquer et facile a essayer avec un premier segment client.",
+        "next_best_action": {
+            "title": "Designer une offre d'appel testable sur 7 jours",
+            "why": "Le projet doit verifier si sa promesse cree assez de desir, de confiance et d'intention de paiement dans des conditions reelles.",
+            "how": [
+                "Resumer l'offre en une promesse simple, un resultat et un format de livraison.",
+                "Creer une offre d'appel a faible risque adaptee au budget du segment.",
+                "Ajouter une preuve ou demonstration tres concrete.",
+                "Presenter l'offre a 5 prospects reels via WhatsApp, appel ou terrain.",
+                "Mesurer les objections, les reponses positives et les demandes de precision.",
+            ],
+            "expected_output": "Une version d'offre plus claire, ses objections principales et un signal reel d'interet ou de paiement.",
+        },
+    }
+    return analysis
+
+
+def _normalize_value_proposition(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "promise": _truncate(payload.get("promise") or fallback["promise"], 220),
+        "target_result": _truncate(payload.get("target_result") or fallback["target_result"], 220),
+        "main_benefits": _coerce_string_list(payload.get("main_benefits"), limit=5) or fallback["main_benefits"],
+        "differentiation": _truncate(payload.get("differentiation") or fallback["differentiation"], 220),
+        "proof_needed": _coerce_string_list(payload.get("proof_needed"), limit=5) or fallback["proof_needed"],
+    }
+
+
+def _normalize_offer_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "main_offer": _truncate(payload.get("main_offer") or fallback["main_offer"], 200),
+        "entry_offer": _truncate(payload.get("entry_offer") or fallback["entry_offer"], 200),
+        "premium_offer": _truncate(payload.get("premium_offer") or fallback["premium_offer"], 200),
+        "deliverables": _coerce_string_list(payload.get("deliverables"), limit=5) or fallback["deliverables"],
+        "conditions": _coerce_string_list(payload.get("conditions"), limit=5) or fallback["conditions"],
+    }
+
+
+def _normalize_customer_fit(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "pains_addressed": _coerce_string_list(payload.get("pains_addressed"), limit=5) or fallback["pains_addressed"],
+        "gains_created": _coerce_string_list(payload.get("gains_created"), limit=5) or fallback["gains_created"],
+        "objections": _coerce_string_list(payload.get("objections"), limit=5) or fallback["objections"],
+        "trust_builders": _coerce_string_list(payload.get("trust_builders"), limit=5) or fallback["trust_builders"],
+    }
+
+
+def _normalize_offer_value_scores(value: Any, fallback: dict[str, Any]) -> dict[str, int]:
+    payload = _as_dict(value)
+    scores = {key: _clamp_score(payload.get(key, fallback[key])) for key in _OFFER_VALUE_SCORE_KEYS}
+    scores["global"] = round(sum(scores[key] for key in _OFFER_VALUE_SCORE_KEYS) / len(_OFFER_VALUE_SCORE_KEYS))
+    return scores
+
+
+def _normalize_offer_value_analysis(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    normalized = {
+        "value_proposition": _normalize_value_proposition(payload.get("value_proposition"), fallback["value_proposition"]),
+        "offer": _normalize_offer_block(payload.get("offer"), fallback["offer"]),
+        "customer_fit": _normalize_customer_fit(payload.get("customer_fit"), fallback["customer_fit"]),
+        "scores": _normalize_offer_value_scores(payload.get("scores"), fallback["scores"]),
+        "strengths": _coerce_string_list(payload.get("strengths"), limit=6) or fallback["strengths"],
+        "risks": _coerce_string_list(payload.get("risks"), limit=6) or fallback["risks"],
+        "missing_information": _coerce_string_list(payload.get("missing_information"), limit=6) or fallback["missing_information"],
+        "recommended_next_step": _truncate(payload.get("recommended_next_step") or fallback["recommended_next_step"], 260),
+        "next_best_action": _normalize_next_best_action(payload.get("next_best_action"), fallback["next_best_action"]),
+    }
+    normalized["scores"]["global"] = round(
+        sum(normalized["scores"][key] for key in _OFFER_VALUE_SCORE_KEYS) / len(_OFFER_VALUE_SCORE_KEYS)
+    )
+    return normalized
+
+
+def _build_offer_value_llm_prompt(project: dict[str, Any], instruction: str | None, fallback: dict[str, Any]) -> str:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = json.dumps(_as_dict(project.get("project_data")), ensure_ascii=True, default=str)
+    opencloud_project_path = _clean_text(project.get("opencloud_project_path")) or "N/A"
+    instruction_block = _clean_text(instruction) or "Aucune instruction additionnelle."
+    fallback_json = json.dumps(fallback, ensure_ascii=True, default=str)
+    return (
+        "Tu es founder_offer_value_v1 pour ChatLAYA Founder.\n"
+        "Tu n'es pas un chatbot. Tu produis un diagnostic structuré sur l'offre et la proposition de valeur pour un Founder Builder OS.\n"
+        "Retourne UNIQUEMENT un JSON valide, sans markdown ni texte autour.\n"
+        "Integre si pertinent les realites africaines/locales: confiance client, preuve sociale, WhatsApp, petits budgets, cash, mobile money, offre d'appel, bouche-a-oreille, distribution locale.\n"
+        "Schema JSON attendu:\n"
+        "{"
+        "\"value_proposition\": {\"promise\": string, \"target_result\": string, \"main_benefits\": [string], \"differentiation\": string, \"proof_needed\": [string]},"
+        "\"offer\": {\"main_offer\": string, \"entry_offer\": string, \"premium_offer\": string, \"deliverables\": [string], \"conditions\": [string]},"
+        "\"customer_fit\": {\"pains_addressed\": [string], \"gains_created\": [string], \"objections\": [string], \"trust_builders\": [string]},"
+        "\"scores\": {\"offer_clarity\": 0, \"value_strength\": 0, \"differentiation\": 0, \"trust_readiness\": 0, \"testability\": 0, \"global\": 0},"
+        "\"strengths\": [string],"
+        "\"risks\": [string],"
+        "\"missing_information\": [string],"
+        "\"recommended_next_step\": string,"
+        "\"next_best_action\": {\"title\": string, \"why\": string, \"how\": [string], \"expected_output\": string}"
+        "}\n"
+        "Contraintes:\n"
+        "- scores entre 0 et 100\n"
+        "- diagnostic concret, commercial et testable\n"
+        "- pas de secret ni detail interne\n"
+        f"Instruction additionnelle: {instruction_block}\n"
+        f"Titre: {title}\n"
+        f"OpenCloud path: {opencloud_project_path}\n"
+        f"Project data JSON: {project_data}\n"
+        f"Fallback deterministic reference: {fallback_json}\n"
+    )
+
+
+async def run_founder_offer_value_v1(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    fallback = build_deterministic_offer_value_analysis(project, instruction=instruction)
+    analysis = fallback
+    source = "deterministic"
+    try:
+        prompt = _build_offer_value_llm_prompt(project, instruction, fallback)
+        raw_response = await asyncio.to_thread(
+            generate_answer,
+            prompt,
+            None,
+            None,
+            90,
+            1200,
+        )
+        candidate = _extract_json_payload(raw_response)
+        if candidate:
+            analysis = _normalize_offer_value_analysis(candidate, fallback)
+            source = "llm"
+    except Exception:
+        analysis = fallback
+        source = "deterministic"
+
+    patch = {
+        "agent_offer_value_v1": {
+            "agent": "founder_offer_value_v1",
+            "label": "Founder Offer & Value Agent V1",
             "version": 1,
             "source": source,
             "generated_at": _now_iso(),
