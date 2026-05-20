@@ -16,8 +16,10 @@ import {
   getFounderProject,
   listFounderProjects,
   runFounderCadrageAgent,
+  runFounderClientProblemAgent,
   updateFounderProject,
   type FounderCadrageAnalysis,
+  type FounderClientProblemAnalysis,
   type FounderProject,
 } from "@/lib/api-client/chatlaya-founder";
 
@@ -2536,6 +2538,395 @@ function FounderDiagnosticBlock({ analysis, loading, error, locale, onRun }: Fou
   );
 }
 
+// ─── Client & Problème IA ────────────────────────────────────────────────────
+
+const CLIENT_PROBLEM_SCORE_KEYS = [
+  "client_precision", "problem_intensity", "market_accessibility", "validation_readiness",
+] as const;
+
+const CLIENT_PROBLEM_SCORE_LABELS_FR: Record<string, string> = {
+  client_precision: "Précision client",
+  problem_intensity: "Intensité problème",
+  market_accessibility: "Accessibilité marché",
+  validation_readiness: "Prêt à valider",
+};
+const CLIENT_PROBLEM_SCORE_LABELS_EN: Record<string, string> = {
+  client_precision: "Client precision",
+  problem_intensity: "Problem intensity",
+  market_accessibility: "Market accessibility",
+  validation_readiness: "Validation readiness",
+};
+
+type FounderClientProblemBlockProps = {
+  analysis: FounderClientProblemAnalysis | null;
+  loading: boolean;
+  error: string | null;
+  locale: string;
+  onRun: () => void;
+};
+
+function FounderClientProblemBlock({ analysis, loading, error, locale, onRun }: FounderClientProblemBlockProps) {
+  const isEnglish = founderIsEnglish(locale);
+  const scoreLabels = isEnglish ? CLIENT_PROBLEM_SCORE_LABELS_EN : CLIENT_PROBLEM_SCORE_LABELS_FR;
+  const scores = analysis?.scores;
+  const nba = analysis?.next_best_action;
+  const tc = analysis?.target_client;
+  const prob = analysis?.problem;
+  const val = analysis?.validation;
+
+  return (
+    <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] p-5 shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#101015]">
+            <Target className="h-3.5 w-3.5 text-[#B8963E]" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+              {isEnglish ? "Client & Problem IA" : "Client & Problème IA"}
+            </p>
+            {analysis ? (
+              <p className="text-[10px] text-[#6F6A60]">
+                {isEnglish ? "Last analysis available" : "Dernière analyse disponible"}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onRun}
+          disabled={loading}
+          className="flex shrink-0 items-center gap-2 rounded-full bg-[#101015] px-4 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <svg className="h-3 w-3 animate-spin text-[#B8963E]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+              </svg>
+              {isEnglish ? "Analysing…" : "Analyse en cours…"}
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 text-[#B8963E]" />
+              {analysis
+                ? (isEnglish ? "Regenerate" : "Régénérer")
+                : (isEnglish ? "Analyse client & problem" : "Analyser client & problème")}
+            </>
+          )}
+        </button>
+      </div>
+
+      {error ? (
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {error}
+        </div>
+      ) : null}
+
+      {analysis ? (
+        <div className="space-y-4">
+          {/* Global score */}
+          {typeof scores?.global === "number" ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[#101015]">
+                  {isEnglish ? "Global score" : "Score global"}
+                </span>
+                <span className="text-lg font-bold text-[#B8963E]">
+                  {scores.global}
+                  <span className="text-xs font-normal text-[#6F6A60]">/100</span>
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, scores.global))}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {/* Score cards */}
+          {scores && CLIENT_PROBLEM_SCORE_KEYS.some((k) => typeof scores[k] === "number") ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {CLIENT_PROBLEM_SCORE_KEYS.map((key) => {
+                const scoreVal = scores[key];
+                if (typeof scoreVal !== "number") return null;
+                return (
+                  <div key={key} className="rounded-xl border border-[#E7DED0] bg-white px-3 py-2">
+                    <p className="text-[10px] font-medium text-[#6F6A60]">{scoreLabels[key]}</p>
+                    <p className="mt-0.5 text-sm font-bold text-[#101015]">
+                      {scoreVal}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+                    </p>
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
+                      <div
+                        className="h-full rounded-full bg-[#B8963E] transition-all duration-700"
+                        style={{ width: `${Math.min(100, Math.max(0, scoreVal))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {/* Client cible */}
+          {tc && (tc.segment || tc.profile || tc.context || tc.ability_to_pay || tc.access_channel) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Target client" : "Client cible"}
+              </p>
+              <dl className="space-y-1">
+                {tc.segment ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Segment" : "Segment"}</dt>
+                    <dd className="text-[#6F6A60]">{tc.segment}</dd>
+                  </div>
+                ) : null}
+                {tc.profile ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Profile" : "Profil"}</dt>
+                    <dd className="text-[#6F6A60]">{tc.profile}</dd>
+                  </div>
+                ) : null}
+                {tc.context ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Context" : "Contexte"}</dt>
+                    <dd className="text-[#6F6A60]">{tc.context}</dd>
+                  </div>
+                ) : null}
+                {tc.ability_to_pay ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Ability to pay" : "Capacité de paiement"}</dt>
+                    <dd className="text-[#6F6A60]">{tc.ability_to_pay}</dd>
+                  </div>
+                ) : null}
+                {tc.access_channel ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Access channel" : "Canal d'accès"}</dt>
+                    <dd className="text-[#6F6A60]">{tc.access_channel}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Problème */}
+          {prob && (prob.main_problem || typeof prob.pain_level === "number" || prob.frequency || prob.consequences?.length || prob.current_alternatives?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Problem" : "Problème"}
+              </p>
+              <dl className="space-y-2">
+                {prob.main_problem ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Main problem" : "Problème principal"}</dt>
+                    <dd className="text-[#6F6A60]">{prob.main_problem}</dd>
+                  </div>
+                ) : null}
+                {typeof prob.pain_level === "number" ? (
+                  <div className="text-xs">
+                    <div className="flex items-center justify-between">
+                      <dt className="font-semibold text-[#3A3530]">{isEnglish ? "Pain intensity" : "Intensité"}</dt>
+                      <dd className="font-bold text-[#B8963E]">{prob.pain_level}/10</dd>
+                    </div>
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
+                      <div className="h-full rounded-full bg-[#B8963E] transition-all duration-700" style={{ width: `${prob.pain_level * 10}%` }} />
+                    </div>
+                  </div>
+                ) : null}
+                {prob.frequency ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Frequency" : "Fréquence"}</dt>
+                    <dd className="text-[#6F6A60]">{prob.frequency}</dd>
+                  </div>
+                ) : null}
+                {prob.consequences?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Consequences" : "Conséquences"}</dt>
+                    <ul className="space-y-0.5">
+                      {prob.consequences.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {prob.current_alternatives?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Current alternatives" : "Alternatives actuelles"}</dt>
+                    <ul className="space-y-0.5">
+                      {prob.current_alternatives.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Validation */}
+          {val && (val.critical_assumptions?.length || val.field_questions?.length || val.people_to_contact?.length || val.validation_method || val.success_criteria?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Validation" : "Validation terrain"}
+              </p>
+              <dl className="space-y-2">
+                {val.critical_assumptions?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Critical assumptions" : "Hypothèses critiques"}</dt>
+                    <ul className="space-y-0.5">
+                      {val.critical_assumptions.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {val.field_questions?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Field questions" : "Questions terrain"}</dt>
+                    <ol className="space-y-0.5">
+                      {val.field_questions.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[#6F6A60]">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#F0E6CC] text-[9px] font-bold text-[#8A6A20]">{i + 1}</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+                {val.people_to_contact?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "People to contact" : "Personnes à contacter"}</dt>
+                    <ul className="space-y-0.5">
+                      {val.people_to_contact.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {val.validation_method ? (
+                  <div className="flex gap-2 text-xs">
+                    <dt className="w-32 shrink-0 font-semibold text-[#3A3530]">{isEnglish ? "Method" : "Méthode"}</dt>
+                    <dd className="text-[#6F6A60]">{val.validation_method}</dd>
+                  </div>
+                ) : null}
+                {val.success_criteria?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Success criteria" : "Critères de succès"}</dt>
+                    <ul className="space-y-0.5">
+                      {val.success_criteria.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Forces / Risques */}
+          {(analysis.strengths?.length || analysis.risks?.length) ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {analysis.strengths?.length ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                    {isEnglish ? "Strengths" : "Forces"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.strengths.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {analysis.risks?.length ? (
+                <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                    {isEnglish ? "Risks" : "Risques"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.risks.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
+                        <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Informations manquantes */}
+          {analysis.missing_information?.length ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE] px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "Missing information" : "Informations manquantes"}
+              </p>
+              <ul className="space-y-1">
+                {analysis.missing_information.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[#6F6A60]">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Prochaine meilleure action */}
+          {nba && (nba.title || nba.why || nba.how || nba.expected_output) ? (
+            <div className="rounded-xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F0E6CC]/40 to-white px-4 py-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Next best action" : "Prochaine meilleure action"}
+              </p>
+              {nba.title ? <p className="text-sm font-bold text-[#101015]">{nba.title}</p> : null}
+              {nba.why ? (
+                <p className="mt-1.5 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Why: " : "Pourquoi : "}</span>
+                  {nba.why}
+                </p>
+              ) : null}
+              {nba.how ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
+                  {nba.how}
+                </p>
+              ) : null}
+              {nba.expected_output ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Expected output: " : "Résultat attendu : "}</span>
+                  {nba.expected_output}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : !loading && !error ? (
+        <p className="text-xs text-[#6F6A60]">
+          {isEnglish
+            ? "No analysis yet. Click \"Analyse client & problem\" to start."
+            : "Aucune analyse disponible. Cliquez sur « Analyser client & problème » pour démarrer."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function FounderAccountButton({ firstName }: { firstName?: string }) {
   const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const label = firstName
@@ -2592,6 +2983,9 @@ export default function FounderWorkspace({
   const [diagnosticLoading, setDiagnosticLoading] = useState(false);
   const [diagnosticError, setDiagnosticError] = useState<string | null>(null);
   const [diagnosticAnalysis, setDiagnosticAnalysis] = useState<FounderCadrageAnalysis | null>(null);
+  const [clientProblemLoading, setClientProblemLoading] = useState(false);
+  const [clientProblemError, setClientProblemError] = useState<string | null>(null);
+  const [clientProblemAnalysis, setClientProblemAnalysis] = useState<FounderClientProblemAnalysis | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hydrateRef = useRef(false);
@@ -2763,6 +3157,41 @@ export default function FounderWorkspace({
       setDiagnosticError(err instanceof Error ? err.message : "Erreur inattendue.");
     } finally {
       setDiagnosticLoading(false);
+    }
+  }
+
+  // Load existing client-problem analysis from project_data when switching projects
+  useEffect(() => {
+    setClientProblemError(null);
+    if (!currentProject) { setClientProblemAnalysis(null); return; }
+    const agentData = asRecord(asRecord(currentProject.project_data).agent_client_problem_v1);
+    const existing = agentData.analysis;
+    setClientProblemAnalysis(existing && typeof existing === "object" ? existing as FounderClientProblemAnalysis : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProject?.id]);
+
+  async function runClientProblemAgent() {
+    if (!currentProject || !owner || clientProblemLoading) return;
+    setClientProblemLoading(true);
+    setClientProblemError(null);
+    try {
+      const response = await runFounderClientProblemAgent(currentProject.id, owner, {
+        instruction: "Analyse le client cible, le problème principal et propose un plan de validation terrain concret.",
+        auto_update: true,
+      });
+      setClientProblemAnalysis(response.analysis);
+      if (response.project && owner) {
+        try {
+          const refreshed = await getFounderProject(currentProject.id, owner);
+          setProjects((prev) => mergeFounderProjectList(prev, refreshed));
+        } catch {
+          // Non-critical: project data already saved server-side
+        }
+      }
+    } catch (err) {
+      setClientProblemError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setClientProblemLoading(false);
     }
   }
 
@@ -3578,6 +4007,17 @@ export default function FounderWorkspace({
                 error={diagnosticError}
                 locale={locale}
                 onRun={() => void runDiagnostic()}
+              />
+            ) : null}
+
+            {/* Client & Problème IA */}
+            {currentProject ? (
+              <FounderClientProblemBlock
+                analysis={clientProblemAnalysis}
+                loading={clientProblemLoading}
+                error={clientProblemError}
+                locale={locale}
+                onRun={() => void runClientProblemAgent()}
               />
             ) : null}
 
