@@ -14,6 +14,7 @@ from app.repositories.chatlaya_pg import (
     update_founder_project_data,
     update_founder_project_opencloud_workspace,
 )
+from app.services.founder_agents import run_founder_cadrage_v1
 from app.services.opencloud_client import ensure_founder_project_workspace
 
 
@@ -80,6 +81,11 @@ class FounderProjectUpdatePayload(BaseModel):
         if self.status is not None and self.status not in _FOUNDER_ALLOWED_STATUS:
             raise ValueError("status is invalid")
         return self
+
+
+class FounderAgentCadragePayload(BaseModel):
+    instruction: str | None = None
+    auto_update: bool = False
 
 
 def _require_internal_token(x_internal_token: str | None) -> None:
@@ -366,4 +372,53 @@ async def archive_public_founder_project(
     return {
         "ok": True,
         "project": project,
+    }
+
+
+@router.post("/chatlaya/founder-projects/{project_id}/agent/cadrage")
+async def run_public_founder_cadrage_agent(
+    project_id: str,
+    payload: FounderAgentCadragePayload,
+    user_id: str | None = None,
+    guest_id: str | None = None,
+) -> dict[str, object]:
+    user_id, guest_id = _validate_owner(user_id, guest_id)
+    project = await get_founder_project(
+        project_id=project_id,
+        user_id=user_id,
+        guest_id=guest_id,
+    )
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+
+    analysis, suggested_project_data_patch = await run_founder_cadrage_v1(
+        project,
+        instruction=payload.instruction,
+    )
+
+    updated_project: dict[str, Any] | None = None
+    if payload.auto_update:
+        current_project_data = project.get("project_data")
+        merged_project_data = current_project_data.copy() if isinstance(current_project_data, dict) else {}
+        merged_project_data.update(suggested_project_data_patch)
+        updated_project = await update_founder_project_data(
+            project_id=project_id,
+            user_id=user_id,
+            guest_id=guest_id,
+            title=None,
+            current_step=None,
+            status=None,
+            project_data=merged_project_data,
+            updated_at=datetime.now(timezone.utc),
+        )
+        if updated_project is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Founder project not found")
+
+    return {
+        "ok": True,
+        "project_id": project_id,
+        "agent": "founder_cadrage_v1",
+        "analysis": analysis,
+        "suggested_project_data_patch": suggested_project_data_patch,
+        "project": updated_project,
     }
