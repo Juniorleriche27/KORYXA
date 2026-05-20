@@ -81,7 +81,7 @@ function normalizeChatlayaBase(base: string | undefined, fallback: string): stri
 
 export function getChatlayaApiBase(): string {
   if (typeof window !== "undefined" && window.location.hostname === CHATLAYA_AUTONOMOUS_HOST) {
-    return "";
+    return "/api";
   }
   return CHATLAYA_API_BASE;
 }
