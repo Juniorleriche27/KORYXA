@@ -80,6 +80,13 @@ _OFFER_VALUE_SCORE_KEYS = (
     "trust_readiness",
     "testability",
 )
+_PRICING_BUSINESS_MODEL_SCORE_KEYS = (
+    "pricing_clarity",
+    "payment_fit",
+    "margin_potential",
+    "business_model_clarity",
+    "financial_readiness",
+)
 
 
 def _now_iso() -> str:
@@ -1432,6 +1439,437 @@ async def run_founder_offer_value_v1(
         "agent_offer_value_v1": {
             "agent": "founder_offer_value_v1",
             "label": "Founder Offer & Value Agent V1",
+            "version": 1,
+            "source": source,
+            "generated_at": _now_iso(),
+            "instruction": _clean_text(instruction) or None,
+            "analysis": analysis,
+        }
+    }
+    return analysis, patch
+
+
+def _build_recommended_price_logic(joined_text: str, business_type: str) -> str:
+    if _contains_any(joined_text, ("petit budget", "cash", "mobile money", "fractionne", "acompte")):
+        return "Prix simple, lisible et progressif: offre d'appel accessible, paiement flexible et montee en gamme selon la confiance."
+    if business_type in {"service", "agency", "coaching", "training"}:
+        return "Prix base sur la valeur livree, avec offre d'appel pour reduire le risque puis offre principale et premium."
+    if business_type in {"commerce", "import_export"}:
+        return "Prix construit autour de la marge reelle apres transport, logistique et rotation du stock."
+    return "Logique de prix a valider avec une offre d'appel claire puis une offre principale rentable."
+
+
+def _build_entry_price_hypothesis(joined_text: str) -> str:
+    if _contains_any(joined_text, ("petit budget", "budget limite", "cash", "mobile money")):
+        return "Hypothese d'entree: ticket faible, payable immediatement en cash, mobile money ou acompte."
+    return "Hypothese d'entree: prix bas risque pour declencher un premier test client."
+
+
+def _build_main_price_hypothesis(joined_text: str, business_type: str) -> str:
+    if business_type in {"service", "agency", "coaching", "training"}:
+        return "Hypothese principale: prix lie au resultat et au niveau d'accompagnement, avec options de paiement simples."
+    if business_type in {"commerce", "import_export"}:
+        return "Hypothese principale: prix couvrant cout d'achat, transport, pertes possibles et marge cible minimale."
+    return "Hypothese principale: prix au centre de la proposition de valeur, a tester sur quelques prospects reels."
+
+
+def _build_premium_price_hypothesis(business_type: str) -> str:
+    if business_type in {"service", "agency", "coaching", "training"}:
+        return "Hypothese premium: version plus personnalisee avec accompagnement, priorite et suivi renforce."
+    return "Hypothese premium: version enrichie avec plus de rapidite, fiabilite ou personnalisation."
+
+
+def _build_payment_modes(joined_text: str) -> list[str]:
+    modes = ["Cash", "Mobile money"]
+    if _contains_any(joined_text, ("acompte", "fractionne", "versement")):
+        modes.append("Paiement fractionne ou acompte")
+    if _contains_any(joined_text, ("virement", "bank", "banque")):
+        modes.append("Virement bancaire")
+    return modes[:4]
+
+
+def _build_pricing_risks(joined_text: str) -> list[str]:
+    risks = [
+        "Le prix peut etre percu comme trop eleve si la preuve de valeur reste faible.",
+        "Une grille trop complexe peut freiner des clients qui veulent comprendre vite et payer simplement.",
+    ]
+    if _contains_any(joined_text, ("transport", "livraison", "logistique", "stock")):
+        risks.append("La marge peut etre surestimee si transport, logistique ou pertes terrain sont mal comptes.")
+    if _contains_any(joined_text, ("cash", "mobile money", "petit budget")):
+        risks.append("Le pouvoir d'achat reel du client peut obliger a decouper l'offre ou a proposer un acompte.")
+    return risks[:4]
+
+
+def _build_revenue_streams(business_type: str, joined_text: str) -> list[str]:
+    streams: list[str] = []
+    if business_type in {"service", "agency", "coaching", "training"}:
+        streams.append("Vente directe de la prestation ou de l'accompagnement principal.")
+    if business_type in {"commerce", "import_export"}:
+        streams.append("Marge sur chaque vente ou transaction realisee.")
+    if business_type in {"saas", "digital_product"}:
+        streams.append("Abonnement ou paiement recurrent selon l'usage.")
+    streams.append("Offre d'appel ou test payant pour reduire la friction de premier achat.")
+    if _contains_any(joined_text, ("premium", "upsell", "suivi")):
+        streams.append("Upsell premium avec suivi, personnalisation ou priorite.")
+    return streams[:5]
+
+
+def _build_cost_structure(joined_text: str, business_type: str) -> list[str]:
+    costs = ["Temps de production ou de service"]
+    if _contains_any(joined_text, ("transport", "livraison", "logistique")) or business_type in {"commerce", "import_export"}:
+        costs.append("Transport, logistique ou livraison")
+    if _contains_any(joined_text, ("whatsapp", "marketing", "acquisition", "publicite")):
+        costs.append("Acquisition client faible cout via WhatsApp, terrain ou bouche-a-oreille")
+    if _contains_any(joined_text, ("stock", "materiel", "produit")):
+        costs.append("Stock, matieres ou approvisionnement")
+    costs.append("Support, suivi et execution terrain")
+    return costs[:5]
+
+
+def _build_key_resources(business_type: str, joined_text: str) -> list[str]:
+    resources = ["Canal direct vers le segment cible"]
+    if _contains_any(joined_text, ("whatsapp",)):
+        resources.append("WhatsApp ou telephone pour acquisition et suivi")
+    if business_type in {"service", "agency", "coaching", "training"}:
+        resources.append("Competence metier et capacite d'execution")
+    if business_type in {"commerce", "import_export"}:
+        resources.append("Source d'approvisionnement fiable")
+    resources.append("Preuves client et script commercial simple")
+    return resources[:5]
+
+
+def _build_key_partners(business_type: str, joined_text: str) -> list[str]:
+    partners = ["Relais de confiance ou prescripteurs locaux"]
+    if business_type in {"commerce", "import_export"}:
+        partners.append("Fournisseurs, grossistes ou transporteurs")
+    if _contains_any(joined_text, ("mobile money", "paiement")):
+        partners.append("Operateurs de paiement ou relais de collecte")
+    if _contains_any(joined_text, ("distribution", "marche", "boutique")):
+        partners.append("Points de distribution ou revendeurs terrain")
+    return partners[:5]
+
+
+def _build_distribution_channels(joined_text: str) -> list[str]:
+    channels = []
+    if _contains_any(joined_text, ("whatsapp",)):
+        channels.append("WhatsApp")
+    if _contains_any(joined_text, ("bouche a oreille", "recommandation")):
+        channels.append("Bouche-a-oreille")
+    if _contains_any(joined_text, ("marche", "terrain", "boutique")):
+        channels.append("Terrain ou marche physique")
+    if _contains_any(joined_text, ("facebook", "instagram")):
+        channels.append("Reseaux sociaux legers")
+    if not channels:
+        channels.append("Canal direct a faible cout encore a valider")
+    return channels[:5]
+
+
+def _build_unit_economics_summary(joined_text: str, business_type: str) -> str:
+    if business_type in {"commerce", "import_export"}:
+        return "Verifier que la marge nette reste positive apres achat, transport, pertes eventuelles et cout de vente."
+    if _contains_any(joined_text, ("service", "coaching", "formation")):
+        return "Comparer prix vendu, temps reel livre et cout d'acquisition pour eviter une offre chronophage et peu rentable."
+    return "Le modele doit montrer qu'un premier client payant couvre au minimum execution, acquisition et marge cible simple."
+
+
+def _build_startup_costs_to_estimate(joined_text: str, business_type: str) -> list[str]:
+    costs = ["Communication de lancement et premiers supports commerciaux"]
+    if business_type in {"commerce", "import_export"}:
+        costs.append("Premier stock ou premier approvisionnement")
+    if _contains_any(joined_text, ("transport", "livraison")):
+        costs.append("Budget transport ou logistique initial")
+    if _contains_any(joined_text, ("whatsapp", "telephone")):
+        costs.append("Credit communication, internet ou equipement mobile")
+    return costs[:5]
+
+
+def _build_fixed_costs(joined_text: str) -> list[str]:
+    costs = ["Communication recurrente", "Outils ou abonnements minimums"]
+    if _contains_any(joined_text, ("boutique", "local", "loyer")):
+        costs.append("Loyer ou frais de point de vente")
+    return costs[:5]
+
+
+def _build_variable_costs(joined_text: str, business_type: str) -> list[str]:
+    costs = ["Temps d'execution par vente"]
+    if business_type in {"commerce", "import_export"}:
+        costs.append("Cout unitaire d'achat ou de production")
+    if _contains_any(joined_text, ("transport", "livraison")):
+        costs.append("Transport ou livraison par commande")
+    if _contains_any(joined_text, ("mobile money", "paiement")):
+        costs.append("Frais de transaction ou d'encaissement")
+    return costs[:5]
+
+
+def _build_break_even_logic(joined_text: str, business_type: str) -> str:
+    if business_type in {"commerce", "import_export"}:
+        return "Atteindre le seuil quand la marge par vente couvre transport, achat, pertes et charges fixes du mois."
+    return "Atteindre le seuil quand le nombre de ventes couvre le temps livre, l'acquisition et les couts fixes simples."
+
+
+def _build_sales_needed_for_goal(joined_text: str) -> str:
+    if _contains_any(joined_text, ("petit budget", "cash", "mobile money")):
+        return "Definir un objectif simple: combien de petites ventes ou acomptes faut-il pour couvrir le mois."
+    return "Calculer combien de ventes principales ou clients actifs sont necessaires pour couvrir les couts et la marge cible."
+
+
+def _build_scenarios(joined_text: str) -> dict[str, str]:
+    return {
+        "pessimistic": "Peu de prospects paient, le ticket moyen reste faible et la marge est comprimee par les couts terrain.",
+        "realistic": "Une offre d'appel convertit quelques clients, puis une partie passe sur l'offre principale avec marge moderee.",
+        "ambitious": "Le canal direct fonctionne bien, la preuve sociale augmente la confiance et les upsells ameliorent rapidement la marge.",
+    }
+
+
+def _build_pricing_business_model_scores(
+    workspace_signals: dict[str, str],
+    joined_text: str,
+) -> dict[str, int]:
+    pricing_clarity = _score_from_signal(workspace_signals.get("prix", ""), (18, 42, 72))
+    payment_fit = 30
+    if _contains_any(joined_text, ("cash", "mobile money", "fractionne", "acompte", "petit budget")):
+        payment_fit += 28
+    margin_potential = 24
+    if _contains_any(joined_text, ("marge", "revenus", "upsell", "premium", "logistique")):
+        margin_potential += 24
+    business_model_clarity = _score_from_signal(workspace_signals.get("business_model", ""), (16, 40, 70))
+    financial_readiness = 20
+    if _contains_any(joined_text, ("cout", "coût", "break even", "seuil", "rentabilite", "rentabilité", "prix")):
+        financial_readiness += 26
+    scores = {
+        "pricing_clarity": _clamp_score(pricing_clarity),
+        "payment_fit": _clamp_score(payment_fit),
+        "margin_potential": _clamp_score(margin_potential),
+        "business_model_clarity": _clamp_score(business_model_clarity),
+        "financial_readiness": _clamp_score(financial_readiness),
+    }
+    scores["global"] = round(
+        sum(scores[key] for key in _PRICING_BUSINESS_MODEL_SCORE_KEYS) / len(_PRICING_BUSINESS_MODEL_SCORE_KEYS)
+    )
+    return scores
+
+
+def build_deterministic_pricing_business_model_analysis(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> dict[str, Any]:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = _as_dict(project.get("project_data"))
+    workspace_signals = _extract_workspace_signals(project_data)
+    instruction_text = _clean_text(instruction)
+    joined_text = " ".join(
+        part for part in [
+            title,
+            instruction_text,
+            json.dumps(project_data, ensure_ascii=True, default=str),
+            " ".join(workspace_signals.values()),
+        ] if part
+    ).lower()
+    business_type = _infer_business_type(
+        _tokenize(title, instruction_text, " ".join(workspace_signals.values())),
+        joined_text,
+    )
+    scores = _build_pricing_business_model_scores(workspace_signals, joined_text)
+    analysis = {
+        "pricing": {
+            "recommended_price_logic": _build_recommended_price_logic(joined_text, business_type),
+            "entry_price_hypothesis": _build_entry_price_hypothesis(joined_text),
+            "main_price_hypothesis": _build_main_price_hypothesis(joined_text, business_type),
+            "premium_price_hypothesis": _build_premium_price_hypothesis(business_type),
+            "payment_modes": _build_payment_modes(joined_text),
+            "pricing_risks": _build_pricing_risks(joined_text),
+        },
+        "business_model": {
+            "revenue_streams": _build_revenue_streams(business_type, joined_text),
+            "cost_structure": _build_cost_structure(joined_text, business_type),
+            "key_resources": _build_key_resources(business_type, joined_text),
+            "key_partners": _build_key_partners(business_type, joined_text),
+            "distribution_channels": _build_distribution_channels(joined_text),
+            "unit_economics_summary": _build_unit_economics_summary(joined_text, business_type),
+        },
+        "simple_finance": {
+            "startup_costs_to_estimate": _build_startup_costs_to_estimate(joined_text, business_type),
+            "fixed_costs": _build_fixed_costs(joined_text),
+            "variable_costs": _build_variable_costs(joined_text, business_type),
+            "break_even_logic": _build_break_even_logic(joined_text, business_type),
+            "sales_needed_for_goal": _build_sales_needed_for_goal(joined_text),
+        },
+        "scenarios": _build_scenarios(joined_text),
+        "scores": scores,
+        "strengths": [
+            "Le projet peut structurer une logique de prix simple adaptee au terrain." if _contains_any(joined_text, ("cash", "mobile money", "petit budget")) else "Le projet peut encore definir un prix testable sans complexite inutile.",
+            "Le canal direct faible cout peut proteger la marge s'il est bien execute." if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "terrain")) else "Le projet peut garder un cout d'acquisition bas avec un canal simple et direct.",
+        ][:2],
+        "risks": [
+            "Le prix risque d'etre defini sans preuve suffisante de capacite de paiement.",
+            "La marge reelle peut etre surestimee si les couts terrain et la logistique sont sous-estimes.",
+            "Le modele economique peut rester trop flou sans scenario minimal de rentabilite.",
+        ][:3],
+        "missing_information": [
+            "Le prix reel que le segment accepte sans blocage fort.",
+            "Les couts exacts a integrer avant de parler de marge nette.",
+            "Le volume de ventes minimal pour atteindre un equilibre simple.",
+        ][:3],
+        "recommended_next_step": "Tester une hypothese de prix simple et verifier si le modele couvre vraiment couts, execution et marge minimale.",
+        "next_best_action": {
+            "title": "Tester une grille prix et marge sur 5 prospects reels",
+            "why": "Le projet doit verifier si le niveau de prix, le mode de paiement et la marge restent coherents avec la realite terrain.",
+            "how": [
+                "Definir une offre d'appel, une offre principale et une offre premium.",
+                "Associer a chaque offre un mode de paiement simple: cash, mobile money ou acompte.",
+                "Lister les couts fixes, variables et logistiques les plus probables.",
+                "Presenter les hypothese de prix a 5 prospects ou relais terrain.",
+                "Noter objections, niveau d'acceptation et ajustements necessaires.",
+            ],
+            "expected_output": "Une hypothese de prix plus credible, une meilleure lecture de la marge et un modele economique plus concret.",
+        },
+    }
+    return analysis
+
+
+def _normalize_pricing_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "recommended_price_logic": _truncate(payload.get("recommended_price_logic") or fallback["recommended_price_logic"], 220),
+        "entry_price_hypothesis": _truncate(payload.get("entry_price_hypothesis") or fallback["entry_price_hypothesis"], 200),
+        "main_price_hypothesis": _truncate(payload.get("main_price_hypothesis") or fallback["main_price_hypothesis"], 220),
+        "premium_price_hypothesis": _truncate(payload.get("premium_price_hypothesis") or fallback["premium_price_hypothesis"], 220),
+        "payment_modes": _coerce_string_list(payload.get("payment_modes"), limit=5) or fallback["payment_modes"],
+        "pricing_risks": _coerce_string_list(payload.get("pricing_risks"), limit=5) or fallback["pricing_risks"],
+    }
+
+
+def _normalize_business_model_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "revenue_streams": _coerce_string_list(payload.get("revenue_streams"), limit=6) or fallback["revenue_streams"],
+        "cost_structure": _coerce_string_list(payload.get("cost_structure"), limit=6) or fallback["cost_structure"],
+        "key_resources": _coerce_string_list(payload.get("key_resources"), limit=6) or fallback["key_resources"],
+        "key_partners": _coerce_string_list(payload.get("key_partners"), limit=6) or fallback["key_partners"],
+        "distribution_channels": _coerce_string_list(payload.get("distribution_channels"), limit=6) or fallback["distribution_channels"],
+        "unit_economics_summary": _truncate(payload.get("unit_economics_summary") or fallback["unit_economics_summary"], 220),
+    }
+
+
+def _normalize_simple_finance_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "startup_costs_to_estimate": _coerce_string_list(payload.get("startup_costs_to_estimate"), limit=6) or fallback["startup_costs_to_estimate"],
+        "fixed_costs": _coerce_string_list(payload.get("fixed_costs"), limit=6) or fallback["fixed_costs"],
+        "variable_costs": _coerce_string_list(payload.get("variable_costs"), limit=6) or fallback["variable_costs"],
+        "break_even_logic": _truncate(payload.get("break_even_logic") or fallback["break_even_logic"], 220),
+        "sales_needed_for_goal": _truncate(payload.get("sales_needed_for_goal") or fallback["sales_needed_for_goal"], 220),
+    }
+
+
+def _normalize_scenarios_block(value: Any, fallback: dict[str, Any]) -> dict[str, str]:
+    payload = _as_dict(value)
+    return {
+        "pessimistic": _truncate(payload.get("pessimistic") or fallback["pessimistic"], 220),
+        "realistic": _truncate(payload.get("realistic") or fallback["realistic"], 220),
+        "ambitious": _truncate(payload.get("ambitious") or fallback["ambitious"], 220),
+    }
+
+
+def _normalize_pricing_business_model_scores(value: Any, fallback: dict[str, Any]) -> dict[str, int]:
+    payload = _as_dict(value)
+    scores = {key: _clamp_score(payload.get(key, fallback[key])) for key in _PRICING_BUSINESS_MODEL_SCORE_KEYS}
+    scores["global"] = round(
+        sum(scores[key] for key in _PRICING_BUSINESS_MODEL_SCORE_KEYS) / len(_PRICING_BUSINESS_MODEL_SCORE_KEYS)
+    )
+    return scores
+
+
+def _normalize_pricing_business_model_analysis(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    normalized = {
+        "pricing": _normalize_pricing_block(payload.get("pricing"), fallback["pricing"]),
+        "business_model": _normalize_business_model_block(payload.get("business_model"), fallback["business_model"]),
+        "simple_finance": _normalize_simple_finance_block(payload.get("simple_finance"), fallback["simple_finance"]),
+        "scenarios": _normalize_scenarios_block(payload.get("scenarios"), fallback["scenarios"]),
+        "scores": _normalize_pricing_business_model_scores(payload.get("scores"), fallback["scores"]),
+        "strengths": _coerce_string_list(payload.get("strengths"), limit=6) or fallback["strengths"],
+        "risks": _coerce_string_list(payload.get("risks"), limit=6) or fallback["risks"],
+        "missing_information": _coerce_string_list(payload.get("missing_information"), limit=6) or fallback["missing_information"],
+        "recommended_next_step": _truncate(payload.get("recommended_next_step") or fallback["recommended_next_step"], 260),
+        "next_best_action": _normalize_next_best_action(payload.get("next_best_action"), fallback["next_best_action"]),
+    }
+    normalized["scores"]["global"] = round(
+        sum(normalized["scores"][key] for key in _PRICING_BUSINESS_MODEL_SCORE_KEYS)
+        / len(_PRICING_BUSINESS_MODEL_SCORE_KEYS)
+    )
+    return normalized
+
+
+def _build_pricing_business_model_llm_prompt(
+    project: dict[str, Any],
+    instruction: str | None,
+    fallback: dict[str, Any],
+) -> str:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = json.dumps(_as_dict(project.get("project_data")), ensure_ascii=True, default=str)
+    opencloud_project_path = _clean_text(project.get("opencloud_project_path")) or "N/A"
+    instruction_block = _clean_text(instruction) or "Aucune instruction additionnelle."
+    fallback_json = json.dumps(fallback, ensure_ascii=True, default=str)
+    return (
+        "Tu es founder_pricing_business_model_v1 pour ChatLAYA Founder.\n"
+        "Tu n'es pas un chatbot. Tu produis un diagnostic structure prix et modele economique pour un Founder Builder OS.\n"
+        "Retourne UNIQUEMENT un JSON valide, sans markdown ni texte autour.\n"
+        "Integre si pertinent les realites africaines/locales: mobile money, cash, paiement fractionne, acompte, petits budgets, confiance client, informalite, distribution locale, marches physiques, WhatsApp, bouche-a-oreille, cout d'acquisition faible, marge reelle apres transport/logistique.\n"
+        "Schema JSON attendu:\n"
+        "{"
+        "\"pricing\": {\"recommended_price_logic\": string, \"entry_price_hypothesis\": string, \"main_price_hypothesis\": string, \"premium_price_hypothesis\": string, \"payment_modes\": [string], \"pricing_risks\": [string]},"
+        "\"business_model\": {\"revenue_streams\": [string], \"cost_structure\": [string], \"key_resources\": [string], \"key_partners\": [string], \"distribution_channels\": [string], \"unit_economics_summary\": string},"
+        "\"simple_finance\": {\"startup_costs_to_estimate\": [string], \"fixed_costs\": [string], \"variable_costs\": [string], \"break_even_logic\": string, \"sales_needed_for_goal\": string},"
+        "\"scenarios\": {\"pessimistic\": string, \"realistic\": string, \"ambitious\": string},"
+        "\"scores\": {\"pricing_clarity\": 0, \"payment_fit\": 0, \"margin_potential\": 0, \"business_model_clarity\": 0, \"financial_readiness\": 0, \"global\": 0},"
+        "\"strengths\": [string],"
+        "\"risks\": [string],"
+        "\"missing_information\": [string],"
+        "\"recommended_next_step\": string,"
+        "\"next_best_action\": {\"title\": string, \"why\": string, \"how\": [string], \"expected_output\": string}"
+        "}\n"
+        "Contraintes:\n"
+        "- scores entre 0 et 100\n"
+        "- diagnostic concret, financier, terrain et actionnable\n"
+        "- pas de secret ni detail interne\n"
+        f"Instruction additionnelle: {instruction_block}\n"
+        f"Titre: {title}\n"
+        f"OpenCloud path: {opencloud_project_path}\n"
+        f"Project data JSON: {project_data}\n"
+        f"Fallback deterministic reference: {fallback_json}\n"
+    )
+
+
+async def run_founder_pricing_business_model_v1(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    fallback = build_deterministic_pricing_business_model_analysis(project, instruction=instruction)
+    analysis = fallback
+    source = "deterministic"
+    try:
+        prompt = _build_pricing_business_model_llm_prompt(project, instruction, fallback)
+        raw_response = await asyncio.to_thread(
+            generate_answer,
+            prompt,
+            None,
+            None,
+            90,
+            1200,
+        )
+        candidate = _extract_json_payload(raw_response)
+        if candidate:
+            analysis = _normalize_pricing_business_model_analysis(candidate, fallback)
+            source = "llm"
+    except Exception:
+        analysis = fallback
+        source = "deterministic"
+
+    patch = {
+        "agent_pricing_business_model_v1": {
+            "agent": "founder_pricing_business_model_v1",
+            "label": "Founder Pricing & Business Model Agent V1",
             "version": 1,
             "source": source,
             "generated_at": _now_iso(),
