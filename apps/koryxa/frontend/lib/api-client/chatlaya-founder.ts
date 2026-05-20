@@ -1,9 +1,54 @@
 import { getChatlayaApiBase } from "@/lib/env";
 import { requestJson } from "@/lib/api";
 
-type FounderOwner = {
+export type FounderOwner = {
   guestId?: string | null;
   userId?: string | null;
+};
+
+export type FounderMaturityScores = {
+  global?: number | null;
+  client_clarity?: number | null;
+  problem_clarity?: number | null;
+  offer_strength?: number | null;
+  pricing_coherence?: number | null;
+  business_model?: number | null;
+  validation?: number | null;
+  sales_readiness?: number | null;
+  execution_readiness?: number | null;
+  [key: string]: number | null | undefined;
+};
+
+export type FounderNextBestAction = {
+  title?: string | null;
+  why?: string | null;
+  how?: string | null;
+  expected_output?: string | null;
+};
+
+export type FounderCadrageAnalysis = {
+  project_stage?: string | null;
+  business_type?: string | null;
+  main_goal?: string | null;
+  summary?: string | null;
+  diagnosis?: Record<string, unknown> | null;
+  maturity_scores?: FounderMaturityScores | null;
+  strengths?: string[] | null;
+  risks?: string[] | null;
+  missing_information?: string[] | null;
+  recommended_next_step?: string | null;
+  next_best_action?: FounderNextBestAction | null;
+  suggested_questions?: string[] | null;
+  roadmap_7_days?: string[] | null;
+};
+
+export type FounderCadrageAgentResponse = {
+  ok: boolean;
+  project_id: string;
+  agent: string;
+  analysis: FounderCadrageAnalysis;
+  suggested_project_data_patch?: Record<string, unknown> | null;
+  project?: unknown | null;
 };
 
 type FounderProjectData = Record<string, unknown>;
@@ -119,6 +164,28 @@ export async function updateFounderProject(
     },
   );
   return normalizeProject(response.project);
+}
+
+export async function runFounderCadrageAgent(
+  projectId: string,
+  owner: FounderOwner,
+  payload?: {
+    instruction?: string | null;
+    auto_update?: boolean;
+  },
+): Promise<FounderCadrageAgentResponse> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<FounderCadrageAgentResponse>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/agent/cadrage?${params.toString()}`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        instruction: payload?.instruction ?? null,
+        auto_update: payload?.auto_update ?? false,
+      }),
+    },
+  );
+  return response;
 }
 
 export async function archiveFounderProject(projectId: string, owner: FounderOwner): Promise<FounderProject> {

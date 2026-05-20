@@ -15,7 +15,9 @@ import {
   createFounderProject,
   getFounderProject,
   listFounderProjects,
+  runFounderCadrageAgent,
   updateFounderProject,
+  type FounderCadrageAnalysis,
   type FounderProject,
 } from "@/lib/api-client/chatlaya-founder";
 
@@ -2290,6 +2292,250 @@ interface FounderWorkspaceProps {
   onExit: () => void;
 }
 
+// ─── Diagnostic IA Founder ───────────────────────────────────────────────────
+
+const DIAGNOSTIC_SCORE_KEYS = [
+  "client_clarity", "problem_clarity", "offer_strength", "pricing_coherence",
+  "business_model", "validation", "sales_readiness", "execution_readiness",
+] as const;
+
+const DIAGNOSTIC_SCORE_LABELS_FR: Record<string, string> = {
+  client_clarity: "Clarté client", problem_clarity: "Clarté problème",
+  offer_strength: "Force de l'offre", pricing_coherence: "Cohérence prix",
+  business_model: "Modèle éco", validation: "Validation",
+  sales_readiness: "Prêt à vendre", execution_readiness: "Prêt à exécuter",
+};
+const DIAGNOSTIC_SCORE_LABELS_EN: Record<string, string> = {
+  client_clarity: "Client clarity", problem_clarity: "Problem clarity",
+  offer_strength: "Offer strength", pricing_coherence: "Pricing coherence",
+  business_model: "Business model", validation: "Validation",
+  sales_readiness: "Sales readiness", execution_readiness: "Execution readiness",
+};
+
+type FounderDiagnosticBlockProps = {
+  analysis: FounderCadrageAnalysis | null;
+  loading: boolean;
+  error: string | null;
+  locale: string;
+  onRun: () => void;
+};
+
+function FounderDiagnosticBlock({ analysis, loading, error, locale, onRun }: FounderDiagnosticBlockProps) {
+  const isEnglish = founderIsEnglish(locale);
+  const scoreLabels = isEnglish ? DIAGNOSTIC_SCORE_LABELS_EN : DIAGNOSTIC_SCORE_LABELS_FR;
+  const scores = analysis?.maturity_scores;
+  const nba = analysis?.next_best_action;
+
+  return (
+    <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] p-5 shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#101015]">
+            <BarChart2 className="h-3.5 w-3.5 text-[#B8963E]" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+              {isEnglish ? "AI Founder Diagnostic" : "Diagnostic IA Founder"}
+            </p>
+            {analysis ? (
+              <p className="text-[10px] text-[#6F6A60]">
+                {isEnglish ? "Last analysis available" : "Dernière analyse disponible"}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onRun}
+          disabled={loading}
+          className="flex shrink-0 items-center gap-2 rounded-full bg-[#101015] px-4 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <svg className="h-3 w-3 animate-spin text-[#B8963E]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+              </svg>
+              {isEnglish ? "Analysing…" : "Analyse en cours…"}
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 text-[#B8963E]" />
+              {analysis
+                ? (isEnglish ? "Regenerate" : "Régénérer")
+                : (isEnglish ? "Run AI Diagnostic" : "Lancer le diagnostic IA")}
+            </>
+          )}
+        </button>
+      </div>
+
+      {error ? (
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {error}
+        </div>
+      ) : null}
+
+      {analysis ? (
+        <div className="space-y-4">
+          {typeof scores?.global === "number" ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[#101015]">
+                  {isEnglish ? "Global score" : "Score global"}
+                </span>
+                <span className="text-lg font-bold text-[#B8963E]">
+                  {scores.global}
+                  <span className="text-xs font-normal text-[#6F6A60]">/100</span>
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, scores.global))}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {scores && DIAGNOSTIC_SCORE_KEYS.some((k) => typeof scores[k] === "number") ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {DIAGNOSTIC_SCORE_KEYS.map((key) => {
+                const val = scores[key];
+                if (typeof val !== "number") return null;
+                return (
+                  <div key={key} className="rounded-xl border border-[#E7DED0] bg-white px-3 py-2">
+                    <p className="text-[10px] font-medium text-[#6F6A60]">{scoreLabels[key]}</p>
+                    <p className="mt-0.5 text-sm font-bold text-[#101015]">
+                      {val}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+                    </p>
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
+                      <div
+                        className="h-full rounded-full bg-[#B8963E] transition-all duration-700"
+                        style={{ width: `${Math.min(100, Math.max(0, val))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {analysis.summary ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "Summary" : "Résumé"}
+              </p>
+              <p className="text-xs leading-relaxed text-[#3A3530]">{analysis.summary}</p>
+            </div>
+          ) : null}
+
+          {(analysis.strengths?.length || analysis.risks?.length) ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {analysis.strengths?.length ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                    {isEnglish ? "Strengths" : "Forces"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.strengths.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {analysis.risks?.length ? (
+                <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                    {isEnglish ? "Risks" : "Risques"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.risks.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
+                        <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {analysis.missing_information?.length ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE] px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "Missing information" : "Informations manquantes"}
+              </p>
+              <ul className="space-y-1">
+                {analysis.missing_information.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[#6F6A60]">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {nba && (nba.title || nba.why || nba.how || nba.expected_output) ? (
+            <div className="rounded-xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F0E6CC]/40 to-white px-4 py-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Next best action" : "Prochaine meilleure action"}
+              </p>
+              {nba.title ? <p className="text-sm font-bold text-[#101015]">{nba.title}</p> : null}
+              {nba.why ? (
+                <p className="mt-1.5 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Why: " : "Pourquoi : "}</span>
+                  {nba.why}
+                </p>
+              ) : null}
+              {nba.how ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
+                  {nba.how}
+                </p>
+              ) : null}
+              {nba.expected_output ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Expected output: " : "Résultat attendu : "}</span>
+                  {nba.expected_output}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {analysis.roadmap_7_days?.length ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "7-day roadmap" : "Roadmap 7 jours"}
+              </p>
+              <ol className="space-y-1">
+                {analysis.roadmap_7_days.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-[#3A3530]">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#F0E6CC] text-[9px] font-bold text-[#8A6A20]">
+                      {i + 1}
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+        </div>
+      ) : !loading && !error ? (
+        <p className="text-xs text-[#6F6A60]">
+          {isEnglish
+            ? "No diagnostic yet. Click \"Run AI Diagnostic\" to analyse your project."
+            : "Aucun diagnostic disponible. Cliquez sur « Lancer le diagnostic IA » pour analyser votre projet."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function FounderAccountButton({ firstName }: { firstName?: string }) {
   const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const label = firstName
@@ -2343,6 +2589,9 @@ export default function FounderWorkspace({
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectActionId, setProjectActionId] = useState<string | null>(null);
+  const [diagnosticLoading, setDiagnosticLoading] = useState(false);
+  const [diagnosticError, setDiagnosticError] = useState<string | null>(null);
+  const [diagnosticAnalysis, setDiagnosticAnalysis] = useState<FounderCadrageAnalysis | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hydrateRef = useRef(false);
@@ -2481,6 +2730,41 @@ export default function FounderWorkspace({
   }, [activeId, currentProject, locale, owner, starterProject, workspaceLoaded, ws]);
   useEffect(() => { contentRef.current?.scrollTo({ top: 0, behavior: "smooth" }); }, [activeId]);
   useEffect(() => () => { streamAbortRef.current?.abort(); }, []);
+
+  // Load existing diagnostic from project_data when switching projects
+  useEffect(() => {
+    setDiagnosticError(null);
+    if (!currentProject) { setDiagnosticAnalysis(null); return; }
+    const agentData = asRecord(asRecord(currentProject.project_data).agent_cadrage_v1);
+    const existing = agentData.analysis;
+    setDiagnosticAnalysis(existing && typeof existing === "object" ? existing as FounderCadrageAnalysis : null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProject?.id]);
+
+  async function runDiagnostic() {
+    if (!currentProject || !owner || diagnosticLoading) return;
+    setDiagnosticLoading(true);
+    setDiagnosticError(null);
+    try {
+      const response = await runFounderCadrageAgent(currentProject.id, owner, {
+        instruction: "Analyse le projet Founder et propose la prochaine meilleure action pour avancer vers une offre claire, testable et vendable.",
+        auto_update: true,
+      });
+      setDiagnosticAnalysis(response.analysis);
+      if (response.project && owner) {
+        try {
+          const refreshed = await getFounderProject(currentProject.id, owner);
+          setProjects((prev) => mergeFounderProjectList(prev, refreshed));
+        } catch {
+          // Non-critical: project data already saved server-side
+        }
+      }
+    } catch (err) {
+      setDiagnosticError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setDiagnosticLoading(false);
+    }
+  }
 
   const updateMs = useCallback((id: string, patch: Partial<ModuleState>) => {
     setWs((prev) => { const cur = prev[id] ?? defaultMs(); return { ...prev, [id]: { ...cur, ...patch } }; });
@@ -3284,6 +3568,17 @@ export default function FounderWorkspace({
                   {copy.revisionBody}
                 </p>
               </div>
+            ) : null}
+
+            {/* Diagnostic IA Founder */}
+            {currentProject ? (
+              <FounderDiagnosticBlock
+                analysis={diagnosticAnalysis}
+                loading={diagnosticLoading}
+                error={diagnosticError}
+                locale={locale}
+                onRun={() => void runDiagnostic()}
+              />
             ) : null}
 
             {/* Input fields */}
