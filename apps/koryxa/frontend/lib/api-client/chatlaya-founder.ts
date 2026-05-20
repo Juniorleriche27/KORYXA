@@ -51,6 +51,59 @@ export type FounderCadrageAgentResponse = {
   project?: unknown | null;
 };
 
+export type FounderClientProblemTargetClient = {
+  segment?: string | null;
+  profile?: string | null;
+  context?: string | null;
+  ability_to_pay?: string | null;
+  access_channel?: string | null;
+};
+
+export type FounderClientProblemProblem = {
+  main_problem?: string | null;
+  pain_level?: number | null;
+  frequency?: string | null;
+  consequences?: string[] | null;
+  current_alternatives?: string[] | null;
+};
+
+export type FounderClientProblemValidation = {
+  critical_assumptions?: string[] | null;
+  field_questions?: string[] | null;
+  people_to_contact?: string[] | null;
+  validation_method?: string | null;
+  success_criteria?: string[] | null;
+};
+
+export type FounderClientProblemScores = {
+  client_precision?: number | null;
+  problem_intensity?: number | null;
+  market_accessibility?: number | null;
+  validation_readiness?: number | null;
+  global?: number | null;
+};
+
+export type FounderClientProblemAnalysis = {
+  target_client?: FounderClientProblemTargetClient | null;
+  problem?: FounderClientProblemProblem | null;
+  validation?: FounderClientProblemValidation | null;
+  scores?: FounderClientProblemScores | null;
+  strengths?: string[] | null;
+  risks?: string[] | null;
+  missing_information?: string[] | null;
+  recommended_next_step?: string | null;
+  next_best_action?: FounderNextBestAction | null;
+};
+
+export type FounderClientProblemAgentResponse = {
+  ok: boolean;
+  project_id: string;
+  agent: string;
+  analysis: FounderClientProblemAnalysis;
+  suggested_project_data_patch?: Record<string, unknown> | null;
+  project?: unknown | null;
+};
+
 type FounderProjectData = Record<string, unknown>;
 
 export type FounderProject = {
@@ -177,6 +230,28 @@ export async function runFounderCadrageAgent(
   const params = resolveOwner(owner);
   const response = await requestJson<FounderCadrageAgentResponse>(
     founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/agent/cadrage?${params.toString()}`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        instruction: payload?.instruction ?? null,
+        auto_update: payload?.auto_update ?? false,
+      }),
+    },
+  );
+  return response;
+}
+
+export async function runFounderClientProblemAgent(
+  projectId: string,
+  owner: FounderOwner,
+  payload?: {
+    instruction?: string | null;
+    auto_update?: boolean;
+  },
+): Promise<FounderClientProblemAgentResponse> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<FounderClientProblemAgentResponse>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/agent/client-problem?${params.toString()}`),
     {
       method: "POST",
       body: JSON.stringify({
