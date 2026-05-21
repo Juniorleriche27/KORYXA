@@ -345,6 +345,98 @@ export async function runFounderOfferValueAgent(
   return response;
 }
 
+export type FounderPricingPricing = {
+  recommended_price_logic?: string | null;
+  entry_price_hypothesis?: string | null;
+  main_price_hypothesis?: string | null;
+  premium_price_hypothesis?: string | null;
+  payment_modes?: string[] | null;
+  pricing_risks?: string[] | null;
+};
+
+export type FounderPricingBusinessModel = {
+  revenue_streams?: string[] | null;
+  cost_structure?: string[] | null;
+  key_resources?: string[] | null;
+  key_partners?: string[] | null;
+  distribution_channels?: string[] | null;
+  unit_economics_summary?: string | null;
+};
+
+export type FounderPricingSimpleFinance = {
+  startup_costs_to_estimate?: string[] | null;
+  fixed_costs?: string[] | null;
+  variable_costs?: string[] | null;
+  break_even_logic?: string | null;
+  sales_needed_for_goal?: string | null;
+};
+
+export type FounderPricingScenarios = {
+  pessimistic?: string | null;
+  realistic?: string | null;
+  ambitious?: string | null;
+};
+
+export type FounderPricingScores = {
+  pricing_clarity?: number | null;
+  payment_fit?: number | null;
+  margin_potential?: number | null;
+  business_model_clarity?: number | null;
+  financial_readiness?: number | null;
+  global?: number | null;
+};
+
+export type FounderPricingNextBestAction = {
+  title?: string | null;
+  why?: string | null;
+  how?: string[] | string | null;
+  expected_output?: string | null;
+};
+
+export type FounderPricingBusinessModelAnalysis = {
+  pricing?: FounderPricingPricing | null;
+  business_model?: FounderPricingBusinessModel | null;
+  simple_finance?: FounderPricingSimpleFinance | null;
+  scenarios?: FounderPricingScenarios | null;
+  scores?: FounderPricingScores | null;
+  strengths?: string[] | null;
+  risks?: string[] | null;
+  missing_information?: string[] | null;
+  recommended_next_step?: string | null;
+  next_best_action?: FounderPricingNextBestAction | null;
+};
+
+export type FounderPricingBusinessModelAgentResponse = {
+  ok: boolean;
+  project_id: string;
+  agent: string;
+  analysis: FounderPricingBusinessModelAnalysis;
+  suggested_project_data_patch?: Record<string, unknown> | null;
+  project?: unknown | null;
+};
+
+export async function runFounderPricingBusinessModelAgent(
+  projectId: string,
+  owner: FounderOwner,
+  payload?: {
+    instruction?: string | null;
+    auto_update?: boolean;
+  },
+): Promise<FounderPricingBusinessModelAgentResponse> {
+  const params = resolveOwner(owner);
+  const response = await requestJson<FounderPricingBusinessModelAgentResponse>(
+    founderApiUrl(`/chatlaya/founder-projects/${encodeURIComponent(projectId)}/agent/pricing-business-model?${params.toString()}`),
+    {
+      method: "POST",
+      body: JSON.stringify({
+        instruction: payload?.instruction ?? null,
+        auto_update: payload?.auto_update ?? false,
+      }),
+    },
+  );
+  return response;
+}
+
 export async function archiveFounderProject(projectId: string, owner: FounderOwner): Promise<FounderProject> {
   const params = resolveOwner(owner);
   const response = await requestJson<{ project?: unknown }>(

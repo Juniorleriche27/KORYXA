@@ -18,10 +18,12 @@ import {
   runFounderCadrageAgent,
   runFounderClientProblemAgent,
   runFounderOfferValueAgent,
+  runFounderPricingBusinessModelAgent,
   updateFounderProject,
   type FounderCadrageAnalysis,
   type FounderClientProblemAnalysis,
   type FounderOfferValueAnalysis,
+  type FounderPricingBusinessModelAnalysis,
   type FounderProject,
 } from "@/lib/api-client/chatlaya-founder";
 
@@ -2298,6 +2300,13 @@ interface FounderWorkspaceProps {
 
 // ─── Diagnostic IA Founder ───────────────────────────────────────────────────
 
+function scoreInterpretation(score: number, isEnglish: boolean): { label: string; color: string } {
+  if (score >= 80) return { label: isEnglish ? "Strong — ready to structure" : "Fort — prêt à structurer en livrable", color: "text-emerald-600" };
+  if (score >= 60) return { label: isEnglish ? "Good — ready for field test" : "Bon — prêt pour test terrain", color: "text-[#B8963E]" };
+  if (score >= 40) return { label: isEnglish ? "Medium — promising but fragile" : "Moyen — base exploitable mais encore fragile", color: "text-amber-600" };
+  return { label: isEnglish ? "Weak — clarify before selling" : "Faible — à clarifier avant de vendre", color: "text-rose-600" };
+}
+
 const DIAGNOSTIC_SCORE_KEYS = [
   "client_clarity", "problem_clarity", "offer_strength", "pricing_coherence",
   "business_model", "validation", "sales_readiness", "execution_readiness",
@@ -2497,10 +2506,24 @@ function FounderDiagnosticBlock({ analysis, loading, error, locale, onRun }: Fou
                 </p>
               ) : null}
               {nba.how ? (
-                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
-                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
-                  {nba.how}
-                </p>
+                nba.how.includes("\n") ? (
+                  <div className="mt-1">
+                    <p className="text-xs font-semibold text-[#3A3530]">{isEnglish ? "How:" : "Comment :"}</p>
+                    <ol className="mt-1 space-y-0.5">
+                      {nba.how.split("\n").filter(Boolean).map((step, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-[#6F6A60]">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#F0E6CC] text-[9px] font-bold text-[#8A6A20]">{i + 1}</span>
+                          {step.trim()}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                    <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
+                    {nba.how}
+                  </p>
+                )
               ) : null}
               {nba.expected_output ? (
                 <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
@@ -2730,10 +2753,10 @@ function FounderClientProblemBlock({ analysis, loading, error, locale, onRun }: 
                   <div className="text-xs">
                     <div className="flex items-center justify-between">
                       <dt className="font-semibold text-[#3A3530]">{isEnglish ? "Pain intensity" : "Intensité"}</dt>
-                      <dd className="font-bold text-[#B8963E]">{prob.pain_level}/10</dd>
+                      <dd className="font-bold text-[#B8963E]">{prob.pain_level}/100</dd>
                     </div>
                     <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
-                      <div className="h-full rounded-full bg-[#B8963E] transition-all duration-700" style={{ width: `${prob.pain_level * 10}%` }} />
+                      <div className="h-full rounded-full bg-[#B8963E] transition-all duration-700" style={{ width: `${Math.min(100, Math.max(0, prob.pain_level))}%` }} />
                     </div>
                   </div>
                 ) : null}
@@ -3334,6 +3357,713 @@ function FounderOfferValueBlock({ analysis, loading, error, locale, onRun }: Fou
   );
 }
 
+const PRICING_BM_SCORE_KEYS = [
+  "pricing_clarity", "payment_fit", "margin_potential", "business_model_clarity", "financial_readiness",
+] as const;
+
+const PRICING_BM_SCORE_LABELS_FR: Record<string, string> = {
+  pricing_clarity: "Clarté prix",
+  payment_fit: "Adéquation paiement",
+  margin_potential: "Potentiel marge",
+  business_model_clarity: "Clarté business model",
+  financial_readiness: "Préparation financière",
+};
+const PRICING_BM_SCORE_LABELS_EN: Record<string, string> = {
+  pricing_clarity: "Pricing clarity",
+  payment_fit: "Payment fit",
+  margin_potential: "Margin potential",
+  business_model_clarity: "Business model clarity",
+  financial_readiness: "Financial readiness",
+};
+
+type FounderPricingBMBlockProps = {
+  analysis: FounderPricingBusinessModelAnalysis | null;
+  loading: boolean;
+  error: string | null;
+  locale: string;
+  onRun: () => void;
+};
+
+function FounderPricingBMBlock({ analysis, loading, error, locale, onRun }: FounderPricingBMBlockProps) {
+  const isEnglish = founderIsEnglish(locale);
+  const scoreLabels = isEnglish ? PRICING_BM_SCORE_LABELS_EN : PRICING_BM_SCORE_LABELS_FR;
+  const scores = analysis?.scores;
+  const pricing = analysis?.pricing;
+  const bm = analysis?.business_model;
+  const finance = analysis?.simple_finance;
+  const scenarios = analysis?.scenarios;
+  const nba = analysis?.next_best_action;
+
+  return (
+    <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] p-5 shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#101015]">
+            <DollarSign className="h-3.5 w-3.5 text-[#B8963E]" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+              {isEnglish ? "Pricing & Business Model IA" : "Pricing & Business Model IA"}
+            </p>
+            {analysis ? (
+              <p className="text-[10px] text-[#6F6A60]">
+                {isEnglish ? "Last analysis available" : "Dernière analyse disponible"}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onRun}
+          disabled={loading}
+          className="flex shrink-0 items-center gap-2 rounded-full bg-[#101015] px-4 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loading ? (
+            <>
+              <svg className="h-3 w-3 animate-spin text-[#B8963E]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+              </svg>
+              {isEnglish ? "Analysing…" : "Analyse en cours…"}
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 text-[#B8963E]" />
+              {analysis
+                ? (isEnglish ? "Regenerate" : "Régénérer")
+                : (isEnglish ? "Analyse pricing & business model" : "Analyser prix & modèle économique")}
+            </>
+          )}
+        </button>
+      </div>
+
+      {error ? (
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {error}
+        </div>
+      ) : null}
+
+      {analysis ? (
+        <div className="space-y-4">
+          {/* Score global */}
+          {typeof scores?.global === "number" ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[#101015]">
+                  {isEnglish ? "Global score" : "Score global"}
+                </span>
+                <span className="text-lg font-bold text-[#B8963E]">
+                  {scores.global}
+                  <span className="text-xs font-normal text-[#6F6A60]">/100</span>
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
+                  style={{ width: `${Math.min(100, Math.max(0, scores.global))}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {/* Score cards */}
+          {scores && PRICING_BM_SCORE_KEYS.some((k) => typeof scores[k] === "number") ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {PRICING_BM_SCORE_KEYS.map((key) => {
+                const scoreVal = scores[key];
+                if (typeof scoreVal !== "number") return null;
+                return (
+                  <div key={key} className="rounded-xl border border-[#E7DED0] bg-white px-3 py-2">
+                    <p className="text-[10px] font-medium text-[#6F6A60]">{scoreLabels[key]}</p>
+                    <p className="mt-0.5 text-sm font-bold text-[#101015]">
+                      {scoreVal}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+                    </p>
+                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-[#F0E6CC]">
+                      <div
+                        className="h-full rounded-full bg-[#B8963E] transition-all duration-700"
+                        style={{ width: `${Math.min(100, Math.max(0, scoreVal))}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {/* Pricing */}
+          {pricing && (pricing.recommended_price_logic || pricing.entry_price_hypothesis || pricing.main_price_hypothesis || pricing.premium_price_hypothesis || pricing.payment_modes?.length || pricing.pricing_risks?.length) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Pricing" : "Pricing"}
+              </p>
+              <dl className="space-y-2">
+                {pricing.recommended_price_logic ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Recommended price logic" : "Logique de prix recommandée"}</dt>
+                    <dd className="text-[#6F6A60]">{pricing.recommended_price_logic}</dd>
+                  </div>
+                ) : null}
+                {pricing.entry_price_hypothesis ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Entry price hypothesis" : "Hypothèse prix d'entrée"}</dt>
+                    <dd className="text-[#6F6A60]">{pricing.entry_price_hypothesis}</dd>
+                  </div>
+                ) : null}
+                {pricing.main_price_hypothesis ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Main price hypothesis" : "Hypothèse prix principal"}</dt>
+                    <dd className="text-[#6F6A60]">{pricing.main_price_hypothesis}</dd>
+                  </div>
+                ) : null}
+                {pricing.premium_price_hypothesis ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Premium price hypothesis" : "Hypothèse premium"}</dt>
+                    <dd className="text-[#6F6A60]">{pricing.premium_price_hypothesis}</dd>
+                  </div>
+                ) : null}
+                {pricing.payment_modes?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Payment modes" : "Modes de paiement"}</dt>
+                    <ul className="space-y-0.5">
+                      {pricing.payment_modes.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {pricing.pricing_risks?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Pricing risks" : "Risques pricing"}</dt>
+                    <ul className="space-y-0.5">
+                      {pricing.pricing_risks.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-amber-700">
+                          <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Business model */}
+          {bm && (bm.revenue_streams?.length || bm.cost_structure?.length || bm.key_resources?.length || bm.key_partners?.length || bm.distribution_channels?.length || bm.unit_economics_summary) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Business model" : "Business model"}
+              </p>
+              <dl className="space-y-2">
+                {bm.revenue_streams?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Revenue streams" : "Sources de revenus"}</dt>
+                    <ul className="space-y-0.5">
+                      {bm.revenue_streams.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {bm.cost_structure?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Cost structure" : "Structure de coûts"}</dt>
+                    <ul className="space-y-0.5">
+                      {bm.cost_structure.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {bm.key_resources?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Key resources" : "Ressources clés"}</dt>
+                    <ul className="space-y-0.5">
+                      {bm.key_resources.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {bm.key_partners?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Key partners" : "Partenaires clés"}</dt>
+                    <ul className="space-y-0.5">
+                      {bm.key_partners.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {bm.distribution_channels?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Distribution channels" : "Canaux de distribution"}</dt>
+                    <ul className="space-y-0.5">
+                      {bm.distribution_channels.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {bm.unit_economics_summary ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Unit economics summary" : "Résumé unit economics"}</dt>
+                    <dd className="text-[#6F6A60]">{bm.unit_economics_summary}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Finance simple */}
+          {finance && (finance.startup_costs_to_estimate?.length || finance.fixed_costs?.length || finance.variable_costs?.length || finance.break_even_logic || finance.sales_needed_for_goal) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Simple finance" : "Finance simple"}
+              </p>
+              <dl className="space-y-2">
+                {finance.startup_costs_to_estimate?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Startup costs to estimate" : "Coûts de lancement à estimer"}</dt>
+                    <ul className="space-y-0.5">
+                      {finance.startup_costs_to_estimate.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {finance.fixed_costs?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Fixed costs" : "Coûts fixes"}</dt>
+                    <ul className="space-y-0.5">
+                      {finance.fixed_costs.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {finance.variable_costs?.length ? (
+                  <div className="text-xs">
+                    <dt className="mb-1 font-semibold text-[#3A3530]">{isEnglish ? "Variable costs" : "Coûts variables"}</dt>
+                    <ul className="space-y-0.5">
+                      {finance.variable_costs.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[#6F6A60]">
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {finance.break_even_logic ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Break-even logic" : "Logique seuil de rentabilité"}</dt>
+                    <dd className="text-[#6F6A60]">{finance.break_even_logic}</dd>
+                  </div>
+                ) : null}
+                {finance.sales_needed_for_goal ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Sales needed for goal" : "Ventes nécessaires pour l'objectif"}</dt>
+                    <dd className="text-[#6F6A60]">{finance.sales_needed_for_goal}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Scénarios */}
+          {scenarios && (scenarios.pessimistic || scenarios.realistic || scenarios.ambitious) ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-white px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Scenarios" : "Scénarios"}
+              </p>
+              <dl className="space-y-2">
+                {scenarios.pessimistic ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-rose-700">{isEnglish ? "Pessimistic" : "Pessimiste"}</dt>
+                    <dd className="text-[#6F6A60]">{scenarios.pessimistic}</dd>
+                  </div>
+                ) : null}
+                {scenarios.realistic ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-[#3A3530]">{isEnglish ? "Realistic" : "Réaliste"}</dt>
+                    <dd className="text-[#6F6A60]">{scenarios.realistic}</dd>
+                  </div>
+                ) : null}
+                {scenarios.ambitious ? (
+                  <div className="text-xs">
+                    <dt className="mb-0.5 font-semibold text-emerald-700">{isEnglish ? "Ambitious" : "Ambitieux"}</dt>
+                    <dd className="text-[#6F6A60]">{scenarios.ambitious}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
+          ) : null}
+
+          {/* Forces / Risques */}
+          {(analysis.strengths?.length || analysis.risks?.length) ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {analysis.strengths?.length ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                    {isEnglish ? "Strengths" : "Forces"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.strengths.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-emerald-800">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {analysis.risks?.length ? (
+                <div className="rounded-xl border border-amber-100 bg-amber-50/40 px-4 py-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                    {isEnglish ? "Risks" : "Risques"}
+                  </p>
+                  <ul className="space-y-1">
+                    {analysis.risks.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
+                        <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Informations manquantes */}
+          {analysis.missing_information?.length ? (
+            <div className="rounded-xl border border-[#E7DED0] bg-[#F7F4EE] px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#6F6A60]">
+                {isEnglish ? "Missing information" : "Informations manquantes"}
+              </p>
+              <ul className="space-y-1">
+                {analysis.missing_information.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-[#6F6A60]">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B8963E]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {/* Prochaine meilleure action */}
+          {nba && (nba.title || nba.why || nba.how || nba.expected_output) ? (
+            <div className="rounded-xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F0E6CC]/40 to-white px-4 py-4">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+                {isEnglish ? "Next best action" : "Prochaine meilleure action"}
+              </p>
+              {nba.title ? <p className="text-sm font-bold text-[#101015]">{nba.title}</p> : null}
+              {nba.why ? (
+                <p className="mt-1.5 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Why: " : "Pourquoi : "}</span>
+                  {nba.why}
+                </p>
+              ) : null}
+              {nba.how ? (
+                Array.isArray(nba.how) ? (
+                  <div className="mt-1">
+                    <p className="text-xs font-semibold text-[#3A3530]">{isEnglish ? "How:" : "Comment :"}</p>
+                    <ol className="mt-1 space-y-0.5">
+                      {nba.how.map((step, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-[#6F6A60]">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#F0E6CC] text-[9px] font-bold text-[#8A6A20]">{i + 1}</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                    <span className="font-semibold text-[#3A3530]">{isEnglish ? "How: " : "Comment : "}</span>
+                    {nba.how}
+                  </p>
+                )
+              ) : null}
+              {nba.expected_output ? (
+                <p className="mt-1 text-xs leading-relaxed text-[#6F6A60]">
+                  <span className="font-semibold text-[#3A3530]">{isEnglish ? "Expected output: " : "Résultat attendu : "}</span>
+                  {nba.expected_output}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : !loading && !error ? (
+        <p className="text-xs text-[#6F6A60]">
+          {isEnglish
+            ? "No analysis yet. Click \"Analyse pricing & business model\" to start."
+            : "Aucune analyse disponible. Cliquez sur « Analyser prix & modèle économique » pour démarrer."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+// ─── Unified AI Panel ────────────────────────────────────────────────────────
+
+type AITab = "diagnostic" | "client_problem" | "offer_value" | "pricing_bm";
+
+function resolveTabFromModule(moduleId: string): AITab {
+  if (moduleId === "client" || moduleId === "probleme") return "client_problem";
+  if (moduleId === "offre") return "offer_value";
+  if (moduleId === "prix" || moduleId === "business_model") return "pricing_bm";
+  return "diagnostic";
+}
+
+type FounderAIPanelProps = {
+  diagnosticAnalysis: FounderCadrageAnalysis | null;
+  diagnosticLoading: boolean;
+  diagnosticError: string | null;
+  onRunDiagnostic: () => void;
+  clientProblemAnalysis: FounderClientProblemAnalysis | null;
+  clientProblemLoading: boolean;
+  clientProblemError: string | null;
+  onRunClientProblem: () => void;
+  offerValueAnalysis: FounderOfferValueAnalysis | null;
+  offerValueLoading: boolean;
+  offerValueError: string | null;
+  onRunOfferValue: () => void;
+  pricingBMAnalysis: FounderPricingBusinessModelAnalysis | null;
+  pricingBMLoading: boolean;
+  pricingBMError: string | null;
+  onRunPricingBM: () => void;
+  activeModuleId: string;
+  locale: string;
+};
+
+function FounderAIPanel({
+  diagnosticAnalysis, diagnosticLoading, diagnosticError, onRunDiagnostic,
+  clientProblemAnalysis, clientProblemLoading, clientProblemError, onRunClientProblem,
+  offerValueAnalysis, offerValueLoading, offerValueError, onRunOfferValue,
+  pricingBMAnalysis, pricingBMLoading, pricingBMError, onRunPricingBM,
+  activeModuleId, locale,
+}: FounderAIPanelProps) {
+  const isEnglish = founderIsEnglish(locale);
+  const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<AITab>(() => resolveTabFromModule(activeModuleId));
+
+  useEffect(() => {
+    setActiveTab(resolveTabFromModule(activeModuleId));
+  }, [activeModuleId]);
+
+  const globalScore =
+    typeof diagnosticAnalysis?.maturity_scores?.global === "number"
+      ? diagnosticAnalysis.maturity_scores.global
+      : typeof clientProblemAnalysis?.scores?.global === "number"
+      ? clientProblemAnalysis.scores.global
+      : typeof offerValueAnalysis?.scores?.global === "number"
+      ? offerValueAnalysis.scores.global
+      : typeof pricingBMAnalysis?.scores?.global === "number"
+      ? pricingBMAnalysis.scores.global
+      : null;
+
+  const priorityRisk =
+    diagnosticAnalysis?.risks?.[0] ??
+    clientProblemAnalysis?.risks?.[0] ??
+    offerValueAnalysis?.risks?.[0] ??
+    pricingBMAnalysis?.risks?.[0] ??
+    null;
+
+  const nba =
+    diagnosticAnalysis?.next_best_action ??
+    clientProblemAnalysis?.next_best_action ??
+    offerValueAnalysis?.next_best_action ??
+    pricingBMAnalysis?.next_best_action ??
+    null;
+
+  const anyLoading = diagnosticLoading || clientProblemLoading || offerValueLoading || pricingBMLoading;
+  const interp = globalScore !== null ? scoreInterpretation(globalScore, isEnglish) : null;
+
+  const tabs: { id: AITab; label: string; hasData: boolean; loading: boolean }[] = [
+    { id: "diagnostic", label: isEnglish ? "Diagnostic" : "Diagnostic", hasData: !!diagnosticAnalysis, loading: diagnosticLoading },
+    { id: "client_problem", label: isEnglish ? "Client & Problem" : "Client & Problème", hasData: !!clientProblemAnalysis, loading: clientProblemLoading },
+    { id: "offer_value", label: isEnglish ? "Offer & Value" : "Offre & Valeur", hasData: !!offerValueAnalysis, loading: offerValueLoading },
+    { id: "pricing_bm", label: isEnglish ? "Pricing & BM" : "Prix & Modèle", hasData: !!pricingBMAnalysis, loading: pricingBMLoading },
+  ];
+
+  const spinnerSvg = (
+    <svg className="h-2.5 w-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+    </svg>
+  );
+
+  return (
+    <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
+      {/* Header — always visible */}
+      <div className="flex items-center gap-3 px-5 py-3.5">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#101015]">
+          <Sparkles className="h-3.5 w-3.5 text-[#B8963E]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
+            {isEnglish ? "AI Project Analysis" : "Analyse IA du projet"}
+          </p>
+          {globalScore !== null && interp ? (
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              <span className="text-sm font-bold text-[#101015]">
+                {globalScore}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+              </span>
+              <span className={`text-[10px] font-medium ${interp.color}`}>— {interp.label}</span>
+            </div>
+          ) : anyLoading ? (
+            <p className="mt-0.5 animate-pulse text-[10px] text-[#6F6A60]">
+              {isEnglish ? "Analysing…" : "Analyse en cours…"}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[10px] text-[#6F6A60]">
+              {isEnglish ? "Copilot agents for your project" : "Agents copilotes pour votre projet"}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="shrink-0 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-semibold text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40"
+        >
+          {open
+            ? (isEnglish ? "Close" : "Fermer")
+            : (isEnglish ? "View full analysis" : "Voir l'analyse complète")}
+        </button>
+      </div>
+
+      {/* Collapsed body */}
+      {!open ? (
+        <div className="space-y-3 border-t border-[#E7DED0]/60 px-5 pb-4 pt-3">
+          {globalScore !== null ? (
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
+                style={{ width: `${Math.min(100, Math.max(0, globalScore))}%` }}
+              />
+            </div>
+          ) : null}
+          {priorityRisk ? (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50/50 px-3 py-2">
+              <AlertCircle className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+              <p className="text-[11px] leading-relaxed text-amber-800">
+                <span className="font-semibold">{isEnglish ? "Priority risk: " : "Risque prioritaire : "}</span>
+                {priorityRisk}
+              </p>
+            </div>
+          ) : null}
+          {nba?.title ? (
+            <div className="flex items-start gap-2 rounded-xl border border-[#B8963E]/20 bg-[#F0E6CC]/30 px-3 py-2">
+              <ArrowRight className="mt-0.5 h-3 w-3 shrink-0 text-[#B8963E]" />
+              <p className="text-[11px] leading-relaxed text-[#3A3530]">
+                <span className="font-semibold">{isEnglish ? "Next action: " : "Prochaine action : "}</span>
+                {nba.title}
+              </p>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={onRunDiagnostic} disabled={diagnosticLoading}
+              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
+              {diagnosticLoading ? spinnerSvg : <BarChart2 className="h-2.5 w-2.5 text-[#B8963E]" />}
+              {isEnglish ? "Global diagnostic" : "Diagnostic global"}
+            </button>
+            <button type="button" onClick={onRunClientProblem} disabled={clientProblemLoading}
+              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
+              {clientProblemLoading ? spinnerSvg : <Target className="h-2.5 w-2.5 text-[#B8963E]" />}
+              {isEnglish ? "Client & problem" : "Client & problème"}
+            </button>
+            <button type="button" onClick={onRunOfferValue} disabled={offerValueLoading}
+              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
+              {offerValueLoading ? spinnerSvg : <Package className="h-2.5 w-2.5 text-[#B8963E]" />}
+              {isEnglish ? "Offer & value" : "Offre & valeur"}
+            </button>
+            <button type="button" onClick={onRunPricingBM} disabled={pricingBMLoading}
+              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
+              {pricingBMLoading ? spinnerSvg : <DollarSign className="h-2.5 w-2.5 text-[#B8963E]" />}
+              {isEnglish ? "Pricing & BM" : "Prix & modèle économique"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Expanded view with tabs */
+        <div className="space-y-4 border-t border-[#E7DED0]/60 px-5 pb-5 pt-4">
+          <div className="flex gap-1 overflow-x-auto rounded-xl border border-[#E7DED0] bg-[#F7F4EE] p-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[10px] font-semibold transition ${
+                  activeTab === tab.id
+                    ? "bg-[#101015] text-white"
+                    : "text-[#6F6A60] hover:bg-white hover:text-[#101015]"
+                }`}
+              >
+                {tab.loading ? (
+                  <svg className="h-2.5 w-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
+                  </svg>
+                ) : (
+                  <span className={`h-1.5 w-1.5 rounded-full ${tab.hasData ? "bg-[#B8963E]" : "bg-[#E7DED0]"}`} />
+                )}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          {activeTab === "diagnostic" ? (
+            <FounderDiagnosticBlock
+              analysis={diagnosticAnalysis}
+              loading={diagnosticLoading}
+              error={diagnosticError}
+              locale={locale}
+              onRun={onRunDiagnostic}
+            />
+          ) : activeTab === "client_problem" ? (
+            <FounderClientProblemBlock
+              analysis={clientProblemAnalysis}
+              loading={clientProblemLoading}
+              error={clientProblemError}
+              locale={locale}
+              onRun={onRunClientProblem}
+            />
+          ) : activeTab === "offer_value" ? (
+            <FounderOfferValueBlock
+              analysis={offerValueAnalysis}
+              loading={offerValueLoading}
+              error={offerValueError}
+              locale={locale}
+              onRun={onRunOfferValue}
+            />
+          ) : (
+            <FounderPricingBMBlock
+              analysis={pricingBMAnalysis}
+              loading={pricingBMLoading}
+              error={pricingBMError}
+              locale={locale}
+              onRun={onRunPricingBM}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FounderAccountButton({ firstName }: { firstName?: string }) {
   const locale = typeof window !== "undefined" && window.location.pathname.startsWith("/en") ? "en" : "fr";
   const label = firstName
@@ -3396,6 +4126,9 @@ export default function FounderWorkspace({
   const [offerValueLoading, setOfferValueLoading] = useState(false);
   const [offerValueError, setOfferValueError] = useState<string | null>(null);
   const [offerValueAnalysis, setOfferValueAnalysis] = useState<FounderOfferValueAnalysis | null>(null);
+  const [pricingBMLoading, setPricingBMLoading] = useState(false);
+  const [pricingBMError, setPricingBMError] = useState<string | null>(null);
+  const [pricingBMAnalysis, setPricingBMAnalysis] = useState<FounderPricingBusinessModelAnalysis | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hydrateRef = useRef(false);
@@ -3637,6 +4370,41 @@ export default function FounderWorkspace({
       setOfferValueError(err instanceof Error ? err.message : "Erreur inattendue.");
     } finally {
       setOfferValueLoading(false);
+    }
+  }
+
+  // Load existing pricing-business-model analysis from project_data when switching projects
+  useEffect(() => {
+    setPricingBMError(null);
+    if (!currentProject) { setPricingBMAnalysis(null); return; }
+    const agentData = asRecord(asRecord(currentProject.project_data).agent_pricing_business_model_v1);
+    const existing = agentData.analysis;
+    setPricingBMAnalysis(existing && typeof existing === "object" ? existing as FounderPricingBusinessModelAnalysis : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProject?.id]);
+
+  async function runPricingBMAgent() {
+    if (!currentProject || !owner || pricingBMLoading) return;
+    setPricingBMLoading(true);
+    setPricingBMError(null);
+    try {
+      const response = await runFounderPricingBusinessModelAgent(currentProject.id, owner, {
+        instruction: "Analyse la stratégie de prix, les modes de paiement, le modèle économique et propose une prochaine action financière simple et testable.",
+        auto_update: true,
+      });
+      setPricingBMAnalysis(response.analysis);
+      if (response.project && owner) {
+        try {
+          const refreshed = await getFounderProject(currentProject.id, owner);
+          setProjects((prev) => mergeFounderProjectList(prev, refreshed));
+        } catch {
+          // Non-critical: project data already saved server-side
+        }
+      }
+    } catch (err) {
+      setPricingBMError(err instanceof Error ? err.message : "Erreur inattendue.");
+    } finally {
+      setPricingBMLoading(false);
     }
   }
 
@@ -4444,39 +5212,6 @@ export default function FounderWorkspace({
               </div>
             ) : null}
 
-            {/* Diagnostic IA Founder */}
-            {currentProject ? (
-              <FounderDiagnosticBlock
-                analysis={diagnosticAnalysis}
-                loading={diagnosticLoading}
-                error={diagnosticError}
-                locale={locale}
-                onRun={() => void runDiagnostic()}
-              />
-            ) : null}
-
-            {/* Client & Problème IA */}
-            {currentProject ? (
-              <FounderClientProblemBlock
-                analysis={clientProblemAnalysis}
-                loading={clientProblemLoading}
-                error={clientProblemError}
-                locale={locale}
-                onRun={() => void runClientProblemAgent()}
-              />
-            ) : null}
-
-            {/* Offre & Valeur IA */}
-            {currentProject ? (
-              <FounderOfferValueBlock
-                analysis={offerValueAnalysis}
-                loading={offerValueLoading}
-                error={offerValueError}
-                locale={locale}
-                onRun={() => void runOfferValueAgent()}
-              />
-            ) : null}
-
             {/* Input fields */}
             <div className="space-y-4">
               {activeModule.inputs.map((field) => (
@@ -4518,6 +5253,30 @@ export default function FounderWorkspace({
                 <span className="text-[11px] text-[#6F6A60]">{copy.generatingAnother}</span>
               ) : null}
             </div>
+
+            {/* Analyse IA du projet */}
+            {currentProject ? (
+              <FounderAIPanel
+                diagnosticAnalysis={diagnosticAnalysis}
+                diagnosticLoading={diagnosticLoading}
+                diagnosticError={diagnosticError}
+                onRunDiagnostic={() => void runDiagnostic()}
+                clientProblemAnalysis={clientProblemAnalysis}
+                clientProblemLoading={clientProblemLoading}
+                clientProblemError={clientProblemError}
+                onRunClientProblem={() => void runClientProblemAgent()}
+                offerValueAnalysis={offerValueAnalysis}
+                offerValueLoading={offerValueLoading}
+                offerValueError={offerValueError}
+                onRunOfferValue={() => void runOfferValueAgent()}
+                pricingBMAnalysis={pricingBMAnalysis}
+                pricingBMLoading={pricingBMLoading}
+                pricingBMError={pricingBMError}
+                onRunPricingBM={() => void runPricingBMAgent()}
+                activeModuleId={activeId}
+                locale={locale}
+              />
+            ) : null}
 
             {/* Previous output (revision mode, while generating) */}
             {isGenerating && !activeMs.output && activeMs.previousOutput ? (
