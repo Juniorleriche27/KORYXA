@@ -592,8 +592,10 @@ function founderUi(locale: string) {
       inProgress: "En cours…",
       copyAction: "Copier",
       copied: "Copié !",
-      revalidateForDossier: "Revalider pour le dossier",
-      validateForDossier: "Valider pour le dossier",
+      revalidateForDossier: "Revalider le dossier fondateur",
+      validateForDossier: "Valider le dossier fondateur",
+      validateStep: "Valider l'étape",
+      revalidateStep: "Revalider l'étape",
       dossierVersionValidated: "Version dossier validée",
       editThisStep: "Modifier cette étape",
       exportDossier: "Exporter le dossier",
@@ -690,8 +692,10 @@ function founderUi(locale: string) {
     inProgress: "In progress...",
     copyAction: "Copy",
     copied: "Copied!",
-    revalidateForDossier: "Revalidate for the dossier",
-    validateForDossier: "Validate for the dossier",
+    revalidateForDossier: "Revalidate founder dossier",
+    validateForDossier: "Validate founder dossier",
+    validateStep: "Validate step",
+    revalidateStep: "Revalidate step",
     dossierVersionValidated: "Dossier version validated",
     editThisStep: "Edit this step",
     exportDossier: "Export dossier",
@@ -4007,46 +4011,67 @@ function FounderAIPanel({
 }: FounderAIPanelProps) {
   const isEnglish = founderIsEnglish(locale);
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<AITab>(() => resolveTabFromModule(activeModuleId));
 
+  // Collapse panel when navigating to a different step
   useEffect(() => {
-    setActiveTab(resolveTabFromModule(activeModuleId));
+    setOpen(false);
   }, [activeModuleId]);
 
-  const globalScore =
-    typeof diagnosticAnalysis?.maturity_scores?.global === "number"
-      ? diagnosticAnalysis.maturity_scores.global
-      : typeof clientProblemAnalysis?.scores?.global === "number"
-      ? clientProblemAnalysis.scores.global
-      : typeof offerValueAnalysis?.scores?.global === "number"
-      ? offerValueAnalysis.scores.global
-      : typeof pricingBMAnalysis?.scores?.global === "number"
-      ? pricingBMAnalysis.scores.global
-      : null;
+  // Determine which agent applies to the current step
+  const activeTab = resolveTabFromModule(activeModuleId);
+  const hasDedicatedAgent =
+    activeModuleId === "client" ||
+    activeModuleId === "probleme" ||
+    activeModuleId === "offre" ||
+    activeModuleId === "prix";
+  const isDossier = activeModuleId === "business_plan";
+  // Steps 5 (business_model) and 6 (vente) have no dedicated agent yet
+  const isComingSoon = !hasDedicatedAgent && !isDossier;
 
-  const priorityRisk =
-    diagnosticAnalysis?.risks?.[0] ??
-    clientProblemAnalysis?.risks?.[0] ??
-    offerValueAnalysis?.risks?.[0] ??
-    pricingBMAnalysis?.risks?.[0] ??
-    null;
+  // Score scoped to the current step's agent only
+  const currentScore: number | null = hasDedicatedAgent
+    ? activeTab === "diagnostic"
+      ? (typeof diagnosticAnalysis?.maturity_scores?.global === "number" ? diagnosticAnalysis.maturity_scores.global : null)
+      : activeTab === "client_problem"
+      ? (typeof clientProblemAnalysis?.scores?.global === "number" ? clientProblemAnalysis.scores.global : null)
+      : activeTab === "offer_value"
+      ? (typeof offerValueAnalysis?.scores?.global === "number" ? offerValueAnalysis.scores.global : null)
+      : (typeof pricingBMAnalysis?.scores?.global === "number" ? pricingBMAnalysis.scores.global : null)
+    : null;
 
-  const nba =
-    diagnosticAnalysis?.next_best_action ??
-    clientProblemAnalysis?.next_best_action ??
-    offerValueAnalysis?.next_best_action ??
-    pricingBMAnalysis?.next_best_action ??
-    null;
+  // Risk scoped to the current step's agent only
+  const priorityRisk: string | null = hasDedicatedAgent
+    ? activeTab === "diagnostic" ? (diagnosticAnalysis?.risks?.[0] ?? null)
+      : activeTab === "client_problem" ? (clientProblemAnalysis?.risks?.[0] ?? null)
+      : activeTab === "offer_value" ? (offerValueAnalysis?.risks?.[0] ?? null)
+      : (pricingBMAnalysis?.risks?.[0] ?? null)
+    : null;
 
-  const anyLoading = diagnosticLoading || clientProblemLoading || offerValueLoading || pricingBMLoading;
-  const interp = globalScore !== null ? scoreInterpretation(globalScore, isEnglish) : null;
+  // Next best action scoped to the current step's agent only
+  const nba = hasDedicatedAgent
+    ? activeTab === "diagnostic" ? (diagnosticAnalysis?.next_best_action ?? null)
+      : activeTab === "client_problem" ? (clientProblemAnalysis?.next_best_action ?? null)
+      : activeTab === "offer_value" ? (offerValueAnalysis?.next_best_action ?? null)
+      : (pricingBMAnalysis?.next_best_action ?? null)
+    : null;
 
-  const tabs: { id: AITab; label: string; hasData: boolean; loading: boolean }[] = [
-    { id: "diagnostic", label: isEnglish ? "Diagnostic" : "Diagnostic", hasData: !!diagnosticAnalysis, loading: diagnosticLoading },
-    { id: "client_problem", label: isEnglish ? "Client & Problem" : "Client & Problème", hasData: !!clientProblemAnalysis, loading: clientProblemLoading },
-    { id: "offer_value", label: isEnglish ? "Offer & Value" : "Offre & Valeur", hasData: !!offerValueAnalysis, loading: offerValueLoading },
-    { id: "pricing_bm", label: isEnglish ? "Pricing & BM" : "Prix & Modèle", hasData: !!pricingBMAnalysis, loading: pricingBMLoading },
-  ];
+  const currentLoading = hasDedicatedAgent
+    ? activeTab === "diagnostic" ? diagnosticLoading
+      : activeTab === "client_problem" ? clientProblemLoading
+      : activeTab === "offer_value" ? offerValueLoading
+      : pricingBMLoading
+    : false;
+
+  const interp = currentScore !== null ? scoreInterpretation(currentScore, isEnglish) : null;
+
+  // Contextual panel title per step
+  const panelTitle =
+    activeModuleId === "client" ? (isEnglish ? "Diagnostic AI" : "Diagnostic IA") :
+    activeModuleId === "probleme" ? (isEnglish ? "Client & Problem Analysis" : "Analyse Client & Problème") :
+    activeModuleId === "offre" ? (isEnglish ? "Offer & Value Analysis" : "Analyse Offre & Valeur") :
+    activeModuleId === "prix" ? (isEnglish ? "Pricing & Model Analysis" : "Analyse Prix & Modèle") :
+    isDossier ? (isEnglish ? "Founder dossier" : "Dossier fondateur") :
+    (isEnglish ? "AI Analysis" : "Analyse IA");
 
   return (
     <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
@@ -4057,44 +4082,69 @@ function FounderAIPanel({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#B8963E]">
-            {isEnglish ? "AI Project Analysis" : "Analyse IA du projet"}
+            {panelTitle}
           </p>
-          {globalScore !== null && interp ? (
+          {hasDedicatedAgent && currentScore !== null && interp ? (
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               <span className="text-sm font-bold text-[#101015]">
-                {globalScore}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
+                {currentScore}<span className="text-[10px] font-normal text-[#6F6A60]">/100</span>
               </span>
               <span className={`text-[10px] font-medium ${interp.color}`}>— {interp.label}</span>
             </div>
-          ) : anyLoading ? (
+          ) : hasDedicatedAgent && currentLoading ? (
             <p className="mt-0.5 animate-pulse text-[10px] text-[#6F6A60]">
               {isEnglish ? "Analysing…" : "Analyse en cours…"}
             </p>
           ) : (
             <p className="mt-0.5 text-[10px] text-[#6F6A60]">
-              {isEnglish ? "Copilot agents for your project" : "Agents copilotes pour votre projet"}
+              {isComingSoon
+                ? (isEnglish ? "Dedicated analysis coming soon" : "Analyse dédiée bientôt disponible")
+                : isDossier
+                ? (isEnglish ? "Complete and exportable final document" : "Document final complet et exportable")
+                : (isEnglish ? "Copilot agent for this step" : "Agent copilote pour cette étape")}
             </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="shrink-0 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-semibold text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40"
-        >
-          {open
-            ? (isEnglish ? "Close" : "Fermer")
-            : (isEnglish ? "View full analysis" : "Voir l'analyse complète")}
-        </button>
+        {hasDedicatedAgent ? (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="shrink-0 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-semibold text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40"
+          >
+            {open
+              ? (isEnglish ? "Close" : "Fermer")
+              : (isEnglish ? "View full analysis" : "Voir l'analyse complète")}
+          </button>
+        ) : null}
       </div>
 
-      {/* Collapsed body */}
-      {!open ? (
+      {/* Body */}
+      {isComingSoon ? (
+        /* Steps 5-6: no dedicated agent yet */
+        <div className="border-t border-[#E7DED0]/60 px-5 pb-4 pt-3">
+          <p className="text-[11px] leading-relaxed text-[#6F6A60]">
+            {isEnglish
+              ? "A dedicated AI analysis for this step will be available soon. Use ChatLAYA above to refine your content."
+              : "Une analyse IA dédiée à cette étape sera disponible prochainement. Utilisez ChatLAYA ci-dessus pour affiner votre contenu."}
+          </p>
+        </div>
+      ) : isDossier ? (
+        /* Step 7: dossier fondateur block */
+        <div className="border-t border-[#E7DED0]/60 px-5 pb-4 pt-3">
+          <p className="text-[11px] leading-relaxed text-[#6F6A60]">
+            {isEnglish
+              ? "Once all steps are validated, generate and export your complete founder dossier using the button above."
+              : "Une fois toutes les étapes validées, générez et exportez votre dossier fondateur complet via le bouton ci-dessus."}
+          </p>
+        </div>
+      ) : !open ? (
+        /* Collapsed: score / risk / NBA from current step only */
         <div className="space-y-3 border-t border-[#E7DED0]/60 px-5 pb-4 pt-3">
-          {globalScore !== null ? (
+          {currentScore !== null ? (
             <div className="h-1.5 overflow-hidden rounded-full bg-[#F0E6CC]">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#D4B26A] to-[#B8963E] transition-all duration-700"
-                style={{ width: `${Math.min(100, Math.max(0, globalScore))}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, currentScore))}%` }}
               />
             </div>
           ) : null}
@@ -4117,7 +4167,11 @@ function FounderAIPanel({
             </div>
           ) : null}
           {(() => {
-            const ctx = diagnosticAnalysis?.recommended_next_step ?? diagnosticAnalysis?.summary ?? null;
+            const ctx = activeTab === "diagnostic"
+              ? (diagnosticAnalysis?.recommended_next_step ?? diagnosticAnalysis?.summary ?? null)
+              : activeTab === "client_problem" ? (clientProblemAnalysis?.recommended_next_step ?? null)
+              : activeTab === "offer_value" ? (offerValueAnalysis?.recommended_next_step ?? null)
+              : (pricingBMAnalysis?.recommended_next_step ?? null);
             if (!ctx) return null;
             return (
               <p className="text-[11px] leading-relaxed text-[#6F6A60] italic">
@@ -4127,31 +4181,8 @@ function FounderAIPanel({
           })()}
         </div>
       ) : (
-        /* Expanded view with tabs */
+        /* Expanded: show ONLY the analysis block for this step (no tab bar) */
         <div className="space-y-4 border-t border-[#E7DED0]/60 px-5 pb-5 pt-4">
-          <div className="flex gap-1 overflow-x-auto rounded-xl border border-[#E7DED0] bg-[#F7F4EE] p-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[10px] font-semibold transition ${
-                  activeTab === tab.id
-                    ? "bg-[#101015] text-white"
-                    : "text-[#6F6A60] hover:bg-white hover:text-[#101015]"
-                }`}
-              >
-                {tab.loading ? (
-                  <svg className="h-2.5 w-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
-                  </svg>
-                ) : (
-                  <span className={`h-1.5 w-1.5 rounded-full ${tab.hasData ? "bg-[#B8963E]" : "bg-[#E7DED0]"}`} />
-                )}
-                {tab.label}
-              </button>
-            ))}
-          </div>
           {activeTab === "diagnostic" ? (
             <FounderDiagnosticBlock
               analysis={diagnosticAnalysis}
@@ -5483,7 +5514,9 @@ export default function FounderWorkspace({
                     disabled={!canValidateActive}
                     className="flex items-center gap-2 rounded-full bg-[#101015] px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[#B8963E]/20 transition hover:bg-[#1A1A20] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45">
                     <Check className="h-3.5 w-3.5" />
-                    {isRevision ? copy.revalidateForDossier : copy.validateForDossier}
+                    {activeModule.step === 7
+                      ? (isRevision ? copy.revalidateForDossier : copy.validateForDossier)
+                      : (isRevision ? copy.revalidateStep : copy.validateStep)}
                   </button>
                 ) : (
                   <div className="kx-founder-validated flex items-center gap-2 rounded-full bg-[#F0E6CC]/60 px-4 py-2 text-sm font-semibold text-[#8A6A20] ring-1 ring-[#E7DED0]">
