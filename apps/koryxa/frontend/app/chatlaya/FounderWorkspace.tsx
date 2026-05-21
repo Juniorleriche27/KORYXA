@@ -127,26 +127,39 @@ const FOUNDER_MODULE_ID_BY_STEP: Record<string, string> = Object.fromEntries(
 
 // ─── Module definitions ─────────────────────────────────────────────────────
 
+// ─── Product label mapping (internal ID → visible label) ────────────────────
+// Internal IDs are preserved for backend compatibility. Visible labels follow
+// the official 7-step product roadmap.
+const PRODUCT_LABEL_MAP: Record<string, string> = {
+  client:         "Diagnostic",
+  probleme:       "Client & Problème",
+  offre:          "Offre & Valeur",
+  prix:           "Prix & Modèle",
+  business_model: "Validation & MVP",
+  vente:          "Vente & Go-to-market",
+  business_plan:  "Dossier fondateur",
+};
+
 const MODULES: ModuleDef[] = [
   {
     id: "client",
     step: 1,
-    label: "Client cible",
-    tagline: "À qui vous adressez-vous ?",
-    description: "Définissez précisément votre client idéal — qui il est, ce qui le motive, comment le trouver.",
+    label: PRODUCT_LABEL_MAP.client,
+    tagline: "Posez les bases de votre projet",
+    description: "Comprenez votre projet, votre stade actuel et la bonne orientation pour la suite.",
     icon: Users,
     inputs: [
       {
         id: "activite",
-        label: "Décrivez votre activité en 1-2 phrases",
-        placeholder: "Ex : Je propose des formations pour apprendre à créer des vêtements africains modernes depuis chez soi…",
+        label: "Décrivez votre idée de départ en quelques phrases",
+        placeholder: "Ex : Je veux lancer un service de coaching pour aider les jeunes entrepreneurs africains à structurer leur projet…",
         type: "textarea",
         rows: 2,
       },
       {
         id: "client_idee",
-        label: "À qui vendez-vous selon vous ? (soyez précis)",
-        placeholder: "Ex : Femmes de 25-45 ans qui veulent créer leur propre marque de mode africaine mais ne savent pas coudre…",
+        label: "Quel est votre stade actuel et votre objectif prioritaire ?",
+        placeholder: "Ex : J'ai une idée mais pas encore de client. Mon objectif est de valider si c'est viable avant d'investir…",
         type: "textarea",
         rows: 2,
       },
@@ -155,15 +168,15 @@ const MODULES: ModuleDef[] = [
   {
     id: "probleme",
     step: 2,
-    label: "Problème",
-    tagline: "Quel problème résolvez-vous ?",
-    description: "Formulez clairement la douleur de votre client — ce qu'il perd sans votre solution.",
+    label: PRODUCT_LABEL_MAP.probleme,
+    tagline: "Identifiez précisément votre client et son problème réel",
+    description: "Définissez votre client cible et formulez clairement le problème qu'il vit — ce qu'il perd sans votre solution.",
     icon: Target,
     inputs: [
       {
         id: "probleme_idee",
-        label: "Quel est le problème principal de votre client ?",
-        placeholder: "Ex : Ils veulent se lancer dans la couture africaine mais les formations classiques sont trop chères et éloignées…",
+        label: "Qui est votre client cible et quel problème concret rencontre-t-il ?",
+        placeholder: "Ex : Femmes entrepreneures de 25-45 ans qui veulent vendre leurs créations mais ne savent pas se positionner ni trouver leurs premiers clients…",
         type: "textarea",
         rows: 3,
       },
@@ -172,9 +185,9 @@ const MODULES: ModuleDef[] = [
   {
     id: "offre",
     step: 3,
-    label: "Offre & Valeur",
-    tagline: "Que proposez-vous exactement ?",
-    description: "Structurez votre offre et formulez ce que le client gagne ou évite grâce à vous.",
+    label: PRODUCT_LABEL_MAP.offre,
+    tagline: "Transformez le problème en offre claire et désirable",
+    description: "Structurez votre offre principale et formulez ce que le client gagne ou évite grâce à vous.",
     icon: Package,
     inputs: [
       {
@@ -196,15 +209,15 @@ const MODULES: ModuleDef[] = [
   {
     id: "prix",
     step: 4,
-    label: "Prix",
-    tagline: "Combien et comment facturer ?",
-    description: "Validez votre stratégie tarifaire et apprenez à tester votre prix rapidement.",
+    label: PRODUCT_LABEL_MAP.prix,
+    tagline: "Définissez comment l'argent entre et si le modèle tient",
+    description: "Validez votre stratégie de prix et la logique économique de votre activité.",
     icon: DollarSign,
     inputs: [
       {
         id: "modele_prix",
-        label: "Comment comptez-vous facturer ?",
-        placeholder: "Ex : Paiement unique, abonnement mensuel, à la séance, accès à vie…",
+        label: "Comment comptez-vous facturer et structurer vos revenus ?",
+        placeholder: "Ex : Paiement unique + abonnement mensuel, freemium avec offre premium, à la séance…",
         type: "textarea",
         rows: 2,
       },
@@ -219,15 +232,15 @@ const MODULES: ModuleDef[] = [
   {
     id: "business_model",
     step: 5,
-    label: "Business model",
-    tagline: "Comment votre activité génère-t-elle de la valeur ?",
-    description: "Structurez vos flux de revenus, anticipez vos coûts clés et renforcez la solidité de votre modèle.",
+    label: PRODUCT_LABEL_MAP.business_model,
+    tagline: "Évitez de construire dans le vide",
+    description: "Identifiez ce que vous devez tester et validez votre projet avant d'investir davantage.",
     icon: BarChart2,
     inputs: [
       {
         id: "revenus",
-        label: "Comment gagnez-vous de l'argent concrètement ?",
-        placeholder: "Ex : Vente de formations, coaching individuel payant, vente de kits couture, affiliation…",
+        label: "Quelle est votre hypothèse principale et que devez-vous valider en priorité ?",
+        placeholder: "Ex : Je pense que mes clients paieraient 30 000 FCFA pour un accompagnement individuel de 3 mois. Je veux tester cela avec 5 clients avant de développer…",
         type: "textarea",
         rows: 3,
       },
@@ -236,15 +249,15 @@ const MODULES: ModuleDef[] = [
   {
     id: "vente",
     step: 6,
-    label: "Pitch & Message de vente",
-    tagline: "Comment convaincre et déclencher l'achat ?",
-    description: "Transformez votre cadrage en pitch clair, discours commercial et messages adaptés à vos canaux.",
+    label: PRODUCT_LABEL_MAP.vente,
+    tagline: "Trouvez vos premiers clients et vendez",
+    description: "Construisez votre plan de vente et de lancement pour trouver vos premiers clients rapidement.",
     icon: MessageCircle,
     inputs: [
       {
         id: "canal",
-        label: "Où vendez-vous ou comptez-vous vendre ?",
-        placeholder: "Ex : WhatsApp, Instagram, bouche-à-oreille, marché physique, TikTok…",
+        label: "Par quel canal allez-vous trouver vos premiers clients ?",
+        placeholder: "Ex : Groupes Facebook, bouche-à-oreille + WhatsApp, prospection LinkedIn, marchés physiques…",
         type: "text",
       },
     ],
@@ -252,15 +265,15 @@ const MODULES: ModuleDef[] = [
   {
     id: "business_plan",
     step: 7,
-    label: "Business plan",
-    tagline: "Votre plan complet sur 12 mois",
-    description: "Synthèse structurée de votre projet — vision, marché, modèle, plan d'action et indicateurs clés.",
+    label: PRODUCT_LABEL_MAP.business_plan,
+    tagline: "Votre dossier complet et exportable",
+    description: "Regroupez l'ensemble du travail dans un document final clair, professionnel et prêt à être partagé.",
     icon: FileText,
     optional: true,
     inputs: [
       {
         id: "horizon",
-        label: "Sur quel horizon ?",
+        label: "Sur quel horizon souhaitez-vous projeter votre plan ?",
         placeholder: "Ex : 12 mois",
         type: "text",
         optional: true,
@@ -279,13 +292,13 @@ const MODULES: ModuleDef[] = [
 
 // Document-appropriate labels for the final deliverable
 const DOC_LABELS: Record<string, { title: string; tagline: string }> = {
-  client:         { title: "Client idéal",                    tagline: "À qui s'adresse ce projet" },
-  probleme:       { title: "Problème central",                tagline: "Ce que nous résolvons" },
-  offre:          { title: "Offre & proposition de valeur",   tagline: "Ce que nous apportons" },
-  prix:           { title: "Stratégie de prix",               tagline: "Notre modèle tarifaire" },
-  business_model: { title: "Modèle économique",               tagline: "Comment nous générons de la valeur" },
-  vente:          { title: "Pitch & Message de vente",        tagline: "Notre discours commercial" },
-  business_plan:  { title: "Plan d'action",                   tagline: "Feuille de route et priorités" },
+  client:         { title: "Diagnostic",                      tagline: "Point de départ et orientation du projet" },
+  probleme:       { title: "Client & Problème",               tagline: "Client cible et problème identifié" },
+  offre:          { title: "Offre & Valeur",                  tagline: "Offre structurée et proposition de valeur" },
+  prix:           { title: "Prix & Modèle",                   tagline: "Stratégie de prix et modèle économique" },
+  business_model: { title: "Validation & MVP",                tagline: "Hypothèses testées et MVP défini" },
+  vente:          { title: "Vente & Go-to-market",            tagline: "Plan de vente et stratégie de lancement" },
+  business_plan:  { title: "Dossier fondateur",               tagline: "Document final complet et exportable" },
 };
 
 function founderIsEnglish(locale: string) {
@@ -300,28 +313,28 @@ function localizeModules(locale: string): ModuleDef[] {
   return [
     {
       ...MODULES[0],
-      label: "Target customer",
-      tagline: "Who are you selling to?",
-      description: "Define your ideal customer precisely: who they are, what drives them and how to reach them.",
+      label: "Diagnostic",
+      tagline: "Lay the foundation for your project",
+      description: "Understand your project, your current stage and the right direction to move forward.",
       inputs: [
-        { ...MODULES[0].inputs[0], label: "Describe your business in 1-2 sentences", placeholder: "Example: I offer training courses to help people create modern African fashion from home..." },
-        { ...MODULES[0].inputs[1], label: "Who do you think you sell to? (be specific)", placeholder: "Example: Women aged 25-45 who want to launch their own African fashion brand but do not know how to sew..." },
+        { ...MODULES[0].inputs[0], label: "Describe your starting idea in a few sentences", placeholder: "Example: I want to launch a coaching service to help young African entrepreneurs structure their project..." },
+        { ...MODULES[0].inputs[1], label: "What is your current stage and main goal?", placeholder: "Example: I have an idea but no clients yet. My goal is to validate whether it is viable before investing..." },
       ],
     },
     {
       ...MODULES[1],
-      label: "Problem",
-      tagline: "What problem do you solve?",
-      description: "Clearly formulate your customer's pain: what they lose without your solution.",
+      label: "Client & Problem",
+      tagline: "Identify your customer and their real problem",
+      description: "Define your target customer and clearly formulate the problem they face — what they lose without your solution.",
       inputs: [
-        { ...MODULES[1].inputs[0], label: "What is your customer's main problem?", placeholder: "Example: They want to get started in African sewing but traditional training is too expensive and too far away..." },
+        { ...MODULES[1].inputs[0], label: "Who is your target customer and what concrete problem do they face?", placeholder: "Example: Female entrepreneurs aged 25-45 who want to sell their creations but don't know how to position themselves or find their first clients..." },
       ],
     },
     {
       ...MODULES[2],
       label: "Offer & Value",
-      tagline: "What exactly are you offering?",
-      description: "Structure your offer and clarify what the customer gains or avoids thanks to you.",
+      tagline: "Turn the problem into a clear and desirable offer",
+      description: "Structure your main offer and clarify what the customer gains or avoids thanks to you.",
       inputs: [
         { ...MODULES[2].inputs[0], label: "What exactly are you offering?", placeholder: "Example: A 6-hour video course + 3 live sessions per month + a starter kit..." },
         { ...MODULES[2].inputs[1], label: "What does the customer gain or avoid thanks to you?", placeholder: "Example: They create their first outfits in 30 days without expensive machines and without travelling..." },
@@ -329,39 +342,39 @@ function localizeModules(locale: string): ModuleDef[] {
     },
     {
       ...MODULES[3],
-      label: "Pricing",
-      tagline: "How much and how should you charge?",
-      description: "Validate your pricing strategy and learn how to test your price quickly.",
+      label: "Pricing & Model",
+      tagline: "Define how money comes in and whether the model holds",
+      description: "Validate your pricing strategy and the economic logic of your business.",
       inputs: [
-        { ...MODULES[3].inputs[0], label: "How do you plan to charge?", placeholder: "Example: One-time payment, monthly subscription, per session, lifetime access..." },
+        { ...MODULES[3].inputs[0], label: "How do you plan to charge and structure your revenue?", placeholder: "Example: One-time payment + monthly subscription, freemium with premium offer, per session..." },
         { ...MODULES[3].inputs[1], label: "What price level are you considering?", placeholder: "Example: 25,000 FCFA for the full course" },
       ],
     },
     {
       ...MODULES[4],
-      label: "Business model",
-      tagline: "How does your business create value?",
-      description: "Structure your revenue streams, anticipate key costs and strengthen your business model.",
+      label: "Validation & MVP",
+      tagline: "Avoid building in a vacuum",
+      description: "Identify what you need to test and validate your project before investing further.",
       inputs: [
-        { ...MODULES[4].inputs[0], label: "How do you make money in practice?", placeholder: "Example: Selling courses, paid one-to-one coaching, sewing kits, affiliate revenue..." },
+        { ...MODULES[4].inputs[0], label: "What is your main hypothesis and what do you need to validate first?", placeholder: "Example: I think my clients would pay 30,000 FCFA for a 3-month individual coaching. I want to test this with 5 clients before scaling..." },
       ],
     },
     {
       ...MODULES[5],
-      label: "Pitch & Sales message",
-      tagline: "How do you convince and trigger purchase?",
-      description: "Turn your framing into a clear pitch, sales message and channel-adapted messaging.",
+      label: "Sales & Go-to-market",
+      tagline: "Find your first customers and sell",
+      description: "Build your sales and launch plan to find your first customers quickly.",
       inputs: [
-        { ...MODULES[5].inputs[0], label: "Where do you sell or plan to sell?", placeholder: "Example: WhatsApp, Instagram, word of mouth, physical market, TikTok..." },
+        { ...MODULES[5].inputs[0], label: "Which channel will you use to find your first customers?", placeholder: "Example: Facebook groups, word of mouth + WhatsApp, LinkedIn prospecting, physical markets..." },
       ],
     },
     {
       ...MODULES[6],
-      label: "Business plan",
-      tagline: "Your full 12-month plan",
-      description: "A structured synthesis of your project: vision, market, business model, action plan and key indicators.",
+      label: "Founder dossier",
+      tagline: "Your complete and exportable dossier",
+      description: "Bring all the work together in a clear, professional and ready-to-share final document.",
       inputs: [
-        { ...MODULES[6].inputs[0], label: "What time horizon?", placeholder: "Example: 12 months" },
+        { ...MODULES[6].inputs[0], label: "What time horizon do you want to project your plan over?", placeholder: "Example: 12 months" },
         { ...MODULES[6].inputs[1], label: "Your main goals", placeholder: "Example: Reach 20 paying clients, generate 200,000 FCFA/month..." },
       ],
     },
@@ -374,13 +387,13 @@ function localizeDocLabels(locale: string): Record<string, { title: string; tagl
   }
 
   return {
-    client: { title: "Ideal customer", tagline: "Who this project is for" },
-    probleme: { title: "Core problem", tagline: "What we solve" },
-    offre: { title: "Offer & value proposition", tagline: "What we bring" },
-    prix: { title: "Pricing strategy", tagline: "Our pricing model" },
-    business_model: { title: "Business model", tagline: "How we create value" },
-    vente: { title: "Pitch & sales message", tagline: "Our commercial narrative" },
-    business_plan: { title: "Action plan", tagline: "Roadmap and priorities" },
+    client: { title: "Diagnostic", tagline: "Starting point and project direction" },
+    probleme: { title: "Client & Problem", tagline: "Target customer and identified problem" },
+    offre: { title: "Offer & Value", tagline: "Structured offer and value proposition" },
+    prix: { title: "Pricing & Model", tagline: "Pricing strategy and business model" },
+    business_model: { title: "Validation & MVP", tagline: "Tested hypotheses and defined MVP" },
+    vente: { title: "Sales & Go-to-market", tagline: "Sales plan and launch strategy" },
+    business_plan: { title: "Founder dossier", tagline: "Complete and exportable final document" },
   };
 }
 
@@ -404,16 +417,16 @@ function founderUi(locale: string) {
       archive: "Archiver",
       generalMode: "Mode général",
       framingBadge: "Espace de cadrage business guidé",
-      framingBody: "En 6 étapes, Founder vous aide à clarifier votre client cible, votre problème, votre offre, votre prix, votre modèle de revenus et votre pitch commercial — et à rédiger un dossier projet structuré, exportable à la fin du parcours.",
+      framingBody: "En 7 étapes, Founder vous guide du diagnostic initial jusqu'au dossier fondateur complet : client & problème, offre & valeur, prix & modèle, validation, go-to-market — et un document exportable à la fin du parcours.",
       bravo: "Félicitations !",
-      stepsDone: "Les 6 étapes sont validées. Votre dossier est prêt.",
+      stepsDone: "Les 7 étapes sont validées. Votre dossier fondateur est prêt.",
       finalFolder: "Dossier final",
       revisionTitle: "Mode révision",
       revisionBody: "Modifiez vos réponses ci-dessous et régénérez pour affiner, ou revalidez directement la version existante.",
       starterBadge: "ChatLAYA Founder",
       starterTitle1: "Cadrez votre projet.",
       starterTitle2: "Repartez avec un dossier exploitable.",
-      starterBody: "Un coach IA vous accompagne étape par étape pour clarifier votre client, votre problème, votre offre, votre prix, votre modèle économique et votre pitch commercial.",
+      starterBody: "Un coach IA vous accompagne en 7 étapes pour poser votre diagnostic, clarifier votre client et problème, structurer votre offre, valider votre approche, définir votre go-to-market et finaliser votre dossier fondateur.",
       deliverableTitle: "Le livrable vendu",
       deliverableBody: "Un dossier projet rédigé dans les mots de l'utilisateur, exportable et présentable à un partenaire, une équipe ou un investisseur.",
       startingPoint: "Point de départ",
@@ -502,16 +515,16 @@ function founderUi(locale: string) {
     archive: "Archive",
     generalMode: "General mode",
     framingBadge: "Guided business framing workspace",
-    framingBody: "In 6 steps, Founder helps you clarify your target customer, problem, offer, pricing, revenue model and sales pitch, then turn it into a structured exportable project file.",
+    framingBody: "In 7 steps, Founder guides you from initial diagnosis to a complete founder dossier: customer & problem, offer & value, pricing & model, validation, go-to-market — and an exportable document at the end.",
     bravo: "Congratulations!",
-    stepsDone: "All 6 steps are validated. Your file is ready.",
+    stepsDone: "All 7 steps are validated. Your founder dossier is ready.",
     finalFolder: "Final file",
     revisionTitle: "Revision mode",
     revisionBody: "Edit your answers below and regenerate to refine them, or revalidate the current version directly.",
     starterBadge: "ChatLAYA Founder",
     starterTitle1: "Frame your project.",
     starterTitle2: "Leave with an actionable file.",
-    starterBody: "An AI coach guides you step by step to clarify your customer, problem, offer, pricing, business model and sales pitch.",
+    starterBody: "An AI coach guides you through 7 steps to run your diagnosis, clarify your customer and problem, structure your offer, validate your approach, define your go-to-market strategy and finalize your founder dossier.",
     deliverableTitle: "The sellable deliverable",
     deliverableBody: "A project file written in the user's own words, exportable and presentable to a partner, team or investor.",
     startingPoint: "Starting point",
@@ -611,12 +624,12 @@ function buildPrompt(
   switch (moduleId) {
     case "client":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
-        ? `I am working on: ${inputs.activite || "(not specified)"}. My target customer, as I see it, is: ${inputs.client_idee || "(not specified)"}. Help me define my target customer clearly: who they really are, their main characteristics, what motivates them to buy and how to find them concretely. Be precise and actionable.`
-        : `Je travaille sur : ${inputs.activite || "(non précisé)"}. Mon client cible selon moi est : ${inputs.client_idee || "(non précisé)"}. Aide-moi à définir clairement mon client cible : qui il est vraiment, ses caractéristiques principales, ce qui le motive à acheter, et comment le trouver concrètement. Sois précis et actionnable.`);
+        ? `My project idea: ${inputs.activite || "(not specified)"}. My current stage and main goal: ${inputs.client_idee || "(not specified)"}. Run a diagnostic of my project: identify the project type (product, service, training, coaching…), the maturity stage, the main strengths, the key blockers and the recommended next focus. Be concrete and actionable.`
+        : `Mon idée de départ : ${inputs.activite || "(non précisé)"}. Mon stade actuel et objectif prioritaire : ${inputs.client_idee || "(non précisé)"}. Fais un diagnostic de mon projet : type de projet (produit, service, formation, coaching…), stade de maturité, points forts, blocages clés et orientation recommandée pour la suite. Sois concret et actionnable.`);
     case "probleme":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
-        ? `My target customer is: ${client || "(not defined)"}. I believe I solve this problem: ${inputs.probleme_idee || "(not specified)"}. Help me formulate this problem clearly: why it is painful for the customer, what they lose or miss without a solution, and why this problem is worth solving. Be concrete.`
-        : `Mon client cible est : ${client || "(non défini)"}. Je pense résoudre ce problème : ${inputs.probleme_idee || "(non précisé)"}. Aide-moi à formuler clairement ce problème : en quoi c'est douloureux pour le client, ce qu'il perd ou rate sans solution, et pourquoi ce problème vaut la peine d'être résolu. Sois concret.`);
+        ? `My project: ${client || "(described in the previous step)"}. My target customer and the problem they face: ${inputs.probleme_idee || "(not specified)"}. Help me precisely identify: the target customer (segment, ideal profile, ability to pay, urgency), the main problem (pain, consequences, frequency), field validation signals and the most critical assumptions to test. Be specific.`
+        : `Mon projet : ${client || "(décrit à l'étape précédente)"}. Mon client cible et le problème qu'il rencontre : ${inputs.probleme_idee || "(non précisé)"}. Aide-moi à identifier précisément : le client cible (segment, profil idéal, capacité de paiement, urgence), le problème principal (douleurs, conséquences, fréquence), les signaux de validation terrain et les hypothèses critiques à tester. Sois précis.`);
     case "offre":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
         ? `My customer ${client ? `is: ${short(client)}` : "(defined in the previous step)"}. ${probleme ? `Their problem is: ${short(probleme)}. ` : ""}My offer is: ${inputs.offre_detail || "(not specified)"}. The customer gains or avoids: ${inputs.gain_client || "(not specified)"}. Help me structure a clear and compelling value proposition: what I offer, for whom, why it is different and the concrete benefit. In 3 to 5 actionable points.`
@@ -627,16 +640,16 @@ function buildPrompt(
         : `${offre ? `Mon offre : ${short(offre)}. ` : ""}Mon client : ${short(client || "(défini précédemment)")}. Je pense facturer : ${inputs.modele_prix || "(non précisé)"}${inputs.niveau_prix ? `, avec un niveau de prix de : ${inputs.niveau_prix}` : ""}. Aide-moi à valider ma stratégie de prix : est-ce cohérent avec la valeur apportée, quelles questions je dois me poser, et comment tester mon prix rapidement.`);
     case "business_model":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
-        ? `${offre ? `My offer: ${short(offre)}. ` : ""}${client ? `My customer: ${short(client)}. ` : ""}${prix ? `My pricing: ${short(prix)}. ` : ""}I generate revenue through: ${inputs.revenus || "(not specified)"}. Help me structure my business model: main revenue streams, key costs to anticipate and how to make it more robust or scalable.`
-        : `${offre ? `Mon offre : ${short(offre)}. ` : ""}${client ? `Mon client : ${short(client)}. ` : ""}${prix ? `Mon prix : ${short(prix)}. ` : ""}Je génère des revenus via : ${inputs.revenus || "(non précisé)"}. Aide-moi à structurer mon business model : flux de revenus principaux, coûts clés à anticiper, et comment le rendre plus solide ou scalable.`);
+        ? `${offre ? `My offer: ${short(offre)}. ` : ""}${client ? `My customer: ${short(client)}. ` : ""}${prix ? `My pricing: ${short(prix)}. ` : ""}Main hypothesis to validate: ${inputs.revenus || "(not specified)"}. Help me define my validation strategy and MVP: critical hypotheses to test, minimum viable test, field questions to ask, validation criteria, positive and negative signals, and the decision framework: continue, adjust or pivot.`
+        : `${offre ? `Mon offre : ${short(offre)}. ` : ""}${client ? `Mon client : ${short(client)}. ` : ""}${prix ? `Mon prix : ${short(prix)}. ` : ""}Hypothèse principale à valider : ${inputs.revenus || "(non précisé)"}. Aide-moi à définir ma stratégie de validation et mon MVP : hypothèses critiques à tester, test minimum viable, questions terrain à poser, critères de validation, signaux positifs et négatifs, décision : continuer, ajuster ou pivoter.`);
     case "vente":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
-        ? `${offre ? `My offer: ${short(offre, 120)}. ` : ""}${client ? `My customer: ${short(client, 100)}. ` : ""}${probleme ? `Their problem: ${short(probleme, 100)}. ` : ""}I sell through: ${inputs.canal || "my usual channels"}. Help me turn this framing into a convincing pitch and sales message adapted to ${inputs.canal || "that channel"}. It must clarify the promise, grab attention, show value, handle objections and call to action. Give me a core pitch and 2 to 3 short variants.`
-        : `${offre ? `Mon offre : ${short(offre, 120)}. ` : ""}${client ? `Mon client : ${short(client, 100)}. ` : ""}${probleme ? `Son problème : ${short(probleme, 100)}. ` : ""}Je vends via : ${inputs.canal || "mes canaux habituels"}. Aide-moi à transformer ce cadrage en pitch et message de vente convaincant adapté à ${inputs.canal || "ce canal"}. Il doit clarifier la promesse, capter l'attention, montrer la valeur, lever les objections et appeler à l'action. Donne une base de pitch et 2 à 3 variantes courtes.`);
+        ? `${offre ? `My offer: ${short(offre, 120)}. ` : ""}${client ? `My customer: ${short(client, 100)}. ` : ""}${probleme ? `Their problem: ${short(probleme, 100)}. ` : ""}My go-to-market channel: ${inputs.canal || "to define"}. Help me build a complete sales and go-to-market strategy: commercial positioning, sales message, acquisition channels, first customer acquisition plan, prospecting approach, likely objections and responses, follow-up and launch plan.`
+        : `${offre ? `Mon offre : ${short(offre, 120)}. ` : ""}${client ? `Mon client : ${short(client, 100)}. ` : ""}${probleme ? `Son problème : ${short(probleme, 100)}. ` : ""}Mon canal go-to-market : ${inputs.canal || "à définir"}. Aide-moi à construire une stratégie de vente et go-to-market complète : positionnement commercial, message de vente, canaux d'acquisition, plan pour trouver les premiers clients, approche de prospection, objections probables et réponses, relance et plan de lancement.`);
     case "business_plan":
       return founderDiagnosticMarker + (founderIsEnglish(locale)
-        ? `Here is the summary of my project:\n- Target customer: ${client || "(to complete)"}\n- Problem solved: ${short(probleme || "(to define)")}\n- Offer: ${short(offre || "(to structure)")}\n- Pricing: ${short(prix || "(to define)")}\n- Business model: ${short(bizModel || "(to structure)")}\n\nHelp me write a simple and actionable business plan over ${inputs.horizon || "12 months"}${inputs.objectifs ? ` with these goals: ${inputs.objectifs}` : ""}. Keep it practical, not academic: vision, target market, offer and value, business model, priority action plan, key indicators.`
-        : `Voici le résumé de mon projet :\n- Client cible : ${client || "(à compléter)"}\n- Problème résolu : ${short(probleme || "(à définir)")}\n- Offre : ${short(offre || "(à structurer)")}\n- Prix : ${short(prix || "(à définir)")}\n- Business model : ${short(bizModel || "(à structurer)")}\n\nAide-moi à rédiger un business plan simple et exploitable sur ${inputs.horizon || "12 mois"}${inputs.objectifs ? ` avec ces objectifs : ${inputs.objectifs}` : ""}. Garde-le pratique, pas académique : vision, marché cible, offre et valeur, modèle économique, plan d'action prioritaire, indicateurs clés.`);
+        ? `Here is the complete framing of my project:\n- Diagnostic: ${client || "(to complete)"}\n- Client & Problem: ${short(probleme || "(to define)")}\n- Offer & Value: ${short(offre || "(to structure)")}\n- Pricing & Model: ${short(prix || "(to define)")}\n- Validation & MVP: ${short(bizModel || "(to structure)")}\n\nHelp me produce a complete founder dossier over ${inputs.horizon || "12 months"}${inputs.objectifs ? ` with these goals: ${inputs.objectifs}` : ""}. Include: project summary, target customer, identified problem, proposed solution, value proposition, business model, validation strategy, sales and go-to-market strategy, action plan, founder pitch and synthetic business plan. Keep it professional, export-ready and actionable.`
+        : `Voici le cadrage complet de mon projet :\n- Diagnostic : ${client || "(à compléter)"}\n- Client & Problème : ${short(probleme || "(à définir)")}\n- Offre & Valeur : ${short(offre || "(à structurer)")}\n- Prix & Modèle : ${short(prix || "(à définir)")}\n- Validation & MVP : ${short(bizModel || "(à structurer)")}\n\nAide-moi à produire un dossier fondateur complet sur ${inputs.horizon || "12 mois"}${inputs.objectifs ? ` avec ces objectifs : ${inputs.objectifs}` : ""}. Inclure : résumé du projet, client cible, problème identifié, solution proposée, proposition de valeur, modèle économique, stratégie de validation, stratégie commerciale et go-to-market, plan d'action, pitch fondateur et business plan synthétique. Garde-le professionnel, exportable et exploitable.`);
     default:
       return founderIsEnglish(locale) ? "Help me on this step of my project." : "Aide-moi sur cette étape de mon projet.";
   }
@@ -698,35 +711,35 @@ function finalDraftStructure(locale: string, moduleId: string, docTitle: string)
         `Pricing Risks to Avoid\n` +
         `Pricing Strategy Synthesis`,
       business_model:
-        `Expected structure, like a readable investor section:\n` +
-        `${docTitle}: [selected model]\n\n` +
-        `Overall Business Model Logic\n` +
-        `Priority Revenue Sources\n` +
-        `Key Costs and Required Resources\n` +
-        `Value Creation and Capture Mechanics\n` +
-        `Scalability and Leverage Effects\n` +
-        `Assumptions to Validate\n` +
-        `Business Model Synthesis`,
+        `Expected structure, oriented toward field testing and validation:\n` +
+        `${docTitle}: [main hypothesis]\n\n` +
+        `Critical Hypotheses to Test\n` +
+        `MVP and Minimum Viable Test\n` +
+        `Validation Method\n` +
+        `Field Questions to Ask\n` +
+        `Validation Criteria\n` +
+        `Positive Signals and Negative Signals\n` +
+        `Decision: Continue, Adjust or Pivot`,
       vente:
-        `Expected structure, ready for commercial use:\n` +
+        `Expected structure, ready for go-to-market execution:\n` +
         `${docTitle}: [sales angle]\n\n` +
-        `Main Commercial Angle\n` +
-        `Promise to Communicate\n` +
+        `Commercial Positioning\n` +
         `Core Sales Message\n` +
-        `Conviction Arguments\n` +
-        `Channels and Usage Situations\n` +
+        `Acquisition Channels\n` +
+        `First Customer Plan\n` +
+        `Prospecting Approach\n` +
         `Likely Objections and Responses\n` +
-        `Commercial Narrative Synthesis`,
+        `Launch Plan Synthesis`,
       business_plan:
         `Expected structure, concise but substantial:\n` +
         `${docTitle}: [horizon and priority]\n\n` +
-        `Project Vision and Goal\n` +
-        `Target Market and Problem Solved\n` +
+        `Project Summary\n` +
+        `Target Customer and Identified Problem\n` +
         `Offer, Value and Positioning\n` +
-        `Business Model and Revenue Assumptions\n` +
-        `Priority Action Plan\n` +
-        `Tracking Indicators\n` +
-        `Executive Plan Synthesis`,
+        `Pricing and Business Model\n` +
+        `Validation Strategy\n` +
+        `Sales and Go-to-market Strategy\n` +
+        `Action Plan and Key Indicators`,
     };
 
     return structures[moduleId] ?? (
@@ -782,35 +795,35 @@ function finalDraftStructure(locale: string, moduleId: string, docTitle: string)
       `Risques Tarifaires à Éviter\n` +
       `Synthèse de la Stratégie de Prix`,
     business_model:
-      `Structure attendue, comme une section investisseur lisible :\n` +
-      `${docTitle} : [modèle retenu]\n\n` +
-      `Logique Générale du Modèle Économique\n` +
-      `Sources de Revenus Prioritaires\n` +
-      `Coûts Clés et Ressources Nécessaires\n` +
-      `Mécanique de Création et Capture de Valeur\n` +
-      `Scalabilité et Effets de Levier\n` +
-      `Hypothèses à Valider\n` +
-      `Synthèse du Modèle Économique`,
+      `Structure attendue, orientée test et validation terrain :\n` +
+      `${docTitle} : [hypothèse principale]\n\n` +
+      `Hypothèses Critiques à Tester\n` +
+      `MVP et Test Minimum Viable\n` +
+      `Méthode de Validation\n` +
+      `Questions Terrain à Poser\n` +
+      `Critères de Validation\n` +
+      `Signaux Positifs et Signaux Négatifs\n` +
+      `Décision : Continuer, Ajuster ou Pivoter`,
     vente:
-      `Structure attendue, prête à être utilisée commercialement :\n` +
-      `${docTitle} : [angle de vente]\n\n` +
-      `Angle Commercial Principal\n` +
-      `Promesse à Communiquer\n` +
+      `Structure attendue, orientée exécution go-to-market :\n` +
+      `${docTitle} : [angle commercial]\n\n` +
+      `Positionnement Commercial\n` +
       `Message Central de Vente\n` +
-      `Arguments de Conviction\n` +
-      `Canaux et Situations d'Utilisation\n` +
+      `Canaux d'Acquisition\n` +
+      `Plan pour les Premiers Clients\n` +
+      `Approche de Prospection\n` +
       `Objections Probables et Réponses\n` +
-      `Synthèse du Discours Commercial`,
+      `Synthèse du Plan de Lancement`,
     business_plan:
       `Structure attendue, synthétique mais substantielle :\n` +
       `${docTitle} : [horizon et priorité]\n\n` +
-      `Vision et Objectif du Projet\n` +
-      `Marché Cible et Problème Résolu\n` +
+      `Résumé du Projet\n` +
+      `Client Cible et Problème Identifié\n` +
       `Offre, Valeur et Positionnement\n` +
-      `Modèle Économique et Hypothèses de Revenus\n` +
-      `Plan d'Action Prioritaire\n` +
-      `Indicateurs de Suivi\n` +
-      `Synthèse Exécutive du Plan`,
+      `Prix et Modèle Économique\n` +
+      `Stratégie de Validation\n` +
+      `Stratégie Commerciale et Go-to-Market\n` +
+      `Plan d'Action et Indicateurs Clés`,
   };
 
   return structures[moduleId] ?? (
@@ -3829,9 +3842,16 @@ function FounderPricingBMBlock({ analysis, loading, error, locale, onRun }: Foun
 type AITab = "diagnostic" | "client_problem" | "offer_value" | "pricing_bm";
 
 function resolveTabFromModule(moduleId: string): AITab {
-  if (moduleId === "client" || moduleId === "probleme") return "client_problem";
+  // Diagnostic (step 1) → diagnostic global agent
+  if (moduleId === "client") return "diagnostic";
+  // Client & Problème (step 2) → client-problem agent
+  if (moduleId === "probleme") return "client_problem";
+  // Offre & Valeur (step 3) → offer-value agent
   if (moduleId === "offre") return "offer_value";
-  if (moduleId === "prix" || moduleId === "business_model") return "pricing_bm";
+  // Prix & Modèle (step 4) → pricing-business-model agent
+  if (moduleId === "prix") return "pricing_bm";
+  // Validation & MVP (step 5), Vente & Go-to-market (step 6), Dossier fondateur (step 7)
+  // → no dedicated agent yet, show diagnostic overview
   return "diagnostic";
 }
 
@@ -4613,9 +4633,18 @@ export default function FounderWorkspace({
 
   function validate(moduleId: string) {
     const current = getMs(ws, moduleId);
-    const retention = current.retention?.trim();
-    if (!retention) return;
-    updateMs(moduleId, { status: "completed", retention });
+    const foundModule = founderModules.find((m) => m.id === moduleId);
+    const isLastStep = foundModule?.step === 7;
+    if (isLastStep) {
+      // Dossier fondateur (step 7): retention required
+      const retention = current.retention?.trim();
+      if (!retention) return;
+      updateMs(moduleId, { status: "completed", retention });
+    } else {
+      // Steps 1-6: validate with AI output (retention optional)
+      if (!current.output?.trim()) return;
+      updateMs(moduleId, { status: "completed" });
+    }
     const idx = founderModules.findIndex((m) => m.id === moduleId);
     const next = founderModules[idx + 1];
     if (next) setActiveId(next.id);
@@ -4653,7 +4682,8 @@ export default function FounderWorkspace({
   const activeMs = getMs(ws, activeId);
   const isGenerating = generating === activeId;
   const isFinalizing = finalizing === activeId;
-  const canValidateActive = Boolean(activeMs.output?.trim()) && !isFinalizing;
+  const canValidateActive = Boolean(activeMs.output?.trim()) && !isFinalizing &&
+    (activeModule.step !== 7 || Boolean(activeMs.retention?.trim()));
   const isRevision = activeMs.status === "in_progress" && !!activeMs.previousOutput;
   const hasWorkspaceContent = Object.values(ws).some((state) =>
     state.status !== "empty" ||
@@ -5302,8 +5332,8 @@ export default function FounderWorkspace({
               />
             ) : null}
 
-            {/* Finalisation — uniquement dernière étape ou toutes validées */}
-            {activeMs.output && !isGenerating && (activeModule.step === 7 || allDone) ? (
+            {/* Finalisation — uniquement dans l'étape Dossier fondateur (step 7) */}
+            {activeMs.output && !isGenerating && activeModule.step === 7 ? (
               <RetentionBlock
                 value={activeMs.retention ?? ""}
                 onChange={(v) => updateRetention(activeId, v)}
