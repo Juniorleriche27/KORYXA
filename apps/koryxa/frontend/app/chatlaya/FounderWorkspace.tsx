@@ -926,8 +926,12 @@ type MdBlock =
   | { type: "ordered-list"; items: string[] }
   | { type: "unordered-list"; items: string[] };
 
+function normalizeAiText(text: string): string {
+  return text.replace(/\.([A-ZÀÂÄÉÈÊËÎÏÔÙÛÜ])/g, ". $1");
+}
+
 function parseMd(content: string): MdBlock[] {
-  const lines = content.split("\n");
+  const lines = normalizeAiText(content).split("\n");
   const blocks: MdBlock[] = [];
   let i = 0;
 
@@ -3902,12 +3906,6 @@ function FounderAIPanel({
     { id: "pricing_bm", label: isEnglish ? "Pricing & BM" : "Prix & Modèle", hasData: !!pricingBMAnalysis, loading: pricingBMLoading },
   ];
 
-  const spinnerSvg = (
-    <svg className="h-2.5 w-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="28.3 28.3" />
-    </svg>
-  );
-
   return (
     <div className="rounded-2xl border border-[#B8963E]/30 bg-gradient-to-br from-[#F7F4EE] to-[#FFFCF7] shadow-[0_4px_24px_rgba(184,150,62,0.08)]">
       {/* Header — always visible */}
@@ -3976,28 +3974,15 @@ function FounderAIPanel({
               </p>
             </div>
           ) : null}
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onRunDiagnostic} disabled={diagnosticLoading}
-              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
-              {diagnosticLoading ? spinnerSvg : <BarChart2 className="h-2.5 w-2.5 text-[#B8963E]" />}
-              {isEnglish ? "Global diagnostic" : "Diagnostic global"}
-            </button>
-            <button type="button" onClick={onRunClientProblem} disabled={clientProblemLoading}
-              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
-              {clientProblemLoading ? spinnerSvg : <Target className="h-2.5 w-2.5 text-[#B8963E]" />}
-              {isEnglish ? "Client & problem" : "Client & problème"}
-            </button>
-            <button type="button" onClick={onRunOfferValue} disabled={offerValueLoading}
-              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
-              {offerValueLoading ? spinnerSvg : <Package className="h-2.5 w-2.5 text-[#B8963E]" />}
-              {isEnglish ? "Offer & value" : "Offre & valeur"}
-            </button>
-            <button type="button" onClick={onRunPricingBM} disabled={pricingBMLoading}
-              className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] bg-white px-3 py-1.5 text-[10px] font-medium text-[#3A3530] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 disabled:opacity-50">
-              {pricingBMLoading ? spinnerSvg : <DollarSign className="h-2.5 w-2.5 text-[#B8963E]" />}
-              {isEnglish ? "Pricing & BM" : "Prix & modèle économique"}
-            </button>
-          </div>
+          {(() => {
+            const ctx = diagnosticAnalysis?.recommended_next_step ?? diagnosticAnalysis?.summary ?? null;
+            if (!ctx) return null;
+            return (
+              <p className="text-[11px] leading-relaxed text-[#6F6A60] italic">
+                {ctx}
+              </p>
+            );
+          })()}
         </div>
       ) : (
         /* Expanded view with tabs */
@@ -4668,7 +4653,7 @@ export default function FounderWorkspace({
   const activeMs = getMs(ws, activeId);
   const isGenerating = generating === activeId;
   const isFinalizing = finalizing === activeId;
-  const canValidateActive = Boolean(activeMs.retention?.trim()) && !isFinalizing;
+  const canValidateActive = Boolean(activeMs.output?.trim()) && !isFinalizing;
   const isRevision = activeMs.status === "in_progress" && !!activeMs.previousOutput;
   const hasWorkspaceContent = Object.values(ws).some((state) =>
     state.status !== "empty" ||
@@ -4686,6 +4671,7 @@ export default function FounderWorkspace({
 
   const activeIdx = founderModules.findIndex((m) => m.id === activeId);
   const nextModule = activeIdx < founderModules.length - 1 ? founderModules[activeIdx + 1] : null;
+  const prevModule = activeIdx > 0 ? founderModules[activeIdx - 1] : null;
   const visibleHistory: FounderConversation[] = projects.map((project) => ({
     conversation_id: project.id,
     title: project.title,
@@ -5254,30 +5240,6 @@ export default function FounderWorkspace({
               ) : null}
             </div>
 
-            {/* Analyse IA du projet */}
-            {currentProject ? (
-              <FounderAIPanel
-                diagnosticAnalysis={diagnosticAnalysis}
-                diagnosticLoading={diagnosticLoading}
-                diagnosticError={diagnosticError}
-                onRunDiagnostic={() => void runDiagnostic()}
-                clientProblemAnalysis={clientProblemAnalysis}
-                clientProblemLoading={clientProblemLoading}
-                clientProblemError={clientProblemError}
-                onRunClientProblem={() => void runClientProblemAgent()}
-                offerValueAnalysis={offerValueAnalysis}
-                offerValueLoading={offerValueLoading}
-                offerValueError={offerValueError}
-                onRunOfferValue={() => void runOfferValueAgent()}
-                pricingBMAnalysis={pricingBMAnalysis}
-                pricingBMLoading={pricingBMLoading}
-                pricingBMError={pricingBMError}
-                onRunPricingBM={() => void runPricingBMAgent()}
-                activeModuleId={activeId}
-                locale={locale}
-              />
-            ) : null}
-
             {/* Previous output (revision mode, while generating) */}
             {isGenerating && !activeMs.output && activeMs.previousOutput ? (
               <details className="rounded-xl border border-[#E7DED0]">
@@ -5316,8 +5278,32 @@ export default function FounderWorkspace({
               </div>
             ) : null}
 
-            {/* Retention block — livrable final (AXE 2) */}
-            {activeMs.output && !isGenerating ? (
+            {/* État IA du projet — après la réponse ChatLAYA */}
+            {currentProject ? (
+              <FounderAIPanel
+                diagnosticAnalysis={diagnosticAnalysis}
+                diagnosticLoading={diagnosticLoading}
+                diagnosticError={diagnosticError}
+                onRunDiagnostic={() => void runDiagnostic()}
+                clientProblemAnalysis={clientProblemAnalysis}
+                clientProblemLoading={clientProblemLoading}
+                clientProblemError={clientProblemError}
+                onRunClientProblem={() => void runClientProblemAgent()}
+                offerValueAnalysis={offerValueAnalysis}
+                offerValueLoading={offerValueLoading}
+                offerValueError={offerValueError}
+                onRunOfferValue={() => void runOfferValueAgent()}
+                pricingBMAnalysis={pricingBMAnalysis}
+                pricingBMLoading={pricingBMLoading}
+                pricingBMError={pricingBMError}
+                onRunPricingBM={() => void runPricingBMAgent()}
+                activeModuleId={activeId}
+                locale={locale}
+              />
+            ) : null}
+
+            {/* Finalisation — uniquement dernière étape ou toutes validées */}
+            {activeMs.output && !isGenerating && (activeModule.step === 7 || allDone) ? (
               <RetentionBlock
                 value={activeMs.retention ?? ""}
                 onChange={(v) => updateRetention(activeId, v)}
@@ -5333,6 +5319,13 @@ export default function FounderWorkspace({
             {/* Actions bar */}
             {activeMs.output && !isGenerating ? (
               <div className="flex flex-wrap items-center gap-3 pt-1">
+                {prevModule ? (
+                  <button type="button" onClick={() => setActiveId(prevModule.id)}
+                    className="flex items-center gap-1.5 rounded-full border border-[#E7DED0] px-4 py-2 text-sm font-medium text-[#6F6A60] transition hover:border-[#B8963E]/40 hover:bg-[#F0E6CC]/40 hover:text-[#8A6A20]">
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    {prevModule.label}
+                  </button>
+                ) : null}
                 {activeMs.status !== "completed" ? (
                   <button type="button" onClick={() => validate(activeId)}
                     disabled={!canValidateActive}
