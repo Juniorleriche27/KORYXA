@@ -87,6 +87,13 @@ _PRICING_BUSINESS_MODEL_SCORE_KEYS = (
     "business_model_clarity",
     "financial_readiness",
 )
+_VALIDATION_MVP_SCORE_KEYS = (
+    "assumption_clarity",
+    "mvp_focus",
+    "test_speed",
+    "evidence_quality",
+    "decision_readiness",
+)
 
 
 def _now_iso() -> str:
@@ -1870,6 +1877,347 @@ async def run_founder_pricing_business_model_v1(
         "agent_pricing_business_model_v1": {
             "agent": "founder_pricing_business_model_v1",
             "label": "Founder Pricing & Business Model Agent V1",
+            "version": 1,
+            "source": source,
+            "generated_at": _now_iso(),
+            "instruction": _clean_text(instruction) or None,
+            "analysis": analysis,
+        }
+    }
+    return analysis, patch
+
+
+def _build_core_assumptions(workspace_signals: dict[str, str], joined_text: str) -> list[str]:
+    assumptions: list[str] = []
+    if workspace_signals.get("client"):
+        assumptions.append("Le segment cible est accessible rapidement et accepte de discuter du probleme.")
+    else:
+        assumptions.append("Un segment client prioritaire peut etre isole pour un test terrain rapide.")
+    if workspace_signals.get("probleme"):
+        assumptions.append("Le probleme est assez frequent ou douloureux pour justifier une action du client.")
+    else:
+        assumptions.append("Le probleme principal existe vraiment dans le quotidien du segment cible.")
+    if workspace_signals.get("offre"):
+        assumptions.append("La promesse de l'offre est assez claire pour declencher une reponse ou un premier engagement.")
+    else:
+        assumptions.append("Une offre minimale peut etre formulee sans construire tout le produit.")
+    if _contains_any(joined_text, ("prix", "cash", "mobile money", "acompte", "petit budget")):
+        assumptions.append("Le client peut accepter un signal de paiement, acompte ou precommande selon son budget.")
+    else:
+        assumptions.append("Le client est pret a donner un signal concret au-dela d'un simple interet verbal.")
+    return assumptions[:5]
+
+
+def _build_mvp_scope(workspace_signals: dict[str, str], joined_text: str) -> dict[str, Any]:
+    offer_signal = workspace_signals.get("offre", "")
+    if offer_signal:
+        core_feature = _truncate(offer_signal, 180)
+    elif _contains_any(joined_text, ("whatsapp", "message", "commande", "relance")):
+        core_feature = "Un test manuel via WhatsApp pour simuler la valeur principale avant de construire un outil complet."
+    else:
+        core_feature = "Une version manuelle ou concierge qui livre uniquement le resultat principal promis."
+    return {
+        "mvp_type": "concierge_manuel",
+        "core_feature": core_feature,
+        "must_have": [
+            "Une promesse claire presentee au meme segment cible.",
+            "Un parcours de test simple avec un resultat visible.",
+            "Une maniere de collecter preuves, objections et intention de paiement.",
+        ],
+        "nice_to_have": [
+            "Automatisation complete.",
+            "Design avance ou interface finale.",
+            "Fonctionnalites secondaires non necessaires au premier signal terrain.",
+        ],
+        "what_not_to_build_yet": [
+            "Un produit complet avant validation du probleme et de la disposition a payer.",
+            "Un business plan detaille sans preuves terrain.",
+            "Des integrations techniques tant que le test manuel suffit.",
+        ],
+    }
+
+
+def _build_field_test(joined_text: str) -> dict[str, Any]:
+    channel = "WhatsApp, appel ou rencontre terrain" if _contains_any(joined_text, ("whatsapp", "terrain", "marche", "bouche a oreille")) else "Canal direct le plus accessible au segment cible"
+    return {
+        "test_name": "Test terrain MVP en 7 jours",
+        "method": "Presenter une offre minimale a un petit groupe de prospects, livrer manuellement la valeur et mesurer les signaux reels.",
+        "channel": channel,
+        "duration": "7 jours",
+        "sample_size": "5 a 10 prospects du meme segment",
+        "steps": [
+            "Choisir un segment unique et une promesse unique.",
+            "Contacter 5 a 10 prospects via le canal direct prioritaire.",
+            "Presenter l'offre minimale sans construire plus que necessaire.",
+            "Collecter objections, demandes, refus et signaux d'engagement.",
+            "Decider si l'hypothese est validee, a ajuster ou a abandonner.",
+        ],
+    }
+
+
+def _build_validation_criteria(joined_text: str) -> list[str]:
+    criteria = [
+        "Au moins 5 conversations terrain qualifiees avec le meme segment.",
+        "Au moins 3 prospects confirment le probleme avec exemples concrets.",
+        "Au moins 2 prospects acceptent un prochain pas mesurable: essai, rendez-vous, precommande ou paiement test.",
+    ]
+    if _contains_any(joined_text, ("cash", "mobile money", "acompte", "prix")):
+        criteria.append("Au moins 1 prospect accepte un signal de paiement, acompte ou intention de paiement explicite.")
+    else:
+        criteria.append("Au moins 1 prospect accepte de tester la solution dans un contexte reel.")
+    return criteria[:5]
+
+
+def _build_evidence_to_collect(joined_text: str) -> list[str]:
+    evidence = [
+        "Verbatims clients sur le probleme et les alternatives actuelles.",
+        "Objections exactes sur l'offre, le prix ou la confiance.",
+        "Nombre de prospects contactes, reponses positives et refus.",
+    ]
+    if _contains_any(joined_text, ("whatsapp",)):
+        evidence.append("Captures ou traces de conversations WhatsApp utiles.")
+    if _contains_any(joined_text, ("mobile money", "cash", "acompte")):
+        evidence.append("Preuve d'acompte, paiement test ou engagement concret.")
+    return evidence[:5]
+
+
+def _build_validation_risks(joined_text: str) -> list[str]:
+    risks = [
+        "Confondre avis positif et vraie validation comportementale.",
+        "Tester plusieurs segments en meme temps et rendre les signaux illisibles.",
+        "Construire trop de produit avant d'avoir un signal terrain fort.",
+    ]
+    if _contains_any(joined_text, ("petit budget", "cash", "mobile money")):
+        risks.append("Surestimer la capacite de paiement si aucun acompte ou paiement test n'est demande.")
+    return risks[:5]
+
+
+def _build_validation_mvp_scores(workspace_signals: dict[str, str], joined_text: str) -> dict[str, int]:
+    assumption_clarity = _clamp_score(
+        round(
+            (
+                _score_from_signal(workspace_signals.get("client", ""), (18, 42, 70))
+                + _score_from_signal(workspace_signals.get("probleme", ""), (18, 42, 70))
+                + _score_from_signal(workspace_signals.get("offre", ""), (18, 42, 70))
+            )
+            / 3
+        )
+    )
+    mvp_focus = 28
+    if _contains_any(joined_text, ("mvp", "test", "pilote", "manuel", "concierge", "prototype", "essai")):
+        mvp_focus += 30
+    if workspace_signals.get("offre"):
+        mvp_focus += 12
+    test_speed = 30
+    if _contains_any(joined_text, ("whatsapp", "terrain", "bouche a oreille", "marche", "appel")):
+        test_speed += 28
+    evidence_quality = 22
+    if _contains_any(joined_text, ("preuve", "feedback", "precommande", "paiement", "acompte", "client payant")):
+        evidence_quality += 30
+    decision_readiness = 20
+    if _contains_any(joined_text, ("critere", "validation", "seuil", "objectif", "decision")):
+        decision_readiness += 28
+    scores = {
+        "assumption_clarity": _clamp_score(assumption_clarity),
+        "mvp_focus": _clamp_score(mvp_focus),
+        "test_speed": _clamp_score(test_speed),
+        "evidence_quality": _clamp_score(evidence_quality),
+        "decision_readiness": _clamp_score(decision_readiness),
+    }
+    scores["global"] = round(sum(scores[key] for key in _VALIDATION_MVP_SCORE_KEYS) / len(_VALIDATION_MVP_SCORE_KEYS))
+    return scores
+
+
+def build_deterministic_validation_mvp_analysis(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> dict[str, Any]:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = _as_dict(project.get("project_data"))
+    workspace_signals = _extract_workspace_signals(project_data)
+    instruction_text = _clean_text(instruction)
+    joined_text = " ".join(
+        part
+        for part in [
+            title,
+            instruction_text,
+            json.dumps(project_data, ensure_ascii=True, default=str),
+            " ".join(workspace_signals.values()),
+        ]
+        if part
+    ).lower()
+    scores = _build_validation_mvp_scores(workspace_signals, joined_text)
+    analysis = {
+        "validation_focus": {
+            "main_goal": "Valider rapidement que le bon segment ressent le probleme, comprend la promesse et accepte un engagement concret.",
+            "core_assumptions": _build_core_assumptions(workspace_signals, joined_text),
+            "riskiest_assumption": "Le client va donner un signal comportemental fort, pas seulement dire que l'idee est interessante.",
+        },
+        "mvp": _build_mvp_scope(workspace_signals, joined_text),
+        "field_test": _build_field_test(joined_text),
+        "validation_criteria": _build_validation_criteria(joined_text),
+        "evidence_to_collect": _build_evidence_to_collect(joined_text),
+        "validation_risks": _build_validation_risks(joined_text),
+        "scores": scores,
+        "strengths": [
+            "Le projet peut etre teste sans construire une version complete." if _contains_any(joined_text, ("whatsapp", "manuel", "service", "terrain")) else "Le projet peut encore choisir un MVP tres simple pour apprendre vite.",
+            "Les canaux directs permettent de collecter des signaux rapides et peu couteux." if _contains_any(joined_text, ("whatsapp", "bouche a oreille", "terrain", "marche")) else "Un test terrain court peut clarifier la suite avant d'investir davantage.",
+        ][:2],
+        "risks": [
+            "Le test peut rester trop declaratif si aucun engagement mesurable n'est demande.",
+            "Le MVP peut devenir trop large si les fonctionnalites secondaires ne sont pas coupees.",
+            "Les resultats seront faibles si le segment teste n'est pas assez homogene.",
+        ][:3],
+        "missing_information": [
+            "Le segment exact a tester en premier.",
+            "Le signal minimum qui prouvera une vraie traction.",
+            "Le format MVP le plus simple a livrer cette semaine.",
+        ],
+        "recommended_next_step": "Lancer un test MVP de 7 jours avec un segment unique, une promesse unique et des criteres de validation mesurables.",
+        "next_best_action": {
+            "title": "Construire et tester un MVP manuel en 7 jours",
+            "why": "Cette etape doit produire des preuves terrain avant d'investir dans un produit complet ou un plan d'execution lourd.",
+            "how": [
+                "Choisir l'hypothese la plus risquee a tester.",
+                "Definir une version MVP manuelle ou concierge.",
+                "Contacter 5 a 10 prospects du meme segment.",
+                "Demander un signal concret: essai, rendez-vous, precommande, acompte ou paiement test.",
+                "Comparer les preuves aux criteres de validation et decider de continuer, ajuster ou pivoter.",
+            ],
+            "expected_output": "Un verdict clair sur la validation: continuer, ajuster l'offre, changer de segment ou abandonner l'hypothese.",
+        },
+    }
+    return analysis
+
+
+def _normalize_validation_focus(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "main_goal": _truncate(payload.get("main_goal") or fallback["main_goal"], 240),
+        "core_assumptions": _coerce_string_list(payload.get("core_assumptions"), limit=6) or fallback["core_assumptions"],
+        "riskiest_assumption": _truncate(payload.get("riskiest_assumption") or fallback["riskiest_assumption"], 240),
+    }
+
+
+def _normalize_mvp_block(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "mvp_type": _truncate(payload.get("mvp_type") or fallback["mvp_type"], 100),
+        "core_feature": _truncate(payload.get("core_feature") or fallback["core_feature"], 220),
+        "must_have": _coerce_string_list(payload.get("must_have"), limit=6) or fallback["must_have"],
+        "nice_to_have": _coerce_string_list(payload.get("nice_to_have"), limit=6) or fallback["nice_to_have"],
+        "what_not_to_build_yet": _coerce_string_list(payload.get("what_not_to_build_yet"), limit=6) or fallback["what_not_to_build_yet"],
+    }
+
+
+def _normalize_field_test(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    return {
+        "test_name": _truncate(payload.get("test_name") or fallback["test_name"], 140),
+        "method": _truncate(payload.get("method") or fallback["method"], 260),
+        "channel": _truncate(payload.get("channel") or fallback["channel"], 160),
+        "duration": _truncate(payload.get("duration") or fallback["duration"], 80),
+        "sample_size": _truncate(payload.get("sample_size") or fallback["sample_size"], 100),
+        "steps": _coerce_string_list(payload.get("steps"), limit=7) or fallback["steps"],
+    }
+
+
+def _normalize_validation_mvp_scores(value: Any, fallback: dict[str, Any]) -> dict[str, int]:
+    payload = _as_dict(value)
+    scores = {key: _clamp_score(payload.get(key, fallback[key])) for key in _VALIDATION_MVP_SCORE_KEYS}
+    scores["global"] = round(sum(scores[key] for key in _VALIDATION_MVP_SCORE_KEYS) / len(_VALIDATION_MVP_SCORE_KEYS))
+    return scores
+
+
+def _normalize_validation_mvp_analysis(value: Any, fallback: dict[str, Any]) -> dict[str, Any]:
+    payload = _as_dict(value)
+    normalized = {
+        "validation_focus": _normalize_validation_focus(payload.get("validation_focus"), fallback["validation_focus"]),
+        "mvp": _normalize_mvp_block(payload.get("mvp"), fallback["mvp"]),
+        "field_test": _normalize_field_test(payload.get("field_test"), fallback["field_test"]),
+        "validation_criteria": _coerce_string_list(payload.get("validation_criteria"), limit=7) or fallback["validation_criteria"],
+        "evidence_to_collect": _coerce_string_list(payload.get("evidence_to_collect"), limit=7) or fallback["evidence_to_collect"],
+        "validation_risks": _coerce_string_list(payload.get("validation_risks"), limit=7) or fallback["validation_risks"],
+        "scores": _normalize_validation_mvp_scores(payload.get("scores"), fallback["scores"]),
+        "strengths": _coerce_string_list(payload.get("strengths"), limit=6) or fallback["strengths"],
+        "risks": _coerce_string_list(payload.get("risks"), limit=6) or fallback["risks"],
+        "missing_information": _coerce_string_list(payload.get("missing_information"), limit=6) or fallback["missing_information"],
+        "recommended_next_step": _truncate(payload.get("recommended_next_step") or fallback["recommended_next_step"], 260),
+        "next_best_action": _normalize_next_best_action(payload.get("next_best_action"), fallback["next_best_action"]),
+    }
+    normalized["scores"]["global"] = round(
+        sum(normalized["scores"][key] for key in _VALIDATION_MVP_SCORE_KEYS) / len(_VALIDATION_MVP_SCORE_KEYS)
+    )
+    return normalized
+
+
+def _build_validation_mvp_llm_prompt(project: dict[str, Any], instruction: str | None, fallback: dict[str, Any]) -> str:
+    title = _clean_text(project.get("title")) or "Projet Founder"
+    project_data = json.dumps(_as_dict(project.get("project_data")), ensure_ascii=True, default=str)
+    opencloud_project_path = _clean_text(project.get("opencloud_project_path")) or "N/A"
+    instruction_block = _clean_text(instruction) or "Aucune instruction additionnelle."
+    fallback_json = json.dumps(fallback, ensure_ascii=True, default=str)
+    return (
+        "Tu es founder_validation_mvp_v1 pour ChatLAYA Founder.\n"
+        "Tu n'es pas un chatbot. Tu produis un diagnostic structure de validation terrain et MVP pour un Founder Builder OS.\n"
+        "Retourne UNIQUEMENT un JSON valide, sans markdown ni texte autour.\n"
+        "Integre si pertinent les realites locales: WhatsApp, terrain, bouche-a-oreille, cash, mobile money, petits budgets, confiance client, informalite et test manuel avant automatisation.\n"
+        "Schema JSON attendu:\n"
+        "{"
+        "\"validation_focus\": {\"main_goal\": string, \"core_assumptions\": [string], \"riskiest_assumption\": string},"
+        "\"mvp\": {\"mvp_type\": string, \"core_feature\": string, \"must_have\": [string], \"nice_to_have\": [string], \"what_not_to_build_yet\": [string]},"
+        "\"field_test\": {\"test_name\": string, \"method\": string, \"channel\": string, \"duration\": string, \"sample_size\": string, \"steps\": [string]},"
+        "\"validation_criteria\": [string],"
+        "\"evidence_to_collect\": [string],"
+        "\"validation_risks\": [string],"
+        "\"scores\": {\"assumption_clarity\": 0, \"mvp_focus\": 0, \"test_speed\": 0, \"evidence_quality\": 0, \"decision_readiness\": 0, \"global\": 0},"
+        "\"strengths\": [string],"
+        "\"risks\": [string],"
+        "\"missing_information\": [string],"
+        "\"recommended_next_step\": string,"
+        "\"next_best_action\": {\"title\": string, \"why\": string, \"how\": [string], \"expected_output\": string}"
+        "}\n"
+        "Contraintes:\n"
+        "- scores entre 0 et 100\n"
+        "- recommandations concretes, testables en moins de 7 jours\n"
+        "- pas de secret ni detail interne\n"
+        f"Instruction additionnelle: {instruction_block}\n"
+        f"Titre: {title}\n"
+        f"OpenCloud path: {opencloud_project_path}\n"
+        f"Project data JSON: {project_data}\n"
+        f"Fallback deterministic reference: {fallback_json}\n"
+    )
+
+
+async def run_founder_validation_mvp_v1(
+    project: dict[str, Any],
+    instruction: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    fallback = build_deterministic_validation_mvp_analysis(project, instruction=instruction)
+    analysis = fallback
+    source = "deterministic"
+    try:
+        prompt = _build_validation_mvp_llm_prompt(project, instruction, fallback)
+        raw_response = await asyncio.to_thread(
+            generate_answer,
+            prompt,
+            None,
+            None,
+            90,
+            1200,
+        )
+        candidate = _extract_json_payload(raw_response)
+        if candidate:
+            analysis = _normalize_validation_mvp_analysis(candidate, fallback)
+            source = "llm"
+    except Exception:
+        analysis = fallback
+        source = "deterministic"
+
+    patch = {
+        "agent_validation_mvp_v1": {
+            "agent": "founder_validation_mvp_v1",
+            "label": "Founder Validation & MVP Agent V1",
             "version": 1,
             "source": source,
             "generated_at": _now_iso(),
