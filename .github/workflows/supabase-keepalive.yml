@@ -24,20 +24,37 @@ jobs:
 
       - name: Wake Supabase Postgres
         env:
-          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+          SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+          SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          if [ -z "${SUPABASE_DATABASE_URL}" ]; then
-            echo "::error::Missing GitHub secret SUPABASE_DATABASE_URL"
-            exit 1
-          fi
-
           python - <<'PY'
           import os
           import psycopg2
 
-          database_url = os.environ["SUPABASE_DATABASE_URL"]
+          required = [
+              "SUPABASE_DB_HOST",
+              "SUPABASE_DB_PORT",
+              "SUPABASE_DB_NAME",
+              "SUPABASE_DB_USER",
+              "SUPABASE_DB_PASSWORD",
+          ]
 
-          conn = psycopg2.connect(database_url, connect_timeout=20)
+          missing = [key for key in required if not os.environ.get(key)]
+          if missing:
+              raise RuntimeError(f"Missing GitHub secrets: {', '.join(missing)}")
+
+          conn = psycopg2.connect(
+              host=os.environ["SUPABASE_DB_HOST"],
+              port=int(os.environ["SUPABASE_DB_PORT"]),
+              dbname=os.environ["SUPABASE_DB_NAME"],
+              user=os.environ["SUPABASE_DB_USER"],
+              password=os.environ["SUPABASE_DB_PASSWORD"],
+              connect_timeout=20,
+          )
+
           conn.autocommit = True
 
           with conn.cursor() as cur:
