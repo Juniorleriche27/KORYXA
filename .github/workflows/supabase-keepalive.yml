@@ -10,10 +10,8 @@ jobs:
   wakeup:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
+    steps:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -32,4 +30,20 @@ jobs:
             echo "::error::Missing GitHub secret SUPABASE_DATABASE_URL"
             exit 1
           fi
-          python scripts/supabase_keepalive.py
+
+          python - <<'PY'
+          import os
+          import psycopg2
+
+          database_url = os.environ["SUPABASE_DATABASE_URL"]
+
+          conn = psycopg2.connect(database_url, connect_timeout=20)
+          conn.autocommit = True
+
+          with conn.cursor() as cur:
+              cur.execute("select now();")
+              row = cur.fetchone()
+              print("Supabase Postgres wakeup OK:", row[0])
+
+          conn.close()
+          PY
