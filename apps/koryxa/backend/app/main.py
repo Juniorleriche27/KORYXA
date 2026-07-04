@@ -431,13 +431,13 @@ if frontend_url:
     if host and not host.startswith("www."):
         cors_origins.add(f"{scheme}://www.{host}".rstrip("/"))
     if host == "innovaplus.africa":
-        cors_origins.add("https://chatlaya.innovaplus.africa")
+        cors_origins.add("https://.innovaplus.africa")
 
 if not cors_origins:
     cors_origins = {
         "https://innovaplus.africa",
         "https://www.innovaplus.africa",
-        "https://chatlaya.innovaplus.africa",
+        "https://.innovaplus.africa",
     }
 
 if (settings.ENV or "").lower() in {"development", "dev", "local"}:

@@ -2,7 +2,6 @@
 // This avoids prod breakage when api.* is not configured.
 const DEFAULT_API_BASE = "https://innovaplus.africa";
 const LEGACY_API_HOST = "https://api.innovaplus.africa";
-export const CHATLAYA_AUTONOMOUS_HOST = "chatlaya.innovaplus.africa";
 
 function normalize(base: string | undefined, fallback: string): string {
   const raw = (base && base.trim() ? base : fallback).replace(/\/+$/, "");
@@ -72,19 +71,12 @@ export const CHATLAYA_API_BASE = CHATLAYA_SOURCE_BASE.replace(/\/+$/, "");
 function normalizeChatlayaBase(base: string | undefined, fallback: string): string {
   const normalized = normalize(base, fallback);
   // If Vercel is configured with only the legacy API origin, keep the live
-  // ChatLAYA ownership under /api/chatlaya/* instead of falling back to /chatlaya/*.
   if (normalized === DEFAULT_API_BASE) {
     return `${DEFAULT_API_BASE}/api`;
   }
   return normalized;
 }
 
-export function getChatlayaApiBase(): string {
-  if (typeof window !== "undefined" && window.location.hostname === CHATLAYA_AUTONOMOUS_HOST) {
-    return "/api";
-  }
-  return CHATLAYA_API_BASE;
-}
 
 export const FORMATION_DATA_ANALYST_URL =
   (process.env.NEXT_PUBLIC_FORMATION_DATA_ANALYST_URL || "").trim() ||

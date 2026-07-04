@@ -4,7 +4,7 @@ KORYXA Monorepo
 Structure
 ---------
 
-- `apps/koryxa/backend` — API FastAPI KORYXA (MongoDB, auth, profils, opportunités, communauté, ChatLAYA, MyPlanning, trajectoire, entreprise).
+- `apps/koryxa/backend` — API FastAPI KORYXA (MongoDB, auth, profils, opportunités, communauté, MyPlanning, trajectoire, entreprise).
 - `apps/koryxa/frontend` — interface Next.js publique et connectée de KORYXA.
 - `apps/koryxa/training` — scripts de fine-tuning / conversion des modèles (SmolLM, Llama, GGUF).
 

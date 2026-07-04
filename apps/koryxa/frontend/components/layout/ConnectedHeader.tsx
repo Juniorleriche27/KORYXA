@@ -28,11 +28,6 @@ const CONNECTED_NAV_LINKS: ConnectedNavLink[] = [
     match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.entreprise),
   },
   {
-    href: PUBLIC_ROUTES.chatlaya,
-    label: "ChatLAYA",
-    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.chatlaya),
-  },
-  {
     href: PUBLIC_ROUTES.serviceIa,
     label: "Service IA",
     match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.serviceIa),

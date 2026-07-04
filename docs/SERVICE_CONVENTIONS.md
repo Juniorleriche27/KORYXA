@@ -35,17 +35,17 @@ services/<service-name>/
 
 ## Naming
 
-- Service folder: kebab-case, example `chatlaya-service`
-- Python package name: snake_case if needed, example `chatlaya_service`
+- Service folder: kebab-case, example ``
+- Python package name: snake_case if needed, example `_service`
 - systemd unit: same as service folder when possible
-- database schema: service-owned schema, example `chatlaya`
+- database schema: service-owned schema, example ``
 
 ## Ports
 
 Reserved internal ports:
 
 - `koryxa-core-service` -> `8000`
-- `chatlaya-service` -> `8010`
+- `` -> `8010`
 - `datalaya-service` -> `8020`
 - `myplanning-service` -> `8030`
 - `playwork-service` -> `8040`
@@ -58,7 +58,7 @@ Reserved internal ports:
 Every service must expose a versioned API prefix:
 
 - `/api/v1/core/*`
-- `/api/v1/chatlaya/*`
+- `/api/v1//*`
 - `/api/v1/datalaya/*`
 - `/api/v1/myplanning/*`
 - `/api/v1/playwork/*`
@@ -109,7 +109,7 @@ Each service must own its own log stream.
 Recommended paths:
 
 - `/var/log/koryxa/koryxa-core-service/`
-- `/var/log/koryxa/chatlaya-service/`
+- `/var/log/koryxa//`
 - `/var/log/koryxa/datalaya-service/`
 - `/var/log/koryxa/myplanning-service/`
 - `/var/log/koryxa/playwork-service/`

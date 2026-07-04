@@ -11,7 +11,7 @@ import SignalementButton from "@/components/layout/SignalementButton";
 function PublicShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const isChatPage = pathname === "/chatlaya";
+  const isChatPage = false;
   const isFunnelStart =
     pathname === "/trajectoire/demarrer" ||
     pathname === "/entreprise/demarrer" ||
@@ -92,10 +92,6 @@ export default function RouteShell({
   const pathname = usePathname();
 
   if (pathname.startsWith("/entreprise/setup")) {
-    return <>{children}</>;
-  }
-
-  if (pathname.startsWith("/chatlaya/auth")) {
     return <>{children}</>;
   }
 

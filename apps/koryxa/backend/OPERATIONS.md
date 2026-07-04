@@ -46,15 +46,7 @@ Mot de passe oublié
 - Le front consomme `https://innovaplus.africa/reset?token=...&email=...`.
 - Endpoint `/auth/reset` met à jour le hash (`password_hash`), marque le token comme utilisé et révoque toutes les sessions actives.
 
-Chatlaya (copilote)
 -------------------
-- Nouvelles routes `/chatlaya/*`:
-  - `POST /chatlaya/session` : récupère ou crée la conversation active.
-  - `GET /chatlaya/conversations` : liste paginée des conversations.
-  - `GET /chatlaya/messages?conversation_id=...` : messages historiques.
-  - `POST /chatlaya/message` : streaming SSE (`event: token`, `event: done`).
-- Messages persistés dans `app.chatlaya_messages` (`conversation_id`, `guest_id|user_id`, `role`, `content`, `meta`, `created_at`).
-- Conversations dans `app.chatlaya_conversations` (`guest_id|user_id`, `title`, `assistant_mode`, `created_at`, `updated_at`, `archived`).
 - Configuration:
   - `PROVIDER=echo` (par défaut) renvoie les messages brut pour les tests.
   - `PROVIDER=cohere` utilise l'API Cohere (`COHERE_API_KEY` requis).

@@ -23,7 +23,6 @@ secrets.toml
 /mart/
 /support/
 /scripts/
-/chatlaya/
 .venv/
 __pycache__/
 *.pyc

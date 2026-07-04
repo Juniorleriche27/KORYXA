@@ -60,7 +60,6 @@ const INNOVA_API_BASE = normalizeInnovaBase(AUTH_API_BASE);
 const PLATFORM_REDIRECTS: Array<{ from: string; to: string }> = [
   { from: "/platform/trajectoire", to: "/trajectoire" },
   { from: "/platform/entreprise", to: "/entreprise" },
-  { from: "/platform/chatlaya", to: "/services-ia" },
   { from: "/platform/opportunites", to: "/opportunites" },
   { from: "/platform/missions", to: "/opportunites" },
   { from: "/platform/communaute", to: "/opportunites" },
@@ -186,7 +185,6 @@ const V1_PUBLIC_PATHS = [
   "/produits",
   "/contact",
   "/services-ia",
-  "/chatlaya",
   "/resources",
   "/privacy",
   "/terms",

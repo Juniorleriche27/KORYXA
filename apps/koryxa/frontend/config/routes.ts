@@ -13,7 +13,6 @@
   resources: "/resources",
   privacy: "/legal/confidentialite",
   terms: "/legal/mentions",
-  chatlaya: "/chatlaya",
   missionMatch: "/missions/match",
 } as const;
 

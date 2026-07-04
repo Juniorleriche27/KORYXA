@@ -64,8 +64,7 @@ export default async function RootLayout(props: { children: ReactNode }) {
     requestHeaders.get("x-forwarded-host") ||
     requestHeaders.get("host") ||
     "";
-  const normalizedHost = host.split(":")[0];
-  const autonomousChatlayaHost = normalizedHost === "chatlaya.innovaplus.africa";
+  const normalizedHost = host.split(":")[0];  const autonomousChatlayaHost = false;
 
   return (
     <html lang="fr" data-app-host={normalizedHost} className={fraunces.variable}>

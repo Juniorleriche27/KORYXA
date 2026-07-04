@@ -60,7 +60,6 @@ const HIDDEN_ON: string[] = ["/login", "/signup", "/reset", "/onboarding"];
 function detectGroup(pathname: string): GroupId {
   if (pathname.startsWith("/entreprise") || pathname.includes("koryxa-enterprise")) return "entreprise";
   if (pathname.startsWith("/trajectoire")) return "trajectoire";
-  if (pathname.startsWith("/chatlaya")) return "activation";
   return "trajectoire";
 }
 
@@ -91,13 +90,6 @@ function getFabContext(pathname: string): { Icon: LucideIcon; closedClass: strin
       Icon: Bot,
       closedClass: "bg-[linear-gradient(135deg,#14532d_0%,#047857_55%,#10b981_100%)] text-white",
       label: "Service IA",
-    };
-  }
-  if (pathname.startsWith("/chatlaya")) {
-    return {
-      Icon: Sparkles,
-      closedClass: "bg-[linear-gradient(135deg,#0f172a_0%,#4338ca_55%,#06b6d4_100%)] text-white",
-      label: "ChatLAYA",
     };
   }
   if (pathname.startsWith("/about") || pathname.startsWith("/a-propos")) {

@@ -45,9 +45,7 @@ export const productList = Object.values(productCatalog);
 
 export const removedProductSlugs = new Set(["plusbook", "plusbooks", "koryxa-sante", "sante"]);
 
-export const productSlugAliases: Record<string, string> = {
-  chatlaya: "service-ia",
-};
+export const productSlugAliases: Record<string, string> = {};
 
 export function resolveProductSlug(slug: string): string {
   return productSlugAliases[slug] || slug;

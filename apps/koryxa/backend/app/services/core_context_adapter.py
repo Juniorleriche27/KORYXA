@@ -142,7 +142,7 @@ def get_guest_summary(guest_id: str) -> dict[str, Any]:
     }
 
 
-def get_user_chatlaya_entitlement(user_id: str) -> dict[str, Any] | None:
+def get_user__entitlement(user_id: str) -> dict[str, Any] | None:
     user = get_user_by_id(user_id)
     if not user:
         return None
@@ -151,7 +151,7 @@ def get_user_chatlaya_entitlement(user_id: str) -> dict[str, Any] | None:
         plan = "free"
     return {
         "user_id": user["id"],
-        "product": "chatlaya",
+        "product": "",
         "allowed": True,
         "plan": plan,
         "access_mode": "full",

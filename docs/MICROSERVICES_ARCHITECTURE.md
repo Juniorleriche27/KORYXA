@@ -23,7 +23,7 @@ Today the server repository is organized around a single active product applicat
 - auth and sessions
 - users and account access
 - public products and enterprise entry points
-- ChatLAYA conversations
+-  conversations
 - notifications
 - billing bootstrap and payment configuration
 - analytics / product metrics
@@ -32,10 +32,10 @@ Today the server repository is organized around a single active product applicat
 Observed entrypoints and coupling:
 
 - `app.main` mounts one main FastAPI application with one shared startup lifecycle.
-- Mounted routers include `auth`, `chatlaya`, `notifications`, `billing`, `trajectoire`, `public_enterprise`, `public_products`, `email`, `invite`, `youtube`.
+- Mounted routers include `auth`, ``, `notifications`, `billing`, `trajectoire`, `public_enterprise`, `public_products`, `email`, `invite`, `youtube`.
 - Health is global, not per business capability.
 - Environment is shared through one backend runtime and one production env file.
-- Postgres bootstrap is shared in one module and currently creates auth and ChatLAYA tables in the same runtime.
+- Postgres bootstrap is shared in one module and currently creates auth and  tables in the same runtime.
 - Some metrics and planning event logging still rely on Mongo collections.
 
 ### Current frontend runtime
@@ -44,7 +44,7 @@ Observed entrypoints and coupling:
 
 - marketing pages
 - auth flows
-- ChatLAYA UI
+-  UI
 - Service IA pages
 - enterprise flows
 - product shell / connected navigation
@@ -53,7 +53,7 @@ The frontend currently proxies one backend through shared rewrites, not service-
 
 ### Current training area
 
-`apps/koryxa/training` contains training scripts and model preparation artifacts tied mainly to ChatLAYA model workflows.
+`apps/koryxa/training` contains training scripts and model preparation artifacts tied mainly to  model workflows.
 
 This is operationally different from the main product runtime, but it still lives inside the same application family.
 
@@ -67,7 +67,7 @@ The following concerns are currently mixed in `apps/koryxa/backend`:
 | --- | --- | --- |
 | Main auth, sessions, user access | `app/routers/auth.py`, auth repositories, auth tables | `koryxa-core-service` |
 | Product catalog and access registry | `app/services/product_registry.py`, public product routes | `koryxa-core-service` |
-| Chat conversations and assistant logic | `app/routers/chatlaya.py`, `app/services/chatlaya_*`, `app/repositories/chatlaya_pg.py` | `chatlaya-service` |
+| Chat conversations and assistant logic | `app/routers/.py`, `app/services/_*`, `app/repositories/_pg.py` | `` |
 | Notification delivery and alert workers | `app/routers/notifications.py`, `app/services/alerts_v1.py`, `app/services/notifications/*`, `app/workers/alerts_worker.py` | `notification-service` |
 | Billing hooks and payment configuration | `app/routers/billing.py`, PayDunya config in `app/core/config.py` | `billing-service` |
 | Product usage metrics | `app/routers/metrics.py`, `app/services/data_logging.py` | `analytics-service` |
@@ -79,7 +79,7 @@ The following concerns are currently mixed in `apps/koryxa/backend`:
 The current frontend combines:
 
 - identity and onboarding pages
-- ChatLAYA application UI
+-  application UI
 - Service IA catalog
 - enterprise discovery and brief flows
 - connected shell / account navigation
@@ -119,7 +119,7 @@ The current architecture has these production limitations:
 | Service | Responsibility | Internal port | Public API prefix |
 | --- | --- | --- | --- |
 | `koryxa-core-service` | auth, users, roles, products, subscriptions, access | `8000` | `/api/v1/core/*` |
-| `chatlaya-service` | assistant IA, conversations, modes, context orchestration | `8010` | `/api/v1/chatlaya/*` |
+| `` | assistant IA, conversations, modes, context orchestration | `8010` | `/api/v1//*` |
 | `datalaya-service` | files, datasets, analysis jobs, reports, insights | `8020` | `/api/v1/datalaya/*` |
 | `myplanning-service` | planning, tasks, spaces, execution support | `8030` | `/api/v1/myplanning/*` |
 | `playwork-service` | simulations, serious games, scores, attestations | `8040` | `/api/v1/playwork/*` |
@@ -144,7 +144,7 @@ The current architecture has these production limitations:
 KORYXA/
   services/
     koryxa-core-service/
-    chatlaya-service/
+    /
     datalaya-service/
     myplanning-service/
     playwork-service/
@@ -187,7 +187,7 @@ Does not own:
 - billing execution details
 - analytics event storage
 
-### `chatlaya-service`
+### ``
 
 Owns:
 
@@ -267,7 +267,7 @@ During migration, services may share one Postgres cluster, but they must not sha
 Recommended transitional ownership:
 
 - `core.*`
-- `chatlaya.*`
+- `.*`
 - `datalaya.*`
 - `myplanning.*`
 - `playwork.*`
@@ -286,7 +286,7 @@ The gateway or Nginx layer will become the stable ingress contract.
 Public routing target:
 
 - `/api/v1/core/*` -> `127.0.0.1:8000`
-- `/api/v1/chatlaya/*` -> `127.0.0.1:8010`
+- `/api/v1//*` -> `127.0.0.1:8010`
 - `/api/v1/datalaya/*` -> `127.0.0.1:8020`
 - `/api/v1/myplanning/*` -> `127.0.0.1:8030`
 - `/api/v1/playwork/*` -> `127.0.0.1:8040`

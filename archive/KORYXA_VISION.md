@@ -133,9 +133,9 @@ insights et recommandations.
 Cette brique sert a transformer la donnee brute en lecture claire et en
 decision plus exploitable.
 
-### ChatLAYA
+### 
 
-ChatLAYA sert d'interface conversationnelle d'aide, d'explication,
+ sert d'interface conversationnelle d'aide, d'explication,
 d'orientation et d'accompagnement.
 
 Cette brique permet de guider l'utilisateur, de clarifier sa demande et
@@ -188,11 +188,11 @@ Pour decider correctement, il faut souvent lire, nettoyer, qualifier et
 interpreter les donnees disponibles.
 DataLAYA joue ce role.
 
-### ChatLAYA orchestre l'experience
+###  orchestre l'experience
 
 Pour que le systeme soit usable, il faut une interface qui explique,
 guide, reformule et relie les briques entre elles.
-ChatLAYA joue ce role.
+ joue ce role.
 
 Donc oui :
 
@@ -244,7 +244,7 @@ Pour rester coherent, KORYXA doit suivre cette ligne :
 
 - garder la vision fondatrice comme cap ;
 - presenter honnetement le produit actuel sans surpromesse ;
-- faire converger Blueprint, Entreprise, DataLAYA et ChatLAYA vers une
+- faire converger Blueprint, Entreprise, DataLAYA et  vers une
   logique commune ;
 - ne pas laisser les modules devenir des outils isoles sans boucle
   strategique ;

@@ -22,12 +22,12 @@ This plan prepares the repository and migration sequence for a real production m
 - one training area: `apps/koryxa/training`
 - one production backend env file
 - one production backend unit
-- shared Postgres bootstrap for auth and ChatLAYA
+- shared Postgres bootstrap for auth and 
 - partial Mongo usage for metrics and planning event logging
 
 ### Not yet extracted
 
-- ChatLAYA is embedded in KORYXA
+-  is embedded in KORYXA
 - notifications are embedded
 - billing is only partially represented
 - analytics are partially embedded
@@ -75,33 +75,33 @@ Exit criteria:
 - core responsibilities are explicit
 - downstream services can depend on a stable auth/access contract
 
-## Phase 2: Extract `chatlaya-service` backend first
+## Phase 2: Extract `` backend first
 
 Goal:
 
-- make ChatLAYA independently deployable without forcing a frontend rewrite
+- make  independently deployable without forcing a frontend rewrite
 
 Tasks:
 
-1. Copy or move ChatLAYA-specific backend code into `services/chatlaya-service/backend`.
+1. Copy or move -specific backend code into `services//backend`.
 2. Give it its own startup, env file, healthcheck and log stream.
 3. Route new service traffic internally on port `8010`.
 4. Keep current public behavior working through gateway aliases.
 5. Keep auth delegated to `koryxa-core-service`.
-6. Move ChatLAYA database ownership from shared bootstrap assumptions toward `chatlaya` schema migrations.
+6. Move  database ownership from shared bootstrap assumptions toward `` schema migrations.
 
 Current source candidates:
 
-- `apps/koryxa/backend/app/routers/chatlaya.py`
-- `apps/koryxa/backend/app/repositories/chatlaya_pg.py`
-- `apps/koryxa/backend/app/services/chatlaya_*`
-- `apps/koryxa/frontend/app/chatlaya`
+- `apps/koryxa/backend/app/routers/.py`
+- `apps/koryxa/backend/app/repositories/_pg.py`
+- `apps/koryxa/backend/app/services/_*`
+- `apps/koryxa/frontend/app/`
 
 Exit criteria:
 
-- ChatLAYA backend can be restarted without restarting core
-- ChatLAYA healthcheck exists
-- ChatLAYA uses service-local env
+-  backend can be restarted without restarting core
+-  healthcheck exists
+-  uses service-local env
 
 ## Phase 3: Extract `notification-service`
 
@@ -200,7 +200,7 @@ Exit criteria:
 
 Goal:
 
-- add a clean service for data files, analysis and reports instead of mixing it into ChatLAYA or enterprise flows later
+- add a clean service for data files, analysis and reports instead of mixing it into  or enterprise flows later
 
 Tasks:
 
@@ -237,7 +237,7 @@ Goal:
 Recommended order:
 
 1. Keep the current frontend as the shell.
-2. Extract ChatLAYA frontend if it needs separate deployment cadence.
+2. Extract  frontend if it needs separate deployment cadence.
 3. Extract MyPlanning frontend if execution workspace becomes its own product surface.
 4. Keep shared UI in `packages/ui`.
 
@@ -246,7 +246,7 @@ Recommended order:
 ### Target public routes
 
 - `/api/v1/core/*`
-- `/api/v1/chatlaya/*`
+- `/api/v1//*`
 - `/api/v1/datalaya/*`
 - `/api/v1/myplanning/*`
 - `/api/v1/playwork/*`
@@ -303,7 +303,7 @@ Recommended sequence:
 
 ## Immediate recommendations
 
-1. Extract `chatlaya-service` first because the boundary is already visible in code.
+1. Extract `` first because the boundary is already visible in code.
 2. Extract `notification-service` second because it reduces side effects in the core process.
 3. Extract `analytics-service` third because it already has distinct event ingestion behavior.
 4. Move `billing-service` next once payment flows are fully implemented.

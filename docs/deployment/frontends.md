@@ -15,7 +15,7 @@ Variables backend (fichier `/etc/innovaplus/backend.env`)
 Frontend unique (Next.js, portefeuille Koryxa)
 ----------------------------------------------
 - Dossier: `apps/koryxa/frontend`
-- Couvre les modules publics et connectés KORYXA: Trajectoire, Entreprise, Opportunités, Communauté, MyPlanningAI, ChatLAYA.
+- Couvre les modules publics et connectés KORYXA: Trajectoire, Entreprise, Opportunités, Communauté, MyPlanningAI, .
 - Env (local et Vercel):
   - `NEXT_PUBLIC_API_URL=https://api.innovaplus.africa/innova/api`
   - (RAG): appeler `/innova/ingest`, `/innova/chat`, `/innova/feedback`

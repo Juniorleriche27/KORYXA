@@ -9,7 +9,7 @@ from app.services.core_context_adapter import (
     get_guest_enterprise_summary,
     get_guest_summary,
     get_guest_trajectory_summary,
-    get_user_chatlaya_entitlement,
+    get_user__entitlement,
     get_user_enterprise_summary,
     get_user_summary,
     get_user_trajectory_summary,
@@ -80,9 +80,9 @@ def get_internal_guest_enterprise_summary(guest_id: str):
     return summary
 
 
-@router.get("/users/{user_id}/entitlements/chatlaya")
-def get_internal_user_chatlaya_entitlement(user_id: str):
-    entitlement = get_user_chatlaya_entitlement(user_id)
+@router.get("/users/{user_id}/entitlements/")
+def get_internal_user__entitlement(user_id: str):
+    entitlement = get_user__entitlement(user_id)
     if not entitlement:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return entitlement

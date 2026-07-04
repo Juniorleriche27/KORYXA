@@ -9,13 +9,13 @@ from app.services.postgres_bootstrap import db_execute, db_fetchall
 
 PUBLIC_PRODUCTS: list[dict[str, Any]] = [
     {
-        "slug": "chatlaya",
-        "name": "ChatLAYA",
-        "href": "/products/chatlaya",
+        "slug": "",
+        "name": "",
+        "href": "/products/",
         "eyebrow": "Copilote",
-        "summary": "ChatLAYA sert de copilote conversationnel pour clarifier une demande, accélérer la production et soutenir l'exécution dans un cadre plus lisible.",
+        "summary": " sert de copilote conversationnel pour clarifier une demande, accélérer la production et soutenir l'exécution dans un cadre plus lisible.",
         "bullets": ["Clarification rapide", "Support conversationnel", "Exécution assistée"],
-        "cta": "Voir ChatLAYA",
+        "cta": "Voir ",
     },
 ]
 

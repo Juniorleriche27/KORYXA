@@ -23,4 +23,4 @@ Status: reserved, not yet integrated in the repository.
 
 ## Migration note
 
-Introduce this service as a clean bounded context instead of mixing file analysis later into ChatLAYA or core endpoints.
+Introduce this service as a clean bounded context instead of mixing file analysis later into core endpoints.

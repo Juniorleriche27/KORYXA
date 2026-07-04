@@ -21,7 +21,6 @@ const PUBLIC_NAV_LINKS: PublicNavLink[] = [
   { href: PUBLIC_ROUTES.home, label: "Accueil" },
   { href: PUBLIC_ROUTES.trajectoire, label: "Formation IA" },
   { href: PUBLIC_ROUTES.entreprise, label: "Entreprise" },
-  { href: PUBLIC_ROUTES.chatlaya, label: "ChatLAYA" },
   { href: PUBLIC_ROUTES.serviceIa, label: "Service IA" },
   { href: PUBLIC_ROUTES.apropos, label: "A propos" },
 ];

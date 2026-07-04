@@ -1,1 +1,0 @@
-"""ChatLAYA service backend package."""

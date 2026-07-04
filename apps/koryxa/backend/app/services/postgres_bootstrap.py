@@ -285,13 +285,13 @@ def ensure_auth_tables() -> None:
     )
 
 
-def ensure_chatlaya_tables() -> None:
+def ensure__tables() -> None:
     if not POOL:
         return
     ensure_auth_tables()
     db_execute(
         """
-        create table if not exists app.chatlaya_conversations (
+        create table if not exists app._conversations (
           id uuid primary key,
           guest_id text,
           user_id uuid references app.auth_users(id) on delete cascade,
@@ -300,7 +300,7 @@ def ensure_chatlaya_tables() -> None:
           archived boolean not null default false,
           created_at timestamptz not null default timezone('utc', now()),
           updated_at timestamptz not null default timezone('utc', now()),
-          constraint chatlaya_conversations_owner_check
+          constraint _conversations_owner_check
             check (
               (user_id is not null and guest_id is null)
               or (user_id is null and guest_id is not null)
@@ -310,26 +310,26 @@ def ensure_chatlaya_tables() -> None:
     )
     db_execute(
         """
-        create table if not exists app.chatlaya_messages (
+        create table if not exists app._messages (
           id uuid primary key,
-          conversation_id uuid not null references app.chatlaya_conversations(id) on delete cascade,
+          conversation_id uuid not null references app._conversations(id) on delete cascade,
           guest_id text,
           user_id uuid references app.auth_users(id) on delete cascade,
           role text not null,
           content text not null,
           meta jsonb not null default '{}'::jsonb,
           created_at timestamptz not null default timezone('utc', now()),
-          constraint chatlaya_messages_role_check check (role in ('user', 'assistant'))
+          constraint _messages_role_check check (role in ('user', 'assistant'))
         );
         """
     )
     db_execute(
-        "create index if not exists idx_chatlaya_conversations_user_updated_at on app.chatlaya_conversations (user_id, updated_at desc) where archived = false;"
+        "create index if not exists idx__conversations_user_updated_at on app._conversations (user_id, updated_at desc) where archived = false;"
     )
     db_execute(
-        "create index if not exists idx_chatlaya_conversations_guest_updated_at on app.chatlaya_conversations (guest_id, updated_at desc) where archived = false;"
+        "create index if not exists idx__conversations_guest_updated_at on app._conversations (guest_id, updated_at desc) where archived = false;"
     )
     db_execute(
-        "create index if not exists idx_chatlaya_messages_conversation_created_at on app.chatlaya_messages (conversation_id, created_at asc);"
+        "create index if not exists idx__messages_conversation_created_at on app._messages (conversation_id, created_at asc);"
     )
 

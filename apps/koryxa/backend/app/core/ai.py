@@ -91,7 +91,7 @@ def generate_answer(
         effective_prompt[:80],
     )
 
-    if provider_name in {"local", "smollm", "chatlaya"}:
+    if provider_name in {"local", "smollm", ""}:
         provider_name = "cohere" if settings.COHERE_API_KEY else "echo"
 
     if provider_name == "cohere":

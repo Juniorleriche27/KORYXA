@@ -51,7 +51,6 @@ const nextConfig: NextConfigWithTurbopack = {
   async rewrites() {
     return [
       { source: "/api/auth/:path*", destination: `${API_BASE}/auth/:path*` },
-      { source: "/api/chatlaya/:path*", destination: `${API_BASE}/chatlaya/:path*` },
       {
         source: "/innova/api/:path*",
         destination: `${INNOVA_API_BASE}/:path*`,

@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from app.services.chatlaya_specialist import (
+from app.services._specialist import (
     CHATLAYA_MODE_LAUNCH_STRUCTURE_SELL,
     _load_launch_structure_sell_chunks,
     _normalize_text,

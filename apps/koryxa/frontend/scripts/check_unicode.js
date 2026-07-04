@@ -20,7 +20,7 @@ function walk(dir){
         process.exitCode = 1;
       }
       if(/Chat[- ]?LAYA|Chat Laya/.test(text)){
-        console.error(`[chatlaya] Non-uniform naming in: ${p}`);
+        console.error(`[koryxa] Non-uniform naming in: ${p}`);
         process.exitCode = 1;
       }
     }

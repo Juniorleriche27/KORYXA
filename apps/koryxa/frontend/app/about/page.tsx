@@ -48,9 +48,9 @@ const PLATFORM_BLOCKS = [
   },
   {
     icon: Sparkles,
-    title: "ChatLAYA",
+    title: "",
     detail: "Assistant pour lancer, structurer et vendre un projet de manière claire.",
-    href: "/chatlaya",
+    href: "/services-ia",
   },
 ] as const;
 

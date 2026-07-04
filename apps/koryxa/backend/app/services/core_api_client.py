@@ -76,5 +76,5 @@ async def get_guest_enterprise_summary(guest_id: str) -> dict[str, Any]:
     return await _get_json(f"/internal/core/guests/{guest_id}/enterprise-summary")
 
 
-async def get_user_chatlaya_entitlement(user_id: str) -> dict[str, Any]:
-    return await _get_json(f"/internal/core/users/{user_id}/entitlements/chatlaya")
+async def get_user__entitlement(user_id: str) -> dict[str, Any]:
+    return await _get_json(f"/internal/core/users/{user_id}/entitlements/")

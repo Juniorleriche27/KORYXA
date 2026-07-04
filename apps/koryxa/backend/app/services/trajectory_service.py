@@ -28,7 +28,7 @@ class BlueprintAIGenerationError(RuntimeError):
 
 def _resolve_blueprint_provider() -> str:
     provider_name = (settings.CHAT_PROVIDER or settings.LLM_PROVIDER or "cohere").strip().lower()
-    if provider_name in {"local", "smollm", "chatlaya"}:
+    if provider_name in {"local", "smollm", ""}:
         return "cohere" if settings.COHERE_API_KEY else "echo"
     return provider_name or "echo"
 

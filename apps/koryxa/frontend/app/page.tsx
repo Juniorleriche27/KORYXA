@@ -23,9 +23,9 @@ import AnimatedTicker from "@/components/ui/AnimatedTicker";
 import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: "KORYXA | Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise, ChatLAYA",
+  title: "KORYXA | Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise",
   description:
-    "KORYXA est la première plateforme d'orchestration IA en Afrique. Cadrez vos besoins, exécutez vos projets data et IA, activez vos talents avec Formation IA, Entreprise, Service IA et ChatLAYA.",
+    "KORYXA est la première plateforme d'orchestration IA en Afrique. Cadrez vos besoins, exécutez vos projets data et IA, activez vos talents avec Formation IA, Entreprise et Service IA.",
   keywords: [
     "plateforme IA Afrique",
     "orchestration IA",
@@ -58,7 +58,7 @@ const TICKER_ITEMS = [
 ] as const;
 
 const KPI_ITEMS = [
-  { icon: Cpu, label: "Briques connectees", value: 5, suffix: " modules", detail: "Formation IA, Entreprise, Service IA, ChatLAYA" },
+  { icon: Cpu, label: "Briques connectees", value: 5, suffix: " modules", detail: "Formation IA, Entreprise, Service IA" },
   { icon: BriefcaseBusiness, label: "Exécution Service IA", value: 10, suffix: " offres", detail: "Data, IA, automatisations, applications et systèmes métier" },
   { icon: Target, label: "Qualification rapide", value: 72, suffix: "h", detail: "Premiere qualification et cadrage du besoin" },
   { icon: FolderKanban, label: "Mode livraison", value: 100, suffix: "%", detail: "De la demande au livrable exploitable" },
@@ -69,7 +69,6 @@ const MODULE_ITEMS = [
   { icon: BriefcaseBusiness, title: "Entreprise", description: "Cadrage intelligent des besoins avant toute exécution.", href: "/entreprise", cta: "Cadrer un besoin" },
   { icon: Bot, title: "Service IA", description: "Exécution professionnelle : agents IA, modèles, applications et plateformes.", href: "/services-ia", cta: "Demander un service" },
   { icon: ChartNoAxesCombined, title: "Opportunités", description: "Pipeline de missions et activation commerciale sur les besoins qualifiés.", href: "/opportunites", cta: "Voir les opportunités" },
-  { icon: Sparkles, title: "ChatLAYA", description: "Assistant de travail pour lancer, structurer et vendre un projet.", href: "/chatlaya", cta: "Ouvrir ChatLAYA" },
 ] as const;
 
 const organizationJsonLd = {
@@ -78,7 +77,7 @@ const organizationJsonLd = {
   name: "KORYXA",
   url: "https://koryxa.com",
   logo: "https://koryxa.com/logo.png",
-  description: "Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise, Service IA, ChatLAYA",
+  description: "Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise, Service IA",
   areaServed: "Africa",
   knowsAbout: ["Intelligence Artificielle", "Data Science", "Machine Learning", "Automatisation"],
 };
@@ -130,7 +129,7 @@ export default function HomePage() {
 
               <p className="mx-auto mt-6 max-w-4xl text-base leading-8 text-slate-300 sm:text-[1.15rem] sm:leading-9">
                 De l'idée à la livraison concrète : Formation IA révèle les talents, Entreprise cadre les besoins,
-                Service IA exécute, et ChatLAYA aide à lancer, structurer et vendre.
+                Service IA exécute, et KORYXA pilote l'ensemble du parcours.
               </p>
 
               <div className="mt-6 text-sm font-semibold text-sky-200 sm:text-base">
@@ -174,7 +173,7 @@ export default function HomePage() {
                 </p>
                 <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <Link
-                    href="/chatlaya?intent=problem_collector"
+                    href="/services-ia"
                     className="kx-cta-glow inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#0ea5e9_0%,#0284c7_100%)] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(2,132,199,0.25)] sm:w-auto sm:min-w-[16rem]"
                   >
                     Partager un problème réel
@@ -329,10 +328,10 @@ export default function HomePage() {
                 <ArrowRight className="kx-arrow-bounce h-4 w-4" />
               </Link>
               <Link
-                href="/chatlaya"
+                href="/services-ia"
                 className="inline-flex items-center rounded-2xl border border-white/12 bg-white/6 px-8 py-4 text-base font-semibold text-white backdrop-blur hover:bg-white/10"
               >
-                Discuter avec ChatLAYA
+                Découvrir Service IA
               </Link>
             </div>
           </div>

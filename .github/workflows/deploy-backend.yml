@@ -131,9 +131,7 @@ jobs:
           set -euo pipefail
           OPENAPI_URL="https://innovaplus.africa/innova/api/openapi.json"
           spec=$(curl -fsS --max-time 20 "${OPENAPI_URL}")
-          required_paths=(
-            "/chatlaya/session"
-            "/trajectoire/onboarding"
+          required_paths=("/trajectoire/onboarding"
             "/products/public"
             "/enterprise/needs"
             "/enterprise/opportunities/public"

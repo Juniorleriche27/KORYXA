@@ -30,7 +30,7 @@ Important:
 Planned public API mapping:
 
 - `/api/v1/core/*` -> `127.0.0.1:8000`
-- `/api/v1/chatlaya/*` -> `127.0.0.1:8010`
+- `/api/v1//*` -> `127.0.0.1:8010`
 - `/api/v1/datalaya/*` -> `127.0.0.1:8020`
 - `/api/v1/myplanning/*` -> `127.0.0.1:8030`
 - `/api/v1/playwork/*` -> `127.0.0.1:8040`
@@ -43,7 +43,7 @@ Planned public API mapping:
 Planned service units:
 
 - `koryxa-core-service.service`
-- `chatlaya-service.service`
+- `-service.service`
 - `datalaya-service.service`
 - `myplanning-service.service`
 - `playwork-service.service`
@@ -64,7 +64,7 @@ Each unit should own:
 Recommended structure:
 
 - `/var/log/koryxa/koryxa-core-service/`
-- `/var/log/koryxa/chatlaya-service/`
+- `/var/log/koryxa/-service/`
 - `/var/log/koryxa/datalaya-service/`
 - `/var/log/koryxa/myplanning-service/`
 - `/var/log/koryxa/playwork-service/`
