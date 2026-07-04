@@ -45,7 +45,6 @@ Observed entrypoints and coupling:
 - marketing pages
 - auth flows
 -  UI
-- Service IA pages
 - enterprise flows
 - product shell / connected navigation
 
@@ -80,7 +79,6 @@ The current frontend combines:
 
 - identity and onboarding pages
 -  application UI
-- Service IA catalog
 - enterprise discovery and brief flows
 - connected shell / account navigation
 

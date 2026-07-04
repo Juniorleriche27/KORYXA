@@ -27,11 +27,6 @@ const CONNECTED_NAV_LINKS: ConnectedNavLink[] = [
     label: "Entreprise",
     match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.entreprise),
   },
-  {
-    href: PUBLIC_ROUTES.serviceIa,
-    label: "Service IA",
-    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.serviceIa),
-  },
 ];
 
 function IconMenu(props: React.SVGProps<SVGSVGElement>) {

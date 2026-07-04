@@ -63,7 +63,6 @@ const PLATFORM_REDIRECTS: Array<{ from: string; to: string }> = [
   { from: "/platform/opportunites", to: "/opportunites" },
   { from: "/platform/missions", to: "/opportunites" },
   { from: "/platform/communaute", to: "/opportunites" },
-  { from: "/platform/messages", to: "/services-ia" },
   { from: "/platform/formateurs", to: "/" },
   { from: "/platform/profil", to: "/account/role" },
   { from: "/platform/notifications", to: "/" },
@@ -184,7 +183,6 @@ const V1_PUBLIC_PATHS = [
   "/products",
   "/produits",
   "/contact",
-  "/services-ia",
   "/resources",
   "/privacy",
   "/terms",
@@ -251,7 +249,7 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/chat-laya" || pathname.startsWith("/chat-laya/")) {
     const url = request.nextUrl.clone();
-    url.pathname = pathname.replace("/chat-laya", "/services-ia");
+    url.pathname = pathname.replace("/chat-laya", "/products");
     return NextResponse.redirect(url, 308);
   }
   if (
@@ -261,7 +259,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/communaute/messages/")
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/services-ia";
+    url.pathname = "/products";
     return NextResponse.redirect(url, 308);
   }
   if (

@@ -270,9 +270,9 @@ export default function EntreprisePage() {
                 },
                 {
                   icon: Sparkles,
-                  label: "Service IA",
+                  label: "produits autonomes",
                   desc: "Historique, scores et profils matchés.",
-                  href: "/services-ia",
+                  href: "/products",
                   accent: "bg-emerald-500/15 text-emerald-300",
                   btn: "bg-emerald-600 hover:bg-emerald-700 text-white",
                 },

@@ -42,15 +42,15 @@ const PLATFORM_BLOCKS = [
   },
   {
     icon: Bot,
-    title: "Service IA",
+    title: "produits autonomes",
     detail: "Prend en charge l'exécution : data, IA, automatisation et applications.",
-    href: "/services-ia",
+    href: "/products",
   },
   {
     icon: Sparkles,
     title: "",
     detail: "Assistant pour lancer, structurer et vendre un projet de manière claire.",
-    href: "/services-ia",
+    href: "/products",
   },
 ] as const;
 
@@ -223,10 +223,10 @@ export default function AboutPage() {
           </h2>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/services-ia"
+              href="/products"
               className="kx-cta-glow inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#0ea5e9,#0284c7)] px-8 py-4 text-base font-semibold text-white"
             >
-              Ouvrir Service IA
+              Ouvrir produits autonomes
               <ArrowRight className="kx-arrow-bounce h-4 w-4" />
             </Link>
             <Link

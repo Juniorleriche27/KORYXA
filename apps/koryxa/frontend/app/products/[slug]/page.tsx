@@ -9,7 +9,7 @@ type ProductPageProps = {
 };
 
 const PRODUCT_ICONS = {
-  "service-ia": <Sparkles className="h-8 w-8 text-white" />,
+  "": <Sparkles className="h-8 w-8 text-white" />,
 } as const;
 
 export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {

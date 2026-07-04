@@ -27,11 +27,11 @@ const NAV_LINKS_V1 = [
 ];
 
 const PUBLIC_PRODUCT_LINKS = [
-  { href: PUBLIC_ROUTES.serviceIa, label: "Service IA", hint: "Studio d'execution IA pour les besoins entreprise" },
+  { href: PUBLIC_ROUTES.produits, label: "produits autonomes", hint: "Écosystème KORYXA" },
 ];
 
 const PRODUCT_LINKS = [
-  { href: PUBLIC_ROUTES.serviceIa, label: "Service IA", hint: "Studio d'execution IA pour les besoins entreprise" },
+  { href: PUBLIC_ROUTES.produits, label: "produits autonomes", hint: "Écosystème KORYXA" },
 ];
 
 const NAV_PILL_CLASS =
@@ -78,8 +78,8 @@ const PUBLIC_SEARCH_ACTIONS = [
     keywords: ["produits", "tools", "outils"],
   },
   {
-    href: PUBLIC_ROUTES.serviceIa,
-    label: "Service IA",
+    href: PUBLIC_ROUTES.produits,
+    label: "produits autonomes",
     hint: "Execution IA de bout en bout",
     keywords: ["service ia", "services", "execution", "offre"],
   },
@@ -162,7 +162,7 @@ export default function Headbar() {
   const [notifs, setNotifs] = useState<Array<{ id: string; type: string; payload: Record<string, unknown> | null; created_at: string; read_at?: string }>>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const hideHeadbar =
-    pathname.startsWith("/services-ia") ||
+    pathname.startsWith("/products") ||
     pathname.startsWith("/trajectoire/demarrer") ||
     pathname.startsWith("/entreprise/demarrer") ||
     pathname.startsWith("/entreprise/cadrage");
@@ -795,7 +795,7 @@ export default function Headbar() {
               ) : (
                 <>
                   <Link 
-                    href={PUBLIC_ROUTES.serviceIa} 
+                    href={PUBLIC_ROUTES.produits} 
                     onClick={() => setDrawerOpen(false)} 
                     className="flex items-center gap-2 w-full rounded-xl px-4 py-3 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >

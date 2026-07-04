@@ -42,7 +42,6 @@ const GROUPS: NavGroup[] = [
     items: [
       { label: "Vue d'ensemble", href: "/trajectoire", icon: <LayoutDashboard className="h-4 w-4" /> },
       { label: "Demarrer", href: "/trajectoire/demarrer", icon: <FileSearch className="h-4 w-4" /> },
-      { label: "Service IA", href: "/services-ia", icon: <TrendingUp className="h-4 w-4" /> },
     ],
   },
   {
@@ -50,7 +49,6 @@ const GROUPS: NavGroup[] = [
     label: "Activation",
     icon: <TrendingUp className="h-4 w-4" />,
     items: [
-      { label: "Service IA", href: "/services-ia", icon: <Compass className="h-4 w-4" /> },
     ],
   },
 ];
@@ -83,13 +81,6 @@ function getFabContext(pathname: string): { Icon: LucideIcon; closedClass: strin
       Icon: BriefcaseBusiness,
       closedClass: "bg-[linear-gradient(135deg,#0f172a_0%,#0f3b67_55%,#0284c7_100%)] text-white",
       label: "Entreprise",
-    };
-  }
-  if (pathname.startsWith("/services-ia")) {
-    return {
-      Icon: Bot,
-      closedClass: "bg-[linear-gradient(135deg,#14532d_0%,#047857_55%,#10b981_100%)] text-white",
-      label: "Service IA",
     };
   }
   if (pathname.startsWith("/about") || pathname.startsWith("/a-propos")) {

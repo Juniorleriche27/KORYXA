@@ -8,7 +8,6 @@
   entrepriseVentes: "/entreprise/ventes",
   trajectoire: "/trajectoire",
   produits: "/produits",
-  serviceIa: "/services-ia",
   apropos: "/a-propos",
   resources: "/resources",
   privacy: "/legal/confidentialite",

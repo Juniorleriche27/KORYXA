@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const PRODUCT_PRESENTATION = {
-  "service-ia": {
+  "": {
     icon: <Sparkles className="h-8 w-8 text-violet-600" />,
     bg: "bg-violet-100",
   },
@@ -21,7 +21,7 @@ export default function ProductsPage() {
     <main>
       <PublishedHero
         title="Solutions KORYXA"
-        description="Service IA, le studio KORYXA pour transformer un besoin entreprise en execution concrete."
+        description="produits autonomes, le studio KORYXA pour transformer un besoin entreprise en execution concrete."
       />
 
       <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
