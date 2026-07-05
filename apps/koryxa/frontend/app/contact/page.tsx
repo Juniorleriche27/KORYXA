@@ -1,68 +1,194 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, Phone } from "lucide-react";
-import { PublishedFormShell, PublishedHero } from "@/components/marketing/PublishedSiteSections";
+import Link from "next/link";
+import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, UserRoundCog } from "lucide-react";
+import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = {
-  title: "Contact | KORYXA",
-  description: "Une question ? Un projet ? Notre équipe est à votre écoute.",
+  title: "Contact KORYXA | Partenariat, produit, compte et presse",
+  description:
+    "Contactez KORYXA pour un partenariat, un produit, le compte KORYXA, une demande presse ou une autre demande liée à l’écosystème.",
 };
+
+const contactReasons = [
+  {
+    icon: Building2,
+    title: "Partenariat",
+    description: "Entreprise, institution, école, communauté ou organisation terrain.",
+  },
+  {
+    icon: PackageCheck,
+    title: "Produit",
+    description: "Question sur ChatLAYA, Cora, Formation, API, Services IA ou un autre produit.",
+  },
+  {
+    icon: UserRoundCog,
+    title: "Compte KORYXA",
+    description: "Accès central, rôles, permissions ou orientation vers KORYXA Admin.",
+  },
+  {
+    icon: Megaphone,
+    title: "Presse",
+    description: "Demande média, présentation officielle ou prise de parole.",
+  },
+  {
+    icon: MessageSquare,
+    title: "Autre demande",
+    description: "Toute autre question liée à l’écosystème KORYXA.",
+  },
+];
 
 export default function ContactPage() {
   return (
-    <main>
-      <PublishedHero
-        title="Contactez-nous"
-        description="Une question ? Un projet ? Notre équipe est à votre écoute."
-      />
-
-      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2">
-          <div>
-            <h2 className="mb-6 text-2xl font-bold text-slate-950">Envoyez-nous un message</h2>
-            <PublishedFormShell>
-              <form className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="text-sm font-medium text-slate-700">Nom</label>
-                  <input id="name" placeholder="Votre nom" className="mt-2 h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-sky-400" />
-                </div>
-                <div>
-                  <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
-                  <input id="email" type="email" placeholder="votre@email.com" className="mt-2 h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-sky-400" />
-                </div>
-                <div>
-                  <label htmlFor="subject" className="text-sm font-medium text-slate-700">Sujet</label>
-                  <input id="subject" placeholder="Objet de votre message" className="mt-2 h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-sky-400" />
-                </div>
-                <div>
-                  <label htmlFor="message" className="text-sm font-medium text-slate-700">Message</label>
-                  <textarea id="message" rows={6} placeholder="Votre message..." className="mt-2 w-full rounded-md border border-slate-200 px-3 py-3 text-sm outline-none focus:border-sky-400" />
-                </div>
-                <button type="button" className="w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700">
-                  Envoyer
-                </button>
-              </form>
-            </PublishedFormShell>
+    <main className="kx-pie-page kx-contact-page">
+      <section className="kx-contact-hero">
+        <div className="kx-pie-blob kx-pie-blob-one" />
+        <div className="kx-pie-blob kx-pie-blob-two" />
+        <div className="kx-contact-hero-inner">
+          <div className="kx-contact-hero-copy kx-pie-animate">
+            <div className="kx-pie-badge">
+              <span className="kx-pie-dot" />
+              <span>Contact KORYXA</span>
+            </div>
+            <h1>Contactez KORYXA.</h1>
+            <p>
+              Choisissez le bon motif de contact : partenariat, produit, compte KORYXA, presse ou autre demande.
+              L’objectif est d’orienter chaque message vers le bon espace de l’écosystème.
+            </p>
+            <div className="kx-pie-hero-ctas">
+              <a href="mailto:contact@koryxa.com" className="kx-pie-btn kx-pie-btn-gold">
+                Écrire à KORYXA
+                <ArrowRight size={18} />
+              </a>
+              <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-outline-white">
+                Compte KORYXA
+              </a>
+            </div>
           </div>
 
-          <div>
-            <h2 className="mb-6 text-2xl font-bold text-slate-950">Informations de contact</h2>
-            <div className="space-y-6">
-              {[
-                { icon: <Mail className="h-6 w-6 text-sky-600" />, title: "Email", text: "contact@koryxa.com", bg: "bg-sky-100" },
-                { icon: <MapPin className="h-6 w-6 text-emerald-600" />, title: "Adresse", text: "Dakar, Sénégal", bg: "bg-emerald-100" },
-                { icon: <Phone className="h-6 w-6 text-amber-600" />, title: "Téléphone", text: "+221 XX XXX XX XX", bg: "bg-amber-100" },
-              ].map((item) => (
-                <PublishedFormShell key={item.title}>
-                  <div className="flex gap-4">
-                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${item.bg}`}>{item.icon}</div>
-                    <div>
-                      <h3 className="font-semibold text-slate-950">{item.title}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{item.text}</p>
-                    </div>
-                  </div>
-                </PublishedFormShell>
-              ))}
+          <div className="kx-contact-panel kx-pie-animate kx-pie-delay-2">
+            <div className="kx-contact-panel-head">
+              <div>
+                <span>Point d’entrée</span>
+                <strong>Une demande, un bon canal</strong>
+              </div>
+              <Mail size={26} />
             </div>
+            <div className="kx-contact-panel-list">
+              {contactReasons.map((reason, index) => {
+                const Icon = reason.icon;
+                return (
+                  <div key={reason.title} style={{ animationDelay: `${0.25 + index * 0.1}s` }}>
+                    <span>{index + 1}</span>
+                    <Icon size={18} />
+                    <p>{reason.title}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="kx-pie-section kx-pie-trust-band">
+        <div className="kx-pie-container">
+          <div className="kx-pie-section-header">
+            <div className="kx-pie-section-label">Motifs de contact</div>
+            <h2>Chaque demande doit arriver au bon endroit.</h2>
+            <p>
+              KORYXA organise les échanges comme son écosystème : avec un motif clair, une orientation simple et un accès lisible.
+            </p>
+          </div>
+
+          <div className="kx-contact-reason-grid">
+            {contactReasons.map((reason) => {
+              const Icon = reason.icon;
+              return (
+                <article className="kx-contact-reason-card" key={reason.title}>
+                  <div className="kx-products-icon">
+                    <Icon size={24} />
+                  </div>
+                  <h3>{reason.title}</h3>
+                  <p>{reason.description}</p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="kx-pie-section">
+        <div className="kx-pie-container">
+          <div className="kx-contact-main-grid">
+            <div className="kx-contact-form-card">
+              <div className="kx-pie-section-label">Message</div>
+              <h2>Envoyez une demande claire.</h2>
+              <p>
+                Ce formulaire est prêt côté interface. La connexion backend sera câblée dans le chantier technique dédié.
+              </p>
+              <form className="kx-contact-form">
+                <div className="kx-contact-field-grid">
+                  <label>
+                    <span>Nom</span>
+                    <input name="name" placeholder="Votre nom" />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input name="email" type="email" placeholder="vous@email.com" />
+                  </label>
+                </div>
+                <label>
+                  <span>Motif</span>
+                  <select name="reason" defaultValue="Partenariat">
+                    {contactReasons.map((reason) => (
+                      <option key={reason.title}>{reason.title}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Message</span>
+                  <textarea name="message" rows={6} placeholder="Décrivez votre demande..." />
+                </label>
+                <button type="button" className="kx-pie-btn kx-pie-btn-primary">
+                  Préparer l’envoi
+                </button>
+              </form>
+            </div>
+
+            <aside className="kx-contact-side-card">
+              <div>
+                <Mail size={24} />
+                <h3>Email officiel</h3>
+                <p>contact@koryxa.com</p>
+              </div>
+              <div>
+                <UserRoundCog size={24} />
+                <h3>Compte central</h3>
+                <p>Accès, rôles et permissions passent par KORYXA Admin.</p>
+                <a href={KORYXA_ACCOUNT_URL}>Ouvrir le Compte KORYXA →</a>
+              </div>
+              <div>
+                <Building2 size={24} />
+                <h3>Partenaires</h3>
+                <p>Les demandes de collaboration sont orientées vers Partner Portal.</p>
+                <Link href={PUBLIC_ROUTES.partenaires}>Voir la page partenaires →</Link>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section className="kx-pie-cta-section">
+        <div className="kx-pie-container">
+          <div className="kx-pie-section-label">Orientation</div>
+          <h2>Vous voulez d’abord comprendre où aller ?</h2>
+          <p>La page Cas d’usage permet de partir du besoin et d’être orienté vers le bon espace.</p>
+          <div className="kx-pie-cta-btns">
+            <Link href={PUBLIC_ROUTES.casUsage} className="kx-pie-btn kx-pie-btn-gold">
+              Voir les cas d’usage
+            </Link>
+            <Link href={PUBLIC_ROUTES.produits} className="kx-pie-btn kx-pie-btn-outline-white">
+              Voir les produits
+            </Link>
           </div>
         </div>
       </section>
