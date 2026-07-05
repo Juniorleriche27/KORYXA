@@ -1,4 +1,4 @@
-export const KORYXA_ACCOUNT_URL = process.env.NEXT_PUBLIC_KORYXA_ACCOUNT_URL || "https://github.com/Juniorleriche27/koryxa-admin";
+export const KORYXA_ACCOUNT_URL = "/login";
 
 export const PUBLIC_ROUTES = {
   home: "/",
