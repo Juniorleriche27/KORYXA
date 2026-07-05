@@ -3118,3 +3118,33 @@ body {
     padding: 36px 18px 54px !important;
   }
 }
+
+
+/* ─────────────────────────────────────────────
+   FINAL HERO ALIGNMENT FIX
+   Right visual block starts at the same level as the badge.
+   ───────────────────────────────────────────── */
+@media (min-width: 981px) {
+  .kx-pie-hero-inner {
+    align-items: flex-start !important;
+    min-height: calc(100vh - 118px) !important;
+    padding-top: 38px !important;
+  }
+
+  .kx-pie-hero-content {
+    align-self: flex-start !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .kx-pie-hero-visual {
+    align-self: flex-start !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    transform: translateY(0) !important;
+  }
+
+  .kx-pie-stats-grid {
+    margin-top: 0 !important;
+  }
+}
