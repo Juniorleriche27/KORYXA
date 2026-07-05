@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BrandLogo from "@/components/layout/BrandLogo";
+import { SocialLinks } from "@/components/layout/SocialLinks";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
 const FOOTER_GROUPS = [
@@ -53,6 +54,10 @@ export default function Footer() {
             KORYXA est la première plateforme d'orchestration IA en Afrique : une vitrine centrale,
             un accès unique et un écosystème de produits autonomes connectés.
           </p>
+          <div className="mt-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#006b43]">Suivre KORYXA</p>
+            <SocialLinks compact />
+          </div>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-3">

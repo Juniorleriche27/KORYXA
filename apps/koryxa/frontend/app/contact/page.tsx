@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, UserRoundCog } from "lucide-react";
+import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, Phone, UserRoundCog } from "lucide-react";
+import { SocialLinks } from "@/components/layout/SocialLinks";
+import { KORYXA_CONTACT } from "@/config/contact";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = {
   title: "Contact KORYXA | Partenariat, produit, compte et presse",
   description:
-    "Contactez KORYXA pour un partenariat, un produit, le compte KORYXA, une demande presse ou une autre demande liée à l’écosystème.",
+    "Contactez KORYXA par email, WhatsApp ou via les pages officielles Facebook et LinkedIn.",
 };
 
 const contactReasons = [
@@ -55,12 +57,12 @@ export default function ContactPage() {
               L’objectif est d’orienter chaque message vers le bon espace de l’écosystème.
             </p>
             <div className="kx-pie-hero-ctas">
-              <a href="mailto:contact@koryxa.com" className="kx-pie-btn kx-pie-btn-gold">
+              <a href={`mailto:${KORYXA_CONTACT.email}`} className="kx-pie-btn kx-pie-btn-gold">
                 Écrire à KORYXA
                 <ArrowRight size={18} />
               </a>
-              <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-outline-white">
-                Compte KORYXA
+              <a href={KORYXA_CONTACT.whatsappUrl} target="_blank" rel="noreferrer" className="kx-pie-btn kx-pie-btn-outline-white">
+                WhatsApp KORYXA
               </a>
             </div>
           </div>
@@ -158,7 +160,22 @@ export default function ContactPage() {
               <div>
                 <Mail size={24} />
                 <h3>Email officiel</h3>
-                <p>contact@koryxa.com</p>
+                <p>{KORYXA_CONTACT.email}</p>
+                <a href={`mailto:${KORYXA_CONTACT.email}`}>Écrire par email →</a>
+              </div>
+              <div>
+                <Phone size={24} />
+                <h3>WhatsApp officiel</h3>
+                <p>{KORYXA_CONTACT.phoneDisplay}</p>
+                <a href={KORYXA_CONTACT.whatsappUrl} target="_blank" rel="noreferrer">Ouvrir WhatsApp →</a>
+              </div>
+              <div>
+                <Mail size={24} />
+                <h3>Réseaux officiels</h3>
+                <p>Suivre KORYXA sur Facebook, LinkedIn, WhatsApp et email.</p>
+                <div className="mt-4">
+                  <SocialLinks />
+                </div>
               </div>
               <div>
                 <UserRoundCog size={24} />
