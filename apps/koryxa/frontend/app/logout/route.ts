@@ -38,7 +38,7 @@ function clearCookieHeaders() {
 }
 
 function safeRedirectTarget(value: string | null): string {
-  return resolveSafeAuthRedirectTarget(value, "/login");
+  return resolveSafeAuthRedirectTarget(value, "/");
 }
 
 export const runtime = "nodejs";

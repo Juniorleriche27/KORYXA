@@ -4,6 +4,8 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { AUTH_API_BASE } from "@/lib/env";
 
+const KORYXA_IDENTITY_SIGN_IN_URL = "https://accounts.koryxa.fr/sign-in?redirect_url=https%3A%2F%2Fwww.koryxa.fr%2F";
+
 export default function RecoverPage() {
   const [email, setEmail] = useState("");
   const [redirectTo, setRedirectTo] = useState("");
@@ -101,7 +103,7 @@ export default function RecoverPage() {
 
         <p className="mt-6 text-sm text-slate-500">
           Retour à la {" "}
-          <Link href="/login" className="font-semibold text-sky-700 hover:underline">
+          <Link href={KORYXA_IDENTITY_SIGN_IN_URL} className="font-semibold text-sky-700 hover:underline">
             page de connexion
           </Link>
         </p>

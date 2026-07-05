@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AUTH_API_BASE } from "@/lib/env";
 
+const KORYXA_IDENTITY_SIGN_IN_URL = "https://accounts.koryxa.fr/sign-in?redirect_url=https%3A%2F%2Fwww.koryxa.fr%2Faccount%2Frole";
+
 const ROLE_CARDS = [
   {
     id: "demandeur",
@@ -31,7 +33,7 @@ export default function RoleSelectionPage() {
     return (
       <main className="mx-auto max-w-2xl px-4 py-10 text-center">
         <p className="text-lg text-slate-600">Merci de te connecter pour choisir ton rôle.</p>
-        <Link href="/login" className="mt-4 inline-flex rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow-sm">
+        <Link href={KORYXA_IDENTITY_SIGN_IN_URL} className="mt-4 inline-flex rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow-sm">
           Aller à la connexion
         </Link>
       </main>

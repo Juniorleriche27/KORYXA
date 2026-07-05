@@ -106,7 +106,9 @@ export default function LoginClient({
 
   useEffect(() => {
     if (!isPreviewDomain) return;
-    window.location.href = `${SITE_BASE_URL}/login?redirect=${encodeURIComponent(redirect)}`;
+    const identityUrl = new URL("https://accounts.koryxa.fr/sign-in");
+    identityUrl.searchParams.set("redirect_url", new URL(redirect, SITE_BASE_URL).toString());
+    window.location.href = identityUrl.toString();
   }, [isPreviewDomain, redirect]);
 
   useEffect(() => {

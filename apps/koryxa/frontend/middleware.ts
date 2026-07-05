@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { resolveSafeAuthRedirectTarget } from "@/lib/auth-redirect";
 
@@ -14,6 +14,10 @@ const SESSION_COOKIE = "innova_session";
 const SITE_BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://koryxa.com").replace(/\/+$/, "");
 const LEGACY_API_HOST = "https://api.innovaplus.africa";
 const DEFAULT_API_BASE = "https://innovaplus.africa";
+const KORYXA_ACCOUNTS_ORIGIN = "https://accounts.koryxa.fr";
+const KORYXA_IDENTITY_SIGN_IN_URL = `${KORYXA_ACCOUNTS_ORIGIN}/sign-in`;
+const KORYXA_IDENTITY_SIGN_UP_URL = `${KORYXA_ACCOUNTS_ORIGIN}/sign-up`;
+const IDENTITY_AUTH_PATHS = new Set(["/login", "/signup", "/sign-in", "/sign-up"]);
 
 function normalizeApiBase(base: string): string {
   const raw = base.replace(/\/+$/, "");
@@ -123,13 +127,43 @@ function requiresConnectedAuth(pathname: string) {
   return CONNECTED_AUTH_REQUIRED_PREFIXES.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-function getLoginPath(pathname: string): "/login" {
-  void pathname;
-  return "/login";
-}
-
 function getSafeRedirectTarget(value: string | null, fallback: string): string {
   return resolveSafeAuthRedirectTarget(value, fallback);
+}
+
+type IdentityAuthMode = "sign-in" | "sign-up";
+
+function getIdentityAuthMode(pathname: string): IdentityAuthMode {
+  return pathname === "/signup" || pathname === "/sign-up" ? "sign-up" : "sign-in";
+}
+
+function buildAbsoluteRedirectTarget(request: NextRequest, value: string | null, fallback = "/"): string {
+  const safeTarget = getSafeRedirectTarget(value, fallback);
+  return new URL(safeTarget, request.url).toString();
+}
+
+function buildKoryxaIdentityUrl(request: NextRequest, mode: IdentityAuthMode, redirectTarget: string | null): URL {
+  const url = new URL(mode === "sign-up" ? KORYXA_IDENTITY_SIGN_UP_URL : KORYXA_IDENTITY_SIGN_IN_URL);
+  url.searchParams.set("redirect_url", buildAbsoluteRedirectTarget(request, redirectTarget));
+
+  const forceAccount = request.nextUrl.searchParams.get("force_account");
+  if (forceAccount) {
+    url.searchParams.set("force_account", forceAccount);
+  }
+
+  return url;
+}
+
+function redirectToKoryxaIdentity(
+  request: NextRequest,
+  mode: IdentityAuthMode = "sign-in",
+  redirectTarget: string | null = null,
+) {
+  return NextResponse.redirect(buildKoryxaIdentityUrl(request, mode, redirectTarget));
+}
+
+function getRequestedAuthRedirect(searchParams: URLSearchParams): string | null {
+  return searchParams.get("redirect_url") || searchParams.get("redirect") || searchParams.get("next");
 }
 
 async function hasValidSession(request: NextRequest): Promise<boolean> {
@@ -196,6 +230,10 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/logout" || pathname.startsWith("/logout/")) {
     return NextResponse.next();
   }
+
+  if (IDENTITY_AUTH_PATHS.has(pathname)) {
+    return redirectToKoryxaIdentity(request, getIdentityAuthMode(pathname), getRequestedAuthRedirect(searchParams));
+  }
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE));
   let sessionChecked = false;
   let sessionValid = false;
@@ -214,24 +252,20 @@ export async function middleware(request: NextRequest) {
     const allowAnonymous = isPublic && !forceAuth;
 
     if (!hasSession && !allowAnonymous) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = getLoginPath(pathname);
-      loginUrl.searchParams.set(
-        "redirect",
-        pathname + (searchParams.toString() ? `?${searchParams}` : "")
+      return redirectToKoryxaIdentity(
+        request,
+        "sign-in",
+        pathname + (searchParams.toString() ? `?${searchParams}` : ""),
       );
-      return NextResponse.redirect(loginUrl);
     }
     if (hasSession && !allowAnonymous) {
       const ok = await ensureSessionValid();
       if (!ok) {
-        const loginUrl = request.nextUrl.clone();
-        loginUrl.pathname = getLoginPath(pathname);
-        loginUrl.searchParams.set(
-          "redirect",
-          pathname + (searchParams.toString() ? `?${searchParams}` : "")
+        const res = redirectToKoryxaIdentity(
+          request,
+          "sign-in",
+          pathname + (searchParams.toString() ? `?${searchParams}` : ""),
         );
-        const res = NextResponse.redirect(loginUrl);
         appendSessionClearHeaders(res);
         return res;
       }
@@ -265,79 +299,45 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isProtectedPath(pathname) && !hasSession) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = getLoginPath(pathname);
-    loginUrl.searchParams.set(
-      "redirect",
-      pathname + (searchParams.toString() ? `?${searchParams}` : "")
+    return redirectToKoryxaIdentity(
+      request,
+      "sign-in",
+      pathname + (searchParams.toString() ? `?${searchParams}` : ""),
     );
-    return NextResponse.redirect(loginUrl);
   }
   if (isProtectedPath(pathname) && hasSession) {
     const ok = await ensureSessionValid();
     if (!ok) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = getLoginPath(pathname);
-      loginUrl.searchParams.set(
-        "redirect",
-        pathname + (searchParams.toString() ? `?${searchParams}` : "")
+      const res = redirectToKoryxaIdentity(
+        request,
+        "sign-in",
+        pathname + (searchParams.toString() ? `?${searchParams}` : ""),
       );
-      const res = NextResponse.redirect(loginUrl);
       appendSessionClearHeaders(res);
       return res;
     }
   }
 
   if (requiresConnectedAuth(pathname) && !hasSession) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = getLoginPath(pathname);
-    loginUrl.searchParams.set(
-      "redirect",
-      pathname + (searchParams.toString() ? `?${searchParams}` : "")
+    return redirectToKoryxaIdentity(
+      request,
+      "sign-in",
+      pathname + (searchParams.toString() ? `?${searchParams}` : ""),
     );
-    return NextResponse.redirect(loginUrl);
   }
   if (requiresConnectedAuth(pathname) && hasSession) {
     const ok = await ensureSessionValid();
     if (!ok) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = getLoginPath(pathname);
-      loginUrl.searchParams.set(
-        "redirect",
-        pathname + (searchParams.toString() ? `?${searchParams}` : "")
+      const res = redirectToKoryxaIdentity(
+        request,
+        "sign-in",
+        pathname + (searchParams.toString() ? `?${searchParams}` : ""),
       );
-      const res = NextResponse.redirect(loginUrl);
       appendSessionClearHeaders(res);
       return res;
     }
   }
 
-  if (
-    pathname === "/login" ||
-    pathname === "/signup"
-  ) {
-    if (!hasSession) {
-      return NextResponse.next();
-    }
-    const ok = await ensureSessionValid();
-    if (ok) {
-      const redirectTarget = getSafeRedirectTarget(
-        searchParams.get("redirect") || searchParams.get("next"),
-        "/",
-      );
-      const redirectUrl = redirectTarget.startsWith("http://") || redirectTarget.startsWith("https://")
-        ? new URL(redirectTarget)
-        : request.nextUrl.clone();
-      if (!redirectTarget.startsWith("http://") && !redirectTarget.startsWith("https://")) {
-        redirectUrl.pathname = redirectTarget;
-        redirectUrl.search = "";
-      }
-      return NextResponse.redirect(redirectUrl);
-    }
-    const res = NextResponse.next();
-    appendSessionClearHeaders(res);
-    return res;
-  }
 
   const res = NextResponse.next();
   res.headers.set("X-Content-Type-Options", "nosniff");

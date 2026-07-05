@@ -1,10 +1,9 @@
-import SignupClient from "./SignupClient";
+import { redirect } from "next/navigation";
+
 import { resolveSafeAuthRedirectTarget } from "@/lib/auth-redirect";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 type SearchParamsInput = SearchParams | Promise<SearchParams>;
-
-const KORYXA_PUBLIC_HOME = "/";
 
 function one(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) return value[0];
@@ -19,20 +18,14 @@ async function resolveSearchParams(input?: SearchParamsInput): Promise<SearchPar
   return input as SearchParams;
 }
 
+function buildIdentityRedirect(mode: "sign-in" | "sign-up", requestedRedirect?: string) {
+  const target = resolveSafeAuthRedirectTarget(requestedRedirect, "/");
+  const url = new URL(`https://accounts.koryxa.fr/${mode}`);
+  url.searchParams.set("redirect_url", new URL(target, "https://www.koryxa.fr").toString());
+  return url.toString();
+}
+
 export default async function SignupPage({ searchParams }: { searchParams?: SearchParamsInput }) {
   const params = await resolveSearchParams(searchParams);
-  const requestedRedirect = one(params?.redirect);
-  const authError = one(params?.auth_error);
-  const successRedirect = resolveSafeAuthRedirectTarget(requestedRedirect, KORYXA_PUBLIC_HOME);
-  const loginHref = `/login?redirect=${encodeURIComponent(successRedirect)}`;
-  const initialError =
-    authError === "google_access_refuse"
-      ? "La connexion Google a ete annulee."
-      : authError === "google_profil_invalide"
-        ? "Le profil Google recu est incomplet ou non verifie."
-        : authError
-          ? "La connexion Google a echoue. Reessayez."
-          : null;
-
-  return <SignupClient successRedirect={successRedirect} loginHref={loginHref} initialError={initialError} />;
+  redirect(buildIdentityRedirect("sign-up", one(params?.redirect) || one(params?.next) || one(params?.redirect_url)));
 }

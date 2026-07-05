@@ -5,17 +5,20 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
+const RECOMMENDATIONS_SIGN_IN_URL =
+  "https://accounts.koryxa.fr/sign-in?redirect_url=https%3A%2F%2Fwww.koryxa.fr%2Fme%2Frecommendations";
+
 export default async function MeRecommendations() {
   const jar = await cookies();
   const session = jar.get("innova_session")?.value;
-  if (!session) redirect("/login?redirect=/me/recommendations");
+  if (!session) redirect(RECOMMENDATIONS_SIGN_IN_URL);
 
   const meRes = await fetch(`${AUTH_API_BASE}/auth/me`, {
     cache: "no-store",
     headers: { cookie: jar.toString() },
     credentials: "include",
   });
-  if (!meRes.ok) redirect("/login?redirect=/me/recommendations");
+  if (!meRes.ok) redirect(RECOMMENDATIONS_SIGN_IN_URL);
 
   const me = (await meRes.json().catch(() => ({}))) as { id?: string };
   const userId = me?.id || "unknown";
