@@ -51,7 +51,7 @@ export default function PublicHeader() {
           <Link href={PUBLIC_ROUTES.home} className="group flex shrink-0 items-center gap-3" aria-label="Retour à l'accueil KORYXA">
             <BrandLogo className="h-10 w-10 rounded-xl object-cover shadow-[0_8px_20px_rgba(13,27,56,0.12)] transition group-hover:-translate-y-0.5" />
             <span className="font-serif text-[1.5rem] font-bold tracking-[-0.03em] text-[#10351f]">
-              KORY<span className="text-[#c9a227]">XA</span>
+              KORY<span className="text-[#00a86b]">XA</span>
             </span>
           </Link>
         </div>
@@ -84,7 +84,7 @@ export default function PublicHeader() {
           </a>
           <Link
             href={PUBLIC_ROUTES.ecosysteme}
-            className="inline-flex items-center justify-center rounded-lg bg-[#c9a227] px-4 py-2.5 text-[0.84rem] font-bold text-white shadow-[0_10px_28px_rgba(201,162,39,0.22)] transition hover:-translate-y-0.5 hover:bg-[#b48f1f]"
+            className="inline-flex items-center justify-center rounded-lg bg-[#00a86b] px-4 py-2.5 text-[0.84rem] font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.20)] transition hover:-translate-y-0.5 hover:bg-[#008b58]"
           >
             Explorer l’écosystème
           </Link>
@@ -123,7 +123,7 @@ export default function PublicHeader() {
               <Link
                 href={PUBLIC_ROUTES.ecosysteme}
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center justify-center rounded-xl bg-[#c9a227] px-4 py-3 text-[0.95rem] font-bold text-white"
+                className="inline-flex items-center justify-center rounded-xl bg-[#00a86b] px-4 py-3 text-[0.95rem] font-bold text-white"
               >
                 Explorer l’écosystème
               </Link>
