@@ -139,6 +139,9 @@ export default function Headbar() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const { user, initialLoggedIn, loading, clear } = useAuth();
+  const identityRedirectPath = pathname || PUBLIC_ROUTES.home;
+  const identityLoginHref = `${CONNECTED_ROUTES.login}?redirect_url=${encodeURIComponent(identityRedirectPath)}`;
+  const identitySignupHref = `${CONNECTED_ROUTES.signup}?redirect_url=${encodeURIComponent(identityRedirectPath)}`;
   const productLinks = IS_V1 ? PUBLIC_PRODUCT_LINKS : PRODUCT_LINKS;
   const navLinks = useMemo(() => {
     return IS_V1 ? NAV_LINKS_V1 : NAV_LINKS;
@@ -512,14 +515,14 @@ export default function Headbar() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link
-                  href={CONNECTED_ROUTES.login}
+                  href={identityLoginHref}
                   prefetch={false}
                     className={clsx(CTA_PILL_CLASS, "hidden sm:inline-flex border border-white/80 bg-white/72 text-slate-700 backdrop-blur hover:-translate-y-0.5 hover:border-sky-200 hover:bg-white hover:text-sky-700")}
                 >
                   Se connecter
                 </Link>
                 <Link
-                  href={CONNECTED_ROUTES.signup}
+                  href={identitySignupHref}
                   prefetch={false}
                     className={clsx(CTA_PILL_CLASS, "bg-[linear-gradient(135deg,#0f172a,#0284c7_58%,#38bdf8)] text-white shadow-[0_16px_30px_rgba(2,132,199,0.24)] hover:-translate-y-0.5 hover:brightness-105")}
                 >
@@ -604,13 +607,13 @@ export default function Headbar() {
                 </Link>
               )}
               <Link
-                href={CONNECTED_ROUTES.login}
+                href={identityLoginHref}
                 className="hidden sm:inline-flex rounded-full border border-white/80 bg-white/72 px-3 py-2 text-[11px] font-semibold text-slate-700 shadow-sm backdrop-blur"
               >
                 Connexion
               </Link>
               <Link
-                href={CONNECTED_ROUTES.signup}
+                href={identitySignupHref}
                 className="hidden sm:inline-flex rounded-full bg-[linear-gradient(135deg,#0f172a,#0284c7_58%,#38bdf8)] px-3 py-2 text-[11px] font-semibold text-white shadow-[0_14px_24px_rgba(2,132,199,0.22)]"
               >
                 Créer

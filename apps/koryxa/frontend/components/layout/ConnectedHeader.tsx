@@ -56,7 +56,7 @@ export default function ConnectedHeader() {
     return fullName || user?.email || "Compte";
   }, [user]);
   const userInitial = displayName.charAt(0).toUpperCase();
-  const loginHref = `${CONNECTED_ROUTES.login}?redirect=${encodeURIComponent(pathname || CONNECTED_ROUTES.home)}`;
+  const loginHref = `${CONNECTED_ROUTES.login}?redirect_url=${encodeURIComponent(pathname || CONNECTED_ROUTES.home)}`;
   const accountHref = isAuthenticated ? "/account/role" : loginHref;
 
   return (

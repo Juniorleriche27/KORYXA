@@ -1,4 +1,4 @@
-export const KORYXA_ACCOUNT_URL = "/login";
+export const KORYXA_ACCOUNT_URL = "https://accounts.koryxa.fr/sign-in";
 
 export const PUBLIC_ROUTES = {
   home: "/",
@@ -14,8 +14,8 @@ export const PUBLIC_ROUTES = {
 
 export const CONNECTED_ROUTES = {
   login: KORYXA_ACCOUNT_URL,
-  signup: KORYXA_ACCOUNT_URL,
-  home: KORYXA_ACCOUNT_URL,
+  signup: "https://accounts.koryxa.fr/sign-up",
+  home: "/",
 } as const;
 
 export const MAIN_NAV_LINKS = [
