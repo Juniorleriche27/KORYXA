@@ -11,9 +11,9 @@ function PublicShell({ children }: { children: ReactNode }) {
   const isHome = pathname === "/";
   const isChatPage = false;
   const isFunnelStart =
-    pathname === "/trajectoire/demarrer" ||
-    pathname === "/entreprise/demarrer" ||
-    pathname === "/entreprise/cadrage";
+    pathname === "/produits/formation" ||
+    pathname === "/cas-usage" ||
+    pathname === "/cas-usage";
 
   return (
     <div className="public-shell kx-grid-backdrop relative flex min-h-screen flex-col overflow-hidden text-slate-900 transition-colors duration-300 dark:text-slate-100">
@@ -86,7 +86,7 @@ export default function RouteShell({
 }) {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/entreprise/setup")) {
+  if (pathname.startsWith("/cas-usage")) {
     return <>{children}</>;
   }
 

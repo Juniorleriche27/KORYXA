@@ -18,14 +18,14 @@ type ConnectedNavLink = {
 
 const CONNECTED_NAV_LINKS: ConnectedNavLink[] = [
   {
-    href: PUBLIC_ROUTES.trajectoire,
-    label: "Formation IA",
-    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.trajectoire),
+    href: PUBLIC_ROUTES.produits,
+    label: "Produits",
+    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.produits),
   },
   {
-    href: PUBLIC_ROUTES.entreprise,
-    label: "Entreprise",
-    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.entreprise),
+    href: PUBLIC_ROUTES.casUsage,
+    label: "Cas d’usage",
+    match: (pathname) => pathname.startsWith(PUBLIC_ROUTES.casUsage),
   },
 ];
 

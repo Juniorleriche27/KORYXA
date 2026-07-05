@@ -53,9 +53,9 @@ const DEFAULT_LINKS = [
 ] as const;
 
 const SIMPLE_LINKS = [
-  { href: "/trajectoire", label: "Formation IA", description: "Diagnostic et progression", icon: BookIcon },
-  { href: "/entreprise", label: "Entreprise", description: "Besoin cadré et mission structurée", icon: BriefcaseIcon },
-  { href: "/products", label: "produits autonomes", description: "10 offres exécutées de bout en bout", icon: GridIcon },
+  { href: "/produits/formation", label: "KORYXA Formation", description: "Diagnostic et progression", icon: BookIcon },
+  { href: "/cas-usage", label: "Cas d’usage", description: "Orientation par besoin", icon: BriefcaseIcon },
+  { href: "/produits", label: "produits autonomes", description: "Catalogue des produits autonomes", icon: GridIcon },
 ] as const;
 
 export default function Sidebar({ className, style }: { className?: string; style?: React.CSSProperties }) {
@@ -68,7 +68,7 @@ export default function Sidebar({ className, style }: { className?: string; styl
     if (saved) setCollapsed(saved === "1");
   }, []);
 
-  if (pathname.startsWith("/trajectoire/demarrer")) {
+  if (pathname.startsWith("/produits/formation")) {
     return null;
   }
 
@@ -102,7 +102,7 @@ export default function Sidebar({ className, style }: { className?: string; styl
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-700">Navigation</p>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">
                 {IS_V1_SIMPLE
-                  ? "Formation IA et Entreprise dans une expérience simple et premium."
+                  ? "KORYXA Formation et Cas d’usage dans une expérience simple et premium."
                   : "Navigation unifiée pour piloter les talents et l'exécution."}
               </p>
             </div>

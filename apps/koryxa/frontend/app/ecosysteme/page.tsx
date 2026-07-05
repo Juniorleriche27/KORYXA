@@ -15,7 +15,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
-import { productList } from "@/app/products/data";
+import { productList } from "@/app/produits/data";
 
 export const metadata: Metadata = {
   title: "Écosystème KORYXA | Orchestration IA en Afrique",

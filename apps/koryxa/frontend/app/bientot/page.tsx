@@ -9,7 +9,7 @@ export default function BientotDisponiblePage() {
         <p className="mt-2 text-sm text-slate-600">
           Cette section sera active dans une prochaine version.
         </p>
-        <Link href="/trajectoire" className="btn-secondary mt-6 inline-flex">Retour à Trajectoire</Link>
+        <Link href="/produits/formation" className="btn-secondary mt-6 inline-flex">Retour à Produits</Link>
       </div>
     </main>
   );

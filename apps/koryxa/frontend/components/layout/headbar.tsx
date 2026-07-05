@@ -13,15 +13,15 @@ const IS_V1 = IS_V1_SIMPLE;
 
 const NAV_LINKS = [
   { href: PUBLIC_ROUTES.home, label: "Accueil" },
-  { href: PUBLIC_ROUTES.resources, label: "Ressources & docs" },
+  { href: PUBLIC_ROUTES.contact, label: "Ressources & docs" },
   { href: PUBLIC_ROUTES.apropos, label: "À propos" },
-  { href: PUBLIC_ROUTES.missionMatch, label: "Matching express" },
+  { href: PUBLIC_ROUTES.casUsage, label: "Matching express" },
 ];
 
 const NAV_LINKS_V1 = [
   { href: PUBLIC_ROUTES.home, label: "Accueil" },
-  { href: PUBLIC_ROUTES.trajectoire, label: "Trajectoire" },
-  { href: PUBLIC_ROUTES.entreprise, label: "Entreprise" },
+  { href: PUBLIC_ROUTES.produits, label: "Produits" },
+  { href: PUBLIC_ROUTES.casUsage, label: "Cas d’usage" },
   { href: PUBLIC_ROUTES.produits, label: "Produits" },
   { href: PUBLIC_ROUTES.apropos, label: "À propos" },
 ];
@@ -48,27 +48,27 @@ const PUBLIC_SEARCH_ACTIONS = [
     keywords: ["home", "accueil", "koryxa"],
   },
   {
-    href: PUBLIC_ROUTES.trajectoire,
-    label: "Trajectoire",
-    hint: "Orientation, diagnostic et progression",
+    href: PUBLIC_ROUTES.produits,
+    label: "Produits",
+    hint: "Catalogue des produits KORYXA",
     keywords: ["trajectoire", "diagnostic", "progression", "matching"],
   },
   {
-    href: `${PUBLIC_ROUTES.trajectoire}/demarrer`,
-    label: "Commencer mon diagnostic",
-    hint: "Lancer l'onboarding et le diagnostic",
+    href: PUBLIC_ROUTES.produits,
+    label: "Explorer les produits",
+    hint: "Explorer le catalogue produits",
     keywords: ["commencer", "onboarding", "demarrer", "diagnostic"],
   },
   {
-    href: PUBLIC_ROUTES.entreprise,
-    label: "Entreprise",
+    href: PUBLIC_ROUTES.casUsage,
+    label: "Cas d’usage",
     hint: "Besoin et mission",
     keywords: ["entreprise", "need", "mission"],
   },
   {
-    href: `${PUBLIC_ROUTES.entreprise}/demarrer`,
-    label: "Décrire un besoin entreprise",
-    hint: "Lancer la qualification du besoin",
+    href: PUBLIC_ROUTES.casUsage,
+    label: "Voir les cas d’usage",
+    hint: "Trouver le bon produit par besoin",
     keywords: ["deposer", "besoin", "brief", "entreprise"],
   },
   {
@@ -162,10 +162,10 @@ export default function Headbar() {
   const [notifs, setNotifs] = useState<Array<{ id: string; type: string; payload: Record<string, unknown> | null; created_at: string; read_at?: string }>>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const hideHeadbar =
-    pathname.startsWith("/products") ||
-    pathname.startsWith("/trajectoire/demarrer") ||
-    pathname.startsWith("/entreprise/demarrer") ||
-    pathname.startsWith("/entreprise/cadrage");
+    pathname.startsWith("/produits") ||
+    pathname.startsWith("/produits/formation") ||
+    pathname.startsWith("/cas-usage") ||
+    pathname.startsWith("/cas-usage");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -306,7 +306,7 @@ export default function Headbar() {
                 <div className="hidden items-center gap-2 rounded-full border border-white/80 bg-white/72 px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm backdrop-blur md:inline-flex">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   <span className="whitespace-nowrap">
-                    {IS_V1 ? "Trajectoires & missions réelles" : "Intelligence Artificielle • Transparence • Équité"}
+                    {IS_V1 ? "Produitss & missions réelles" : "Intelligence Artificielle • Transparence • Équité"}
                   </span>
                 </div>
               </div>
@@ -785,7 +785,7 @@ export default function Headbar() {
             <div className="space-y-3">
               {IS_V1 ? (
                 <Link 
-                  href={PUBLIC_ROUTES.entreprise} 
+                  href={PUBLIC_ROUTES.casUsage} 
                   onClick={() => setDrawerOpen(false)} 
                   className="flex items-center gap-2 w-full rounded-xl px-4 py-3 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 transition-colors"
                 >

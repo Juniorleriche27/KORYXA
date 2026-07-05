@@ -10,17 +10,6 @@ export const PUBLIC_ROUTES = {
   contact: "/contact",
   privacy: "/legal/confidentialite",
   terms: "/legal/mentions",
-
-  // Legacy routes kept for build compatibility during the staged vitrine refactor.
-  demarrer: "/demarrer",
-  entreprise: "/entreprise",
-  entrepriseCadrage: "/entreprise/cadrage",
-  entrepriseSetup: "/entreprise/setup",
-  entrepriseCockpit: "/entreprise/cockpit",
-  entrepriseVentes: "/entreprise/ventes",
-  trajectoire: "/trajectoire",
-  resources: "/resources",
-  missionMatch: "/missions/match",
 } as const;
 
 export const CONNECTED_ROUTES = {

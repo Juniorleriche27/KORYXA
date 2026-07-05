@@ -11,7 +11,7 @@ function isProtectedPath(pathname: string) {
 }
 
 const SESSION_COOKIE = "innova_session";
-const SITE_BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://innovaplus.africa").replace(/\/+$/, "");
+const SITE_BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://koryxa.com").replace(/\/+$/, "");
 const LEGACY_API_HOST = "https://api.innovaplus.africa";
 const DEFAULT_API_BASE = "https://innovaplus.africa";
 
@@ -58,16 +58,16 @@ function normalizeInnovaBase(base: string) {
 const INNOVA_API_BASE = normalizeInnovaBase(AUTH_API_BASE);
 
 const PLATFORM_REDIRECTS: Array<{ from: string; to: string }> = [
-  { from: "/platform/trajectoire", to: "/trajectoire" },
-  { from: "/platform/entreprise", to: "/entreprise" },
-  { from: "/platform/opportunites", to: "/opportunites" },
-  { from: "/platform/missions", to: "/opportunites" },
-  { from: "/platform/communaute", to: "/opportunites" },
-  { from: "/platform/formateurs", to: "/" },
+  { from: "/platform/trajectoire", to: "/produits/formation" },
+  { from: "/platform/entreprise", to: "/cas-usage" },
+  { from: "/platform/opportunites", to: "/produits" },
+  { from: "/platform/missions", to: "/produits" },
+  { from: "/platform/communaute", to: "/partenaires" },
+  { from: "/platform/formateurs", to: "/produits/formation" },
   { from: "/platform/profil", to: "/account/role" },
   { from: "/platform/notifications", to: "/" },
   { from: "/platform/parametres", to: "/account/role" },
-  { from: "/platform/talents", to: "/opportunites" },
+  { from: "/platform/talents", to: "/produits/formation" },
   { from: "/platform", to: "/" },
 ];
 
@@ -172,18 +172,14 @@ const V1_PUBLIC_PATHS = [
   "/login",
   "/signup",
   "/logout",
-  "/trajectoire",
-  "/entreprise",
-  "/community",
-  "/communaute",
-  "/formateurs",
-  "/talents",
-  "/about",
-  "/a-propos",
-  "/products",
+  "/ecosysteme",
   "/produits",
+  "/cas-usage",
+  "/partenaires",
+  "/a-propos",
   "/contact",
-  "/resources",
+  "/legal/confidentialite",
+  "/legal/mentions",
   "/privacy",
   "/terms",
   "/bientot",
@@ -247,40 +243,25 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname === "/chat-laya" || pathname.startsWith("/chat-laya/")) {
-    const url = request.nextUrl.clone();
-    url.pathname = pathname.replace("/chat-laya", "/products");
-    return NextResponse.redirect(url, 308);
-  }
-  if (
-    pathname === "/community/messages" ||
-    pathname.startsWith("/community/messages/") ||
-    pathname === "/communaute/messages" ||
-    pathname.startsWith("/communaute/messages/")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/products";
-    return NextResponse.redirect(url, 308);
-  }
-  if (
-    pathname === "/community" ||
-    pathname.startsWith("/community/") ||
-    pathname === "/communaute" ||
-    pathname.startsWith("/communaute/")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/opportunites";
-    return NextResponse.redirect(url, 308);
-  }
-  if (pathname === "/a-propos") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/about";
-    return NextResponse.rewrite(url);
-  }
-  if (pathname === "/ressources") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/resources";
-    return NextResponse.rewrite(url);
+  const legacyPublicRedirects: Array<{ from: string; to: string }> = [
+    { from: "/products", to: "/produits" },
+    { from: "/about", to: "/a-propos" },
+    { from: "/resources", to: "/contact" },
+    { from: "/ressources", to: "/contact" },
+    { from: "/trajectoire", to: "/produits/formation" },
+    { from: "/entreprise", to: "/cas-usage" },
+    { from: "/opportunites", to: "/produits" },
+    { from: "/community", to: "/partenaires" },
+    { from: "/communaute", to: "/partenaires" },
+    { from: "/chat-laya", to: "/produits/chatlaya" },
+  ];
+
+  for (const entry of legacyPublicRedirects) {
+    if (pathname === entry.from || pathname.startsWith(`${entry.from}/`)) {
+      const url = request.nextUrl.clone();
+      url.pathname = pathname.replace(entry.from, entry.to);
+      return NextResponse.redirect(url, 308);
+    }
   }
 
   if (isProtectedPath(pathname) && !hasSession) {

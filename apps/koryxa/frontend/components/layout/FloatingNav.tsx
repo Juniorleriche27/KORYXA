@@ -27,21 +27,21 @@ type NavGroup = { id: GroupId; label: string; icon: React.ReactNode; items: NavI
 const GROUPS: NavGroup[] = [
   {
     id: "entreprise",
-    label: "Entreprise",
+    label: "Cas d’usage",
     icon: <BriefcaseBusiness className="h-4 w-4" />,
     items: [
-      { label: "Vue d'ensemble", href: "/entreprise", icon: <LayoutDashboard className="h-4 w-4" /> },
-      { label: "Cadrer un besoin", href: "/entreprise/cadrage", icon: <FileSearch className="h-4 w-4" /> },
-      { label: "Mes demandes", href: "/entreprise/demandes", icon: <TrendingUp className="h-4 w-4" /> },
+      { label: "Vue d'ensemble", href: "/cas-usage", icon: <LayoutDashboard className="h-4 w-4" /> },
+      { label: "Cadrer un besoin", href: "/cas-usage", icon: <FileSearch className="h-4 w-4" /> },
+      { label: "Mes demandes", href: "/cas-usage", icon: <TrendingUp className="h-4 w-4" /> },
     ],
   },
   {
     id: "trajectoire",
-    label: "Formation IA",
+    label: "KORYXA Formation",
     icon: <GraduationCap className="h-4 w-4" />,
     items: [
-      { label: "Vue d'ensemble", href: "/trajectoire", icon: <LayoutDashboard className="h-4 w-4" /> },
-      { label: "Demarrer", href: "/trajectoire/demarrer", icon: <FileSearch className="h-4 w-4" /> },
+      { label: "Vue d'ensemble", href: "/produits/formation", icon: <LayoutDashboard className="h-4 w-4" /> },
+      { label: "Demarrer", href: "/produits/formation", icon: <FileSearch className="h-4 w-4" /> },
     ],
   },
   {
@@ -56,8 +56,8 @@ const GROUPS: NavGroup[] = [
 const HIDDEN_ON: string[] = ["/login", "/signup", "/reset", "/onboarding"];
 
 function detectGroup(pathname: string): GroupId {
-  if (pathname.startsWith("/entreprise") || pathname.includes("koryxa-enterprise")) return "entreprise";
-  if (pathname.startsWith("/trajectoire")) return "trajectoire";
+  if (pathname.startsWith("/cas-usage") || pathname.includes("koryxa-enterprise")) return "entreprise";
+  if (pathname.startsWith("/produits/formation")) return "trajectoire";
   return "trajectoire";
 }
 
@@ -69,21 +69,21 @@ function getFabContext(pathname: string): { Icon: LucideIcon; closedClass: strin
       label: "Accueil",
     };
   }
-  if (pathname.startsWith("/trajectoire")) {
+  if (pathname.startsWith("/produits/formation")) {
     return {
       Icon: GraduationCap,
       closedClass: "bg-[linear-gradient(135deg,#4c1d95_0%,#6d28d9_55%,#a855f7_100%)] text-white",
-      label: "Formation IA",
+      label: "KORYXA Formation",
     };
   }
-  if (pathname.startsWith("/entreprise")) {
+  if (pathname.startsWith("/cas-usage")) {
     return {
       Icon: BriefcaseBusiness,
       closedClass: "bg-[linear-gradient(135deg,#0f172a_0%,#0f3b67_55%,#0284c7_100%)] text-white",
-      label: "Entreprise",
+      label: "Cas d’usage",
     };
   }
-  if (pathname.startsWith("/about") || pathname.startsWith("/a-propos")) {
+  if (pathname.startsWith("/a-propos") || pathname.startsWith("/a-propos")) {
     return {
       Icon: Info,
       closedClass: "bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_60%,#0284c7_100%)] text-white",

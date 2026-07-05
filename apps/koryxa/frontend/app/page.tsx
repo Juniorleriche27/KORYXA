@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, DatabaseZap, Globe2, KeyRound, Layers3, Network, ShieldCheck, Sparkles, Workflow, Zap } from "lucide-react";
 import JsonLd from "@/components/seo/JsonLd";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
-import { productList } from "@/app/products/data";
+import { productList } from "@/app/produits/data";
 
 export const metadata: Metadata = {
   title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
