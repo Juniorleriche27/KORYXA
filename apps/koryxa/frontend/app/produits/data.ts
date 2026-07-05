@@ -133,14 +133,14 @@ export const productCatalog: Record<string, ProductInfo> = {
       "Partner Portal permet de rejoindre le programme partenaire KORYXA, recevoir un code partenaire unique, partager un lien, suivre les gains depuis un dashboard et gérer les leads liés à la formation Python Data Analyst.",
     audience: "Partenaires, ambassadeurs, apporteurs d’affaires, communautés et réseaux terrain",
     status: "actif",
-    href: "https://partenaire.koryxa.fr",
+    href: "https://partenaires.koryxa.fr",
     stats: [
       { label: "Commission", value: "5 000 FCFA" },
       { label: "Paiement", value: "48h" },
       { label: "Accès", value: "Dashboard" },
     ],
     highlights: ["Code partenaire", "Dashboard de suivi", "Paiement Mobile Money"],
-    primaryCta: { label: "Ouvrir Partner Portal", href: "https://partenaire.koryxa.fr" },
+    primaryCta: { label: "Ouvrir Partner Portal", href: "https://partenaires.koryxa.fr" },
     useCases: ["Devenir partenaire", "Partager un lien", "Suivre les gains", "Gérer les leads"],
   },
   "services-ia": {
