@@ -829,3 +829,511 @@
   .kx-pie-marquee-section::after { width: 48px; }
   .kx-pie-mini-card { width: 260px; }
 }
+
+/* ─────────────────────────────────────────────
+   KORYXA Ecosystem page
+   ───────────────────────────────────────────── */
+.kx-ecosystem-page {
+  background: var(--kx-pie-white);
+}
+
+.kx-ecosystem-hero {
+  min-height: calc(100vh - 68px);
+  display: flex;
+  align-items: center;
+  background: radial-gradient(ellipse at 70% 50%, #245b37 0%, var(--kx-pie-green) 55%, #07140c 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.kx-ecosystem-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  pointer-events: none;
+}
+
+.kx-ecosystem-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 80px 32px;
+}
+
+.kx-ecosystem-hero-copy h1 {
+  max-width: 720px;
+  color: var(--kx-pie-white);
+  font-size: clamp(2.6rem, 5.8vw, 5rem);
+  line-height: 1.02;
+  margin-bottom: 22px;
+  letter-spacing: -0.035em;
+}
+
+.kx-ecosystem-hero-copy p {
+  max-width: 640px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 1.05rem;
+  margin-bottom: 34px;
+}
+
+.kx-ecosystem-map-card {
+  min-height: 520px;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.055);
+  box-shadow: 0 32px 90px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.kx-ecosystem-map-card::before {
+  content: "";
+  position: absolute;
+  inset: 32px;
+  border-radius: 999px;
+  border: 1px dashed rgba(201,162,39,0.2);
+}
+
+.kx-ecosystem-map-card::after {
+  content: "";
+  position: absolute;
+  inset: 82px;
+  border-radius: 999px;
+  border: 1px dashed rgba(255,255,255,0.12);
+  animation: kxEcosystemRotate 34s linear infinite;
+}
+
+@keyframes kxEcosystemRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.kx-ecosystem-map-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 190px;
+  height: 190px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  background: linear-gradient(145deg, var(--kx-pie-gold), var(--kx-pie-gold-light));
+  color: var(--kx-pie-green);
+  box-shadow: 0 26px 60px rgba(0,0,0,0.25);
+}
+
+.kx-ecosystem-map-core strong {
+  font-family: var(--font-display), serif;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.kx-ecosystem-map-core span {
+  max-width: 120px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.kx-ecosystem-orbit {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.82rem;
+  font-weight: 800;
+  backdrop-filter: blur(14px);
+  animation: kxEcosystemFloat 4.2s ease-in-out infinite alternate;
+}
+
+.orbit-one { top: 72px; left: 64px; animation-delay: -0.4s; }
+.orbit-two { top: 74px; right: 48px; animation-delay: -1s; }
+.orbit-three { left: 42px; bottom: 98px; animation-delay: -1.7s; }
+.orbit-four { right: 42px; bottom: 92px; animation-delay: -2.4s; }
+.orbit-five { left: 50%; bottom: 42px; transform: translateX(-50%); animation-delay: -3s; }
+
+@keyframes kxEcosystemFloat {
+  from { margin-top: 0; }
+  to { margin-top: -12px; }
+}
+
+.kx-ecosystem-layer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.kx-ecosystem-layer-card,
+.kx-ecosystem-product-card {
+  background: var(--kx-pie-white);
+  border-radius: 16px;
+  border: 1px solid var(--kx-pie-gray-100);
+  box-shadow: var(--kx-pie-shadow);
+  padding: 24px;
+  transition: var(--kx-pie-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.kx-ecosystem-layer-card::before,
+.kx-ecosystem-product-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--kx-pie-green), var(--kx-pie-gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.kx-ecosystem-layer-card:hover,
+.kx-ecosystem-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--kx-pie-shadow-lg);
+  border-color: var(--kx-pie-gray-200);
+}
+
+.kx-ecosystem-layer-card:hover::before,
+.kx-ecosystem-product-card:hover::before {
+  transform: scaleX(1);
+}
+
+.kx-ecosystem-layer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.kx-ecosystem-layer-top .kx-pie-trust-icon {
+  margin: 0;
+}
+
+.kx-ecosystem-layer-top span {
+  font-family: var(--font-mono), monospace;
+  color: var(--kx-pie-gold);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.kx-ecosystem-layer-card h3,
+.kx-ecosystem-product-card h3,
+.kx-ecosystem-flow-step h3 {
+  color: var(--kx-pie-green);
+}
+
+.kx-ecosystem-layer-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+}
+
+.kx-ecosystem-layer-card p,
+.kx-ecosystem-product-card p,
+.kx-ecosystem-flow-step p {
+  color: var(--kx-pie-gray-500);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+.kx-ecosystem-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.kx-ecosystem-chip-row span {
+  border-radius: 999px;
+  border: 1px solid rgba(20,53,31,0.08);
+  background: var(--kx-pie-gray-50);
+  color: var(--kx-pie-gray-700);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
+.kx-ecosystem-split {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.kx-ecosystem-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.kx-ecosystem-metrics div {
+  border-radius: 18px;
+  border: 1px solid var(--kx-pie-gray-100);
+  background: var(--kx-pie-white);
+  box-shadow: var(--kx-pie-shadow);
+  padding: 18px;
+}
+
+.kx-ecosystem-metrics strong {
+  display: block;
+  font-family: var(--font-display), serif;
+  font-size: 2rem;
+  color: var(--kx-pie-green);
+  line-height: 1;
+}
+
+.kx-ecosystem-metrics span {
+  display: block;
+  margin-top: 8px;
+  color: var(--kx-pie-gray-500);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.kx-ecosystem-flow-card {
+  border-radius: 24px;
+  border: 1px solid rgba(201,162,39,0.18);
+  background: linear-gradient(180deg, var(--kx-pie-green), #0c2414);
+  box-shadow: 0 30px 70px rgba(20,53,31,0.18);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kx-ecosystem-flow-card::before {
+  content: "";
+  position: absolute;
+  left: 51px;
+  top: 38px;
+  bottom: 38px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--kx-pie-gold), var(--kx-pie-green-light));
+  opacity: 0.8;
+}
+
+.kx-ecosystem-flow-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 22px;
+  margin-bottom: 20px;
+}
+
+.kx-ecosystem-flow-step:last-child {
+  margin-bottom: 0;
+}
+
+.kx-ecosystem-flow-step h3 {
+  color: var(--kx-pie-white);
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.kx-ecosystem-flow-step p {
+  color: rgba(255,255,255,0.68);
+}
+
+.kx-ecosystem-flow-num {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--kx-pie-gold), var(--kx-pie-gold-light));
+  color: var(--kx-pie-green);
+  font-family: var(--font-mono), monospace;
+  font-weight: 900;
+  border: 3px solid var(--kx-pie-green);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.18);
+}
+
+.kx-ecosystem-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.kx-ecosystem-product-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--kx-pie-gold);
+}
+
+.kx-ecosystem-product-head span {
+  border-radius: 999px;
+  border: 1px solid rgba(20,53,31,0.08);
+  background: var(--kx-pie-gray-50);
+  color: var(--kx-pie-green);
+  padding: 4px 9px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kx-ecosystem-product-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.08rem;
+}
+
+.kx-ecosystem-product-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.kx-ecosystem-product-actions a {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--kx-pie-green);
+}
+
+.kx-ecosystem-product-actions a:hover {
+  color: var(--kx-pie-gold);
+}
+
+.kx-ecosystem-account-section {
+  padding: 96px 0;
+  background: var(--kx-pie-white);
+}
+
+.kx-ecosystem-account-card {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 28px;
+  align-items: center;
+  border-radius: 26px;
+  border: 1px solid rgba(201,162,39,0.18);
+  background: linear-gradient(135deg, var(--kx-pie-green), #0c2414);
+  color: var(--kx-pie-white);
+  padding: 34px;
+  box-shadow: 0 30px 70px rgba(20,53,31,0.18);
+}
+
+.kx-ecosystem-account-card h2 {
+  color: var(--kx-pie-white);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  margin-bottom: 10px;
+}
+
+.kx-ecosystem-account-card p {
+  color: rgba(255,255,255,0.7);
+  line-height: 1.75;
+}
+
+.kx-ecosystem-account-points {
+  display: grid;
+  gap: 10px;
+}
+
+.kx-ecosystem-account-points div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.kx-ecosystem-account-points svg {
+  color: var(--kx-pie-gold-light);
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .kx-ecosystem-layer-grid,
+  .kx-ecosystem-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kx-ecosystem-account-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .kx-ecosystem-hero-inner,
+  .kx-ecosystem-split {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .kx-ecosystem-map-card {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 640px) {
+  .kx-ecosystem-hero-inner {
+    padding: 56px 20px 72px;
+  }
+  .kx-ecosystem-hero-copy h1 {
+    font-size: clamp(2.2rem, 12vw, 3.2rem);
+  }
+  .kx-ecosystem-hero-copy p {
+    font-size: 0.98rem;
+  }
+  .kx-ecosystem-layer-grid,
+  .kx-ecosystem-product-grid,
+  .kx-ecosystem-metrics {
+    grid-template-columns: 1fr;
+  }
+  .kx-ecosystem-map-card {
+    min-height: 390px;
+  }
+  .kx-ecosystem-map-core {
+    width: 150px;
+    height: 150px;
+  }
+  .kx-ecosystem-map-core strong {
+    font-size: 1.55rem;
+  }
+  .kx-ecosystem-orbit {
+    min-width: 88px;
+    min-height: 36px;
+    font-size: 0.72rem;
+  }
+  .orbit-one { top: 40px; left: 24px; }
+  .orbit-two { top: 50px; right: 18px; }
+  .orbit-three { left: 18px; bottom: 72px; }
+  .orbit-four { right: 18px; bottom: 70px; }
+  .orbit-five { bottom: 28px; }
+  .kx-ecosystem-account-card {
+    padding: 24px;
+  }
+}
+
