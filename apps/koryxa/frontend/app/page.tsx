@@ -1,335 +1,338 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bot,
-  BriefcaseBusiness,
-  ChartNoAxesCombined,
-  CheckCircle2,
-  Compass,
-  Cpu,
-  FolderKanban,
-  Sparkles,
-  Target,
-  Zap,
-} from "lucide-react";
-import LiveSignalBars from "@/components/marketing/LiveSignalBars";
-import LoopTypewriter from "@/components/marketing/LoopTypewriter";
-import ScrollReveal from "@/components/ui/ScrollReveal";
-import CountUp from "@/components/ui/CountUp";
-import GlowCard from "@/components/ui/GlowCard";
-import AnimatedBeam from "@/components/ui/AnimatedBeam";
-import AnimatedTicker from "@/components/ui/AnimatedTicker";
+import { ArrowRight, CheckCircle2, DatabaseZap, Globe2, KeyRound, Layers3, Network, ShieldCheck, Sparkles, Workflow, Zap } from "lucide-react";
 import JsonLd from "@/components/seo/JsonLd";
+import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
+import { productList } from "@/app/products/data";
 
 export const metadata: Metadata = {
-  title: "KORYXA | Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise",
+  title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
   description:
-    "KORYXA est la première plateforme d'orchestration IA en Afrique. Cadrez vos besoins, exécutez vos projets data et IA, activez vos talents avec Formation IA et Entreprise.",
+    "KORYXA est la première plateforme d'orchestration IA en Afrique. Une vitrine centrale, un compte unique et un écosystème de produits autonomes connectés.",
   keywords: [
+    "KORYXA",
+    "orchestration IA Afrique",
     "plateforme IA Afrique",
-    "orchestration IA",
-    "service data intelligence artificielle",
-    "Formation IA talent Afrique",
-    "chatbot entreprise Afrique",
-    "cadrage besoin IA",
-    "data scientist Afrique",
+    "produits IA autonomes",
+    "compte KORYXA",
+    "écosystème IA africain",
   ],
   openGraph: {
-    title: "KORYXA | L'IA qui transforme vos besoins en exécution",
+    title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
     description:
-      "La première plateforme d'orchestration IA orientée exécution en Afrique : cadrage, conception et livraison pour les entreprises et les talents.",
+      "Un écosystème IA africain connecté par une vitrine centrale, un compte unique et des produits autonomes.",
     url: "/",
     type: "website",
   },
 };
-
-const TICKER_ITEMS = [
-  "Python",
-  "Pandas",
-  "NumPy",
-  "SQL",
-  "LLM",
-  "Automation",
-  "Forecasting",
-  "Data Viz",
-  "APIs",
-  "MLOps",
-] as const;
-
-const KPI_ITEMS = [
-  { icon: Cpu, label: "Briques connectees", value: 5, suffix: " modules", detail: "Formation IA, Entreprise" },
-  { icon: Target, label: "Qualification rapide", value: 72, suffix: "h", detail: "Premiere qualification et cadrage du besoin" },
-  { icon: FolderKanban, label: "Mode livraison", value: 100, suffix: "%", detail: "De la demande au livrable exploitable" },
-] as const;
-
-const MODULE_ITEMS = [
-  { icon: Compass, title: "Formation IA", description: "Profilage talent, trajectoire claire, plan d'action concret.", href: "/trajectoire", cta: "Démarrer Formation IA" },
-  { icon: BriefcaseBusiness, title: "Entreprise", description: "Cadrage intelligent des besoins avant toute exécution.", href: "/entreprise", cta: "Cadrer un besoin" },
-  { icon: ChartNoAxesCombined, title: "Opportunités", description: "Pipeline de missions et activation commerciale sur les besoins qualifiés.", href: "/opportunites", cta: "Voir les opportunités" },
-] as const;
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "KORYXA",
   url: "https://koryxa.com",
-  logo: "https://koryxa.com/logo.png",
-  description: "Plateforme d'orchestration IA en Afrique — Formation IA, Entreprise",
+  description: "La première plateforme d'orchestration IA en Afrique.",
   areaServed: "Africa",
-  knowsAbout: ["Intelligence Artificielle", "Data Science", "Machine Learning", "Automatisation"],
+  knowsAbout: ["Intelligence artificielle", "Orchestration", "Produits autonomes", "Écosystème numérique"],
 };
 
-const serviceJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  provider: { "@type": "Organization", name: "KORYXA" },
-  description: "Services professionnels d'intelligence artificielle, data engineering, agents IA et automatisation en Afrique.",
-  areaServed: "Africa",
-  serviceType: "Intelligence Artificielle et Data",
-};
+const heroStats = [
+  { value: "8", label: "produits autonomes" },
+  { value: "1", label: "compte KORYXA" },
+  { value: "4", label: "couches d’orchestration" },
+  { value: "100%", label: "vision Afrique" },
+];
+
+const pillars = [
+  {
+    icon: Workflow,
+    title: "Orchestrer",
+    description: "KORYXA donne une lecture claire de l’écosystème et relie chaque besoin au bon produit.",
+  },
+  {
+    icon: KeyRound,
+    title: "Accéder",
+    description: "Un seul compte KORYXA sert de porte d’entrée aux espaces, produits et services autorisés.",
+  },
+  {
+    icon: Network,
+    title: "Connecter",
+    description: "Les produits restent autonomes, mais avancent sous une même identité et une même architecture.",
+  },
+  {
+    icon: Zap,
+    title: "Déployer",
+    description: "L’écosystème transforme les idées, les talents et les organisations en systèmes IA utiles.",
+  },
+];
+
+const processSteps = [
+  "Comprendre le besoin",
+  "Orienter vers le bon produit",
+  "Accéder avec le compte KORYXA",
+  "Activer l’espace autonome",
+  "Suivre l’usage et l’impact",
+];
+
+const featuredProducts = productList.slice(0, 6);
 
 export default function HomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd} />
-      <JsonLd data={serviceJsonLd} />
-      <main className="space-y-0">
-        {/* Hero */}
-        <section className="relative overflow-hidden bg-[linear-gradient(140deg,#020617_0%,#07111f_46%,#0b1a30_100%)] text-white">
-          <AnimatedBeam />
-          <div aria-hidden className="kx-animated-grid absolute inset-0 opacity-20" />
-          <div aria-hidden className="kx-orb kx-orb-a" />
-          <div aria-hidden className="kx-orb kx-orb-b" />
-          <div aria-hidden className="kx-orb kx-orb-c" />
-          <div aria-hidden className="kx-orb kx-orb-d" />
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span
-              key={`p-${i}`}
-              aria-hidden
-              className="kx-particle"
-              style={{ left: `${(i * 11) % 100}%`, top: `${(i * 23) % 100}%`, animationDelay: `-${i * 0.9}s`, animationDuration: `${10 + (i % 5) * 1.8}s` }}
-            />
-          ))}
-
-          <div className="relative mx-auto flex min-h-[calc(100svh-72px)] w-full max-w-[var(--marketing-max-w)] flex-col justify-center px-4 pb-20 pt-16 sm:min-h-[calc(100vh-80px)] sm:px-6 sm:pb-24 sm:pt-24 lg:px-8">
-            <div className="mx-auto w-full max-w-5xl text-center">
-              <div className="kx-hero-badge-pulse kx-reveal-up inline-flex items-center gap-2 rounded-full border border-sky-300/25 bg-sky-500/8 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
-                <Sparkles className="h-4 w-4 text-sky-300" />
-                Plateforme d'orchestration IA en Afrique
+      <main className="kx-pie-page">
+        <section className="kx-pie-hero">
+          <div className="kx-pie-blob kx-pie-blob-one" />
+          <div className="kx-pie-blob kx-pie-blob-two" />
+          <div className="kx-pie-hero-inner">
+            <div className="kx-pie-hero-content kx-pie-animate">
+              <div className="kx-pie-badge">
+                <span className="kx-pie-dot" />
+                <span>Plateforme d’orchestration IA en Afrique</span>
               </div>
 
-              <h1 className="mt-8 text-[2.5rem] font-semibold leading-[0.94] tracking-[-0.07em] sm:text-[4.2rem] lg:text-[5.3rem]">
-                <span className="kx-title-gradient-loop kx-display block">KORYXA</span>
-                <span className="mt-2 block text-white/90">la première plateforme d'orchestration IA en Afrique.</span>
+              <h1>
+                KORYXA
+                <br />
+                <em>la première plateforme d'orchestration IA en Afrique.</em>
               </h1>
 
-              <p className="mx-auto mt-6 max-w-4xl text-base leading-8 text-slate-300 sm:text-[1.15rem] sm:leading-9">
-                De l'idée à la livraison concrète : Formation IA révèle les talents, Entreprise cadre les besoins,
-                KORYXA oriente vers les produits autonomes de l'écosystème.
+              <p>
+                KORYXA connecte les produits, les comptes, les talents, les partenaires et les systèmes autonomes
+                de son écosystème pour rendre l’IA plus accessible, utile et organisée.
               </p>
 
-              <div className="mt-6 text-sm font-semibold text-sky-200 sm:text-base">
-                Nous construisons avec{" "}
-                <LoopTypewriter
-                  words={["Data Analysts", "Data Scientists", "Data Engineers", "AI Builders"]}
-                  className="text-white"
-                />
-              </div>
-
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link
-                  href="/products"
-                  className="kx-cta-glow inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#0ea5e9_0%,#0284c7_100%)] px-8 py-4 text-base font-semibold text-white shadow-[0_24px_58px_rgba(2,132,199,0.28)] sm:w-auto sm:min-w-[18rem]"
-                >
-                  Demander un service IA
-                  <ArrowRight className="kx-arrow-bounce h-4 w-4" />
+              <div className="kx-pie-hero-ctas">
+                <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-gold">
+                  Explorer l’écosystème
+                  <ArrowRight size={18} />
                 </Link>
-                <Link
-                  href="/entreprise/demarrer"
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-white/12 bg-white/6 px-8 py-4 text-base font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:w-auto sm:min-w-[18rem]"
-                >
-                  Cadrer un besoin entreprise
+                <Link href={PUBLIC_ROUTES.produits} className="kx-pie-btn kx-pie-btn-outline-white">
+                  Voir les produits KORYXA
                 </Link>
               </div>
 
-              <div className="mt-12">
-                <AnimatedTicker items={TICKER_ITEMS} />
+              <div className="kx-pie-hero-note">
+                <p>
+                  <strong>Compte KORYXA</strong> : une seule identité pour accéder aux produits, espaces et services de l’écosystème.
+                </p>
+                <a href={KORYXA_ACCOUNT_URL}>Ouvrir le compte central →</a>
+              </div>
+            </div>
+
+            <div className="kx-pie-hero-visual kx-pie-animate kx-pie-delay-2">
+              <div className="kx-pie-stats-grid">
+                {heroStats.map((stat, index) => (
+                  <div className="kx-pie-stat-block" key={stat.label} style={{ animationDelay: `${0.28 + index * 0.1}s` }}>
+                    <div className="kx-pie-stat-number">{stat.value}</div>
+                    <div className="kx-pie-stat-desc">{stat.label}</div>
+                  </div>
+                ))}
               </div>
 
-              {/* ── Bloc collecte terrain ── */}
-              <div className="mt-14 border-t border-white/10 pt-10">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-400">Terrain africain</p>
-                <h2 className="mt-3 text-xl font-semibold text-white sm:text-2xl lg:text-3xl">
-                  Aidez KORYXA à comprendre les vrais problèmes du terrain africain.
-                </h2>
-                <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base sm:leading-8">
-                  Parlez-nous d'un problème réel observé dans votre pays, votre ville, votre quartier ou votre secteur.
-                  Chaque contribution aide KORYXA à mieux comprendre les réalités locales et à construire demain des
-                  solutions plus utiles.
-                </p>
-                <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <Link
-                    href="/products"
-                    className="kx-cta-glow inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#0ea5e9_0%,#0284c7_100%)] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(2,132,199,0.25)] sm:w-auto sm:min-w-[16rem]"
-                  >
-                    Partager un problème réel
-                    <ArrowRight className="kx-arrow-bounce h-4 w-4" />
-                  </Link>
-                  <a
-                    href="#modules-section"
-                    className="inline-flex w-full items-center justify-center rounded-2xl border border-white/12 bg-white/6 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10 sm:w-auto sm:min-w-[16rem]"
-                  >
-                    Voir pourquoi c'est utile
-                  </a>
+              <div className="kx-pie-card kx-pie-card-top">
+                <div className="kx-pie-card-header">
+                  <div>
+                    <div className="kx-pie-card-kicker">Orchestration centrale</div>
+                    <div className="kx-pie-card-title">Écosystème KORYXA</div>
+                  </div>
+                  <div className="kx-pie-card-badge">● Actif</div>
+                </div>
+                <div className="kx-pie-progress-row">
+                  <span>Connexion des produits</span>
+                  <span>8 / 8</span>
+                </div>
+                <div className="kx-pie-bar"><span /></div>
+                <div className="kx-pie-tags">
+                  <span>Compte unique</span>
+                  <span className="green">Produits autonomes</span>
+                  <span>Afrique</span>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* KPIs */}
-        <section className="bg-[#020617] px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-[var(--marketing-max-w)]">
-            <ScrollReveal>
-              <div className="mb-8 max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-400">Indicateurs d'exécution</p>
-                <h2 className="kx-display mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-white sm:text-[2.8rem]">
-                  Un système pensé pour livrer, pas pour impressionner.
-                </h2>
-              </div>
-            </ScrollReveal>
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {KPI_ITEMS.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <ScrollReveal key={item.label} delay={i * 0.08}>
-                    <GlowCard as="article" className="h-full">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-500/8 text-sky-300">
-                          <Icon className="kx-kpi-icon-loop h-5 w-5" style={{ animationDelay: `${i * 0.25}s` }} />
-                        </div>
-                        <p className="text-2xl font-semibold text-white">
-                          <CountUp to={item.value} suffix={item.suffix} />
-                        </p>
-                      </div>
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
-                      <p className="mt-2 text-sm leading-7 text-slate-300">{item.detail}</p>
-                    </GlowCard>
-                  </ScrollReveal>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Modules */}
-        <section id="modules-section" className="bg-[#020617] px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-[var(--marketing-max-w)]">
-            <ScrollReveal>
-              <div className="mb-8 max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-400">Écosystème produit</p>
-                <h2 className="kx-display mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-white sm:text-[2.8rem]">
-                  Chaque module a un rôle clair dans la chaîne de valeur.
-                </h2>
-              </div>
-            </ScrollReveal>
-
-            <div className="grid gap-4 lg:grid-cols-5">
-              {MODULE_ITEMS.map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <ScrollReveal key={item.title} delay={i * 0.07}>
-                    <GlowCard as="article" className="flex h-full flex-col">
-                      <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-500/8 text-sky-300">
-                        <Icon className="kx-module-icon-loop h-5 w-5" style={{ animationDelay: `${i * 0.2}s` }} />
-                      </div>
-                      <h3 className="mt-4 text-lg font-semibold tracking-[-0.03em] text-white">{item.title}</h3>
-                      <p className="mt-2 flex-1 text-sm leading-7 text-slate-400">{item.description}</p>
-                      <Link href={item.href} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-400 hover:text-sky-300">
-                        {item.cta}
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </GlowCard>
-                  </ScrollReveal>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Live Pulse + Methode */}
-        <section className="bg-[#020617] px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-[var(--marketing-max-w)] gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <ScrollReveal direction="left">
-              <GlowCard as="article" className="rounded-[30px]">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-400">Activité en direct</p>
-                <h2 className="kx-display mt-3 text-[1.9rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.5rem]">
-                  Un pipeline opérationnel en mouvement.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-400">
-                  Le rythme de production suit un cycle clair : cadrage, audit, conception, tests et livraison.
-                </p>
-                <div className="mt-6">
-                  <LiveSignalBars />
-                </div>
-              </GlowCard>
-            </ScrollReveal>
-
-            <ScrollReveal direction="right">
-              <GlowCard as="article" className="rounded-[30px]">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-400">Méthode</p>
-                <h2 className="kx-display mt-3 text-[1.9rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.5rem]">
-                  Ce que KORYXA apporte en pratique.
-                </h2>
-                <div className="mt-6 space-y-3">
-                  {[
-                    "Une entrée claire selon votre besoin réel",
-                    "Un cadrage métier avant le choix technique",
-                    "Une exécution pilotée avec des livrables concrets",
-                    "Un interlocuteur unique jusqu'a la mise en production",
-                  ].map((item, i) => (
-                    <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/3 px-4 py-3">
-                      <CheckCircle2 className="kx-check-loop mt-0.5 h-5 w-5 shrink-0 text-emerald-400" style={{ animationDelay: `${i * 0.2}s` }} />
-                      <p className="text-sm leading-7 text-slate-300">{item}</p>
+              <div className="kx-pie-card kx-pie-card-bottom">
+                <div className="kx-pie-steps-label">Parcours d’orchestration</div>
+                <div className="kx-pie-steps">
+                  {processSteps.map((step, index) => (
+                    <div className={index < 3 ? "kx-pie-step done" : "kx-pie-step pending"} key={step} style={{ animationDelay: `${0.95 + index * 0.1}s` }}>
+                      <div className="kx-pie-step-icon">{index < 3 ? "✓" : index + 1}</div>
+                      <div className="kx-pie-step-text">{step}</div>
                     </div>
                   ))}
                 </div>
-              </GlowCard>
-            </ScrollReveal>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* CTA final */}
-        <section className="relative overflow-hidden bg-[linear-gradient(145deg,#020617_0%,#07111f_44%,#0b1a30_100%)] px-4 py-16 text-white sm:px-6 lg:px-8">
-          <AnimatedBeam />
-          <div aria-hidden className="kx-animated-grid absolute inset-0 opacity-15" />
-          <div className="relative mx-auto max-w-[var(--marketing-max-w)] text-center">
-            <ScrollReveal>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
-                <Zap className="h-4 w-4 text-sky-300" />
-                Commencer maintenant
+        <section className="kx-pie-marquee-section" aria-label="Produits KORYXA">
+          <div className="kx-pie-marquee-track">
+            <div className="kx-pie-marquee-inner">
+              {[...productList, ...productList].map((product, index) => (
+                <div className="kx-pie-mini-card" key={`${product.slug}-${index}`}>
+                  <span>{product.name}</span>
+                  <small>{product.audience}</small>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="kx-pie-section kx-pie-trust-band">
+          <div className="kx-pie-container">
+            <div className="kx-pie-section-header">
+              <div className="kx-pie-section-label">Pourquoi KORYXA existe</div>
+              <h2>Un point central pour un écosystème qui ne doit pas être dispersé.</h2>
+              <p>
+                L’IA avance vite. Les outils, comptes, produits et projets se multiplient. KORYXA organise cette complexité
+                avec une vitrine claire, un compte central et des produits autonomes connectés.
+              </p>
+            </div>
+            <div className="kx-pie-trust-grid">
+              {pillars.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <article className="kx-pie-trust-item" key={item.title}>
+                    <div className="kx-pie-trust-icon"><Icon size={22} /></div>
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="kx-pie-section">
+          <div className="kx-pie-container">
+            <div className="kx-pie-section-header">
+              <div className="kx-pie-section-label">Produits autonomes</div>
+              <h2>Chaque produit garde son autonomie. KORYXA garde la cohérence.</h2>
+              <p>
+                La vitrine centrale présente les produits, explique leur rôle et oriente vers l’espace adapté.
+              </p>
+            </div>
+            <div className="kx-pie-services-grid">
+              {featuredProducts.map((product, index) => (
+                <article className="kx-pie-service-card" key={product.slug}>
+                  <div className="kx-pie-service-number">{String(index + 1).padStart(2, "0")}</div>
+                  <h3>{product.name}</h3>
+                  <p>{product.summary}</p>
+                  <div className="kx-pie-service-cta">
+                    <Link href={`/produits/${product.slug}`} className="kx-pie-btn kx-pie-btn-primary kx-pie-btn-sm">
+                      Découvrir
+                    </Link>
+                    <a href={product.href} className="kx-pie-btn kx-pie-btn-outline kx-pie-btn-sm">
+                      Ouvrir
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="kx-pie-section kx-pie-bg-gray">
+          <div className="kx-pie-container">
+            <div className="kx-pie-two-col">
+              <div>
+                <div className="kx-pie-section-label">Compte KORYXA</div>
+                <h2 className="kx-pie-section-title">Un seul compte pour accéder à l’écosystème.</h2>
+                <p className="kx-pie-section-lead">
+                  KORYXA Admin porte l’authentification centrale. Les produits autonomes n’ont pas besoin de recréer chacun
+                  leur propre système d’identité : ils s’alignent sur le compte KORYXA.
+                </p>
+                <ul className="kx-pie-feature-list">
+                  <li>✓ Identité centrale</li>
+                  <li>✓ Accès par produit</li>
+                  <li>✓ Rôles et permissions</li>
+                  <li>✓ Expérience cohérente</li>
+                </ul>
+                <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-primary">
+                  Accéder au Compte KORYXA
+                  <ArrowRight size={18} />
+                </a>
               </div>
-              <h2 className="kx-display mx-auto mt-6 max-w-4xl text-[2.15rem] font-semibold leading-[0.95] tracking-[-0.07em] sm:text-[3.2rem]">
-                Vous avez un besoin data ou IA ?<br />
-                Nous le transformons en exécution.
-              </h2>
-            </ScrollReveal>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/products"
-                className="kx-cta-glow inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#0ea5e9,#0284c7)] px-8 py-4 text-base font-semibold text-white"
-              >
-                Explorer l'écosystème
-                <ArrowRight className="kx-arrow-bounce h-4 w-4" />
+
+              <div className="kx-pie-dashboard-preview">
+                <div className="kx-pie-dash-head">
+                  <div>
+                    <div className="kx-pie-dash-kicker">KORYXA Account</div>
+                    <div className="kx-pie-dash-title">Mes accès écosystème</div>
+                  </div>
+                  <div className="kx-pie-dash-meta">Synchronisé</div>
+                </div>
+                <div className="kx-pie-dash-grid">
+                  <div className="kx-pie-dash-card">
+                    <span>Produits actifs</span>
+                    <strong>8</strong>
+                    <small>connectés à KORYXA</small>
+                  </div>
+                  <div className="kx-pie-dash-card">
+                    <span>Identité</span>
+                    <strong>1 compte</strong>
+                    <small>pour tout l’écosystème</small>
+                  </div>
+                </div>
+                <div className="kx-pie-checklist">
+                  {[
+                    "Compte central validé",
+                    "Rôles et permissions",
+                    "Accès produits autonomes",
+                    "Portail partenaires",
+                    "API et intégrations",
+                  ].map((item) => (
+                    <div className="kx-pie-check-item" key={item}>
+                      <span><CheckCircle2 size={14} /></span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="kx-pie-section">
+          <div className="kx-pie-container">
+            <div className="kx-pie-section-header">
+              <div className="kx-pie-section-label">Méthode d’orchestration</div>
+              <h2>Une lecture simple : besoin, orientation, accès, activation.</h2>
+            </div>
+            <div className="kx-pie-method-grid">
+              {[
+                { icon: Globe2, title: "Comprendre", text: "Identifier le besoin réel et le contexte africain." },
+                { icon: Layers3, title: "Orienter", text: "Diriger vers le produit ou l’espace KORYXA adapté." },
+                { icon: ShieldCheck, title: "Accéder", text: "Passer par le compte KORYXA centralisé." },
+                { icon: DatabaseZap, title: "Activer", text: "Utiliser le produit autonome sans perdre la cohérence globale." },
+              ].map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <article className="kx-pie-method-step" key={step.title}>
+                    <div className="kx-pie-method-num">{index + 1}</div>
+                    <Icon size={24} />
+                    <h3>{step.title}</h3>
+                    <p>{step.text}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="kx-pie-cta-section">
+          <div className="kx-pie-container">
+            <h2>Entrez dans l’écosystème KORYXA.</h2>
+            <p>
+              Découvrez les produits, comprenez l’architecture et accédez à votre compte central.
+            </p>
+            <div className="kx-pie-cta-btns">
+              <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-gold">
+                Explorer l’écosystème
               </Link>
-              <Link
-                href="/products"
-                className="inline-flex items-center rounded-2xl border border-white/12 bg-white/6 px-8 py-4 text-base font-semibold text-white backdrop-blur hover:bg-white/10"
-              >
-                Découvrir KORYXA
-              </Link>
+              <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-outline-white">
+                Compte KORYXA
+              </a>
             </div>
           </div>
         </section>
