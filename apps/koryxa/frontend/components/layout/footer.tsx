@@ -1,44 +1,85 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import BrandLogo from "@/components/layout/BrandLogo";
-import { IS_V1_SIMPLE } from "@/lib/env";
+import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
+
+const FOOTER_GROUPS = [
+  {
+    title: "Plateforme",
+    links: [
+      { label: "Écosystème", href: PUBLIC_ROUTES.ecosysteme },
+      { label: "Produits", href: PUBLIC_ROUTES.produits },
+      { label: "Cas d’usage", href: PUBLIC_ROUTES.casUsage },
+    ],
+  },
+  {
+    title: "KORYXA",
+    links: [
+      { label: "Partenaires", href: PUBLIC_ROUTES.partenaires },
+      { label: "À propos", href: PUBLIC_ROUTES.apropos },
+      { label: "Contact", href: PUBLIC_ROUTES.contact },
+    ],
+  },
+  {
+    title: "Accès",
+    links: [
+      { label: "Compte KORYXA", href: KORYXA_ACCOUNT_URL, external: true },
+      { label: "Confidentialité", href: PUBLIC_ROUTES.privacy },
+      { label: "Mentions légales", href: PUBLIC_ROUTES.terms },
+    ],
+  },
+] as const;
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/8 bg-slate-950/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] flex-col gap-5 px-4 py-7 text-xs text-slate-500 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:text-sm">
-        <div className="flex items-center gap-3 text-slate-300">
-          <BrandLogo className="h-12 w-12 rounded-2xl" />
-          <div className="leading-tight">
-            <p className="font-semibold text-white">KORYXA</p>
-            <p className="mt-1 text-xs text-slate-400">
-              {IS_V1_SIMPLE
-                ? "Formation IA et Entreprise dans un cadre simple et premium."
-                : "KORYXA, plateforme d'orchestration IA pour cadrer, piloter et activer."}
-            </p>
+    <footer className="border-t border-white/10 bg-[#020617] text-slate-300">
+      <div className="mx-auto grid w-full max-w-[var(--marketing-max-w)] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.25fr_2fr] lg:px-8 lg:py-14">
+        <div>
+          <div className="flex items-center gap-3">
+            <BrandLogo className="h-12 w-12 rounded-2xl ring-1 ring-white/15" />
+            <div>
+              <p className="kx-display text-xl font-semibold tracking-[-0.05em] text-white">KORYXA</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/80">
+                Orchestration IA en Afrique
+              </p>
+            </div>
           </div>
+          <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+            KORYXA est la première plateforme d'orchestration IA en Afrique : une vitrine centrale,
+            un accès unique et un écosystème de produits autonomes connectés.
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400 sm:text-sm">
-          <Link href="/products" className="transition hover:text-sky-300">
-            produits autonomes
-          </Link>
-          <Link href="/about" className="transition hover:text-sky-300">
-            A propos
-          </Link>
-          <Link href="/legal/confidentialite" className="transition hover:text-sky-300">
-            Confidentialite
-          </Link>
-          <Link href="/legal/mentions" className="transition hover:text-sky-300">
-            Mentions legales
-          </Link>
-          <span className="text-slate-600">v1.0.0</span>
+        <div className="grid gap-8 sm:grid-cols-3">
+          {FOOTER_GROUPS.map((group) => (
+            <div key={group.title}>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">{group.title}</p>
+              <div className="mt-4 flex flex-col gap-3 text-sm">
+                {group.links.map((link) =>
+                  "external" in link && link.external ? (
+                    <a key={link.href} href={link.href} className="transition hover:text-sky-300">
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link key={link.href} href={link.href} className="transition hover:text-sky-300">
+                      {link.label}
+                    </Link>
+                  ),
+                )}
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <p className="text-xs text-slate-500 sm:text-sm">Copyright {year} KORYXA. Tous droits reserves.</p>
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p>Copyright {year} KORYXA. Tous droits réservés.</p>
+          <p>Compte unique. Produits autonomes. Orchestration centrale.</p>
+        </div>
       </div>
     </footer>
   );

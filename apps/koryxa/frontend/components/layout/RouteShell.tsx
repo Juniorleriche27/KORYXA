@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import Footer from "@/components/layout/footer";
 import PublicHeader from "@/components/layout/PublicHeader";
 import ConnectedHeader from "@/components/layout/ConnectedHeader";
-import FloatingNav from "@/components/layout/FloatingNav";
-import SignalementButton from "@/components/layout/SignalementButton";
 
 function PublicShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -64,8 +62,6 @@ function PublicShell({ children }: { children: ReactNode }) {
         </main>
         {isFunnelStart || isChatPage ? null : <Footer />}
       </>
-      <SignalementButton />
-      <FloatingNav />
     </div>
   );
 }
@@ -77,7 +73,6 @@ function ConnectedShell({ children }: { children: ReactNode }) {
       <main id="page-content" className="px-4 py-4 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-[var(--app-max-w)]">{children}</div>
       </main>
-      <FloatingNav />
     </div>
   );
 }

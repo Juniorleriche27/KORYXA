@@ -1,5 +1,17 @@
-﻿export const PUBLIC_ROUTES = {
+export const KORYXA_ACCOUNT_URL = process.env.NEXT_PUBLIC_KORYXA_ACCOUNT_URL || "https://github.com/Juniorleriche27/koryxa-admin";
+
+export const PUBLIC_ROUTES = {
   home: "/",
+  ecosysteme: "/ecosysteme",
+  produits: "/produits",
+  casUsage: "/cas-usage",
+  partenaires: "/partenaires",
+  apropos: "/a-propos",
+  contact: "/contact",
+  privacy: "/legal/confidentialite",
+  terms: "/legal/mentions",
+
+  // Legacy routes kept for build compatibility during the staged vitrine refactor.
   demarrer: "/demarrer",
   entreprise: "/entreprise",
   entrepriseCadrage: "/entreprise/cadrage",
@@ -7,16 +19,21 @@
   entrepriseCockpit: "/entreprise/cockpit",
   entrepriseVentes: "/entreprise/ventes",
   trajectoire: "/trajectoire",
-  produits: "/produits",
-  apropos: "/a-propos",
   resources: "/resources",
-  privacy: "/legal/confidentialite",
-  terms: "/legal/mentions",
   missionMatch: "/missions/match",
 } as const;
 
 export const CONNECTED_ROUTES = {
-  login: "/login",
-  signup: "/signup",
-  home: "/",
+  login: KORYXA_ACCOUNT_URL,
+  signup: KORYXA_ACCOUNT_URL,
+  home: KORYXA_ACCOUNT_URL,
 } as const;
+
+export const MAIN_NAV_LINKS = [
+  { href: PUBLIC_ROUTES.home, label: "Accueil" },
+  { href: PUBLIC_ROUTES.ecosysteme, label: "Écosystème" },
+  { href: PUBLIC_ROUTES.produits, label: "Produits" },
+  { href: PUBLIC_ROUTES.casUsage, label: "Cas d’usage" },
+  { href: PUBLIC_ROUTES.partenaires, label: "Partenaires" },
+  { href: PUBLIC_ROUTES.apropos, label: "À propos" },
+] as const;

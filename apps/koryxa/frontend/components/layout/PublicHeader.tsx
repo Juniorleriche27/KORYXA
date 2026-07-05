@@ -1,32 +1,16 @@
-﻿"use client";
+"use client";
 
 import type { SVGProps } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { UserCircle } from "lucide-react";
-import { useAuth } from "@/components/auth/AuthProvider";
-import LogoutButton from "@/components/auth/LogoutButton";
+import { ExternalLink } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import { CONNECTED_ROUTES, PUBLIC_ROUTES } from "@/config/routes";
-
-type PublicNavLink = {
-  href: string;
-  label: string;
-};
-
-const PUBLIC_NAV_LINKS: PublicNavLink[] = [
-  { href: PUBLIC_ROUTES.home, label: "Accueil" },
-  { href: PUBLIC_ROUTES.trajectoire, label: "Formation IA" },
-  { href: PUBLIC_ROUTES.entreprise, label: "Entreprise" },
-  { href: PUBLIC_ROUTES.apropos, label: "A propos" },
-];
+import { KORYXA_ACCOUNT_URL, MAIN_NAV_LINKS, PUBLIC_ROUTES } from "@/config/routes";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === PUBLIC_ROUTES.home) return pathname === PUBLIC_ROUTES.home;
-  if (href === PUBLIC_ROUTES.entreprise) return pathname.startsWith(PUBLIC_ROUTES.entreprise);
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -48,104 +32,63 @@ function IconClose(props: SVGProps<SVGSVGElement>) {
 
 export default function PublicHeader() {
   const pathname = usePathname();
-  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isHome = pathname === PUBLIC_ROUTES.home;
-  const isAuthenticated = Boolean(user?.email);
-  const isStartChooser = pathname === PUBLIC_ROUTES.demarrer;
-  const isFunnelStart =
-    pathname === `${PUBLIC_ROUTES.trajectoire}/demarrer` || pathname === `${PUBLIC_ROUTES.entreprise}/demarrer`;
-  const nextPublicStep = pathname.startsWith(PUBLIC_ROUTES.entreprise)
-    ? `${PUBLIC_ROUTES.entreprise}/demarrer`
-    : `${PUBLIC_ROUTES.trajectoire}/demarrer`;
-  const signupTarget = isFunnelStart ? pathname || nextPublicStep : nextPublicStep;
-  const loginHref = `${CONNECTED_ROUTES.login}?redirect=${encodeURIComponent(pathname || PUBLIC_ROUTES.home)}`;
-  const primaryHref =
-    isStartChooser
-      ? PUBLIC_ROUTES.demarrer
-      : pathname.startsWith(PUBLIC_ROUTES.trajectoire) || pathname.startsWith(PUBLIC_ROUTES.entreprise)
-        ? `${CONNECTED_ROUTES.signup}?redirect=${encodeURIComponent(signupTarget)}`
-        : PUBLIC_ROUTES.demarrer;
-  const primaryLabel = isFunnelStart ? "Creer mon acces" : "Demarrer";
-  const showPrimaryCta = !isAuthenticated && !isFunnelStart && !isStartChooser;
-
   return (
-    <header
-      className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl transition-colors"
-    >
-      <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
-        <Link href={PUBLIC_ROUTES.home} className="flex shrink-0 items-center gap-3">
-          <BrandLogo className="h-10 w-10 rounded-2xl sm:h-12 sm:w-12" />
-          <p className="kx-display text-[1.3rem] font-semibold leading-none tracking-[-0.06em] text-slate-900 sm:text-[1.55rem]">
-            KORYXA
-          </p>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/88 text-white shadow-[0_18px_60px_rgba(2,6,23,0.28)] backdrop-blur-2xl">
+      <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href={PUBLIC_ROUTES.home} className="group flex shrink-0 items-center gap-3" aria-label="Retour à l'accueil KORYXA">
+          <BrandLogo className="h-10 w-10 rounded-2xl ring-1 ring-white/15 transition group-hover:ring-sky-300/60 sm:h-12 sm:w-12" />
+          <div className="leading-none">
+            <p className="kx-display text-[1.3rem] font-semibold tracking-[-0.06em] text-white sm:text-[1.55rem]">
+              KORYXA
+            </p>
+            <p className="mt-1 hidden text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-sky-200/85 sm:block">
+              Orchestration IA
+            </p>
+          </div>
         </Link>
 
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 xl:flex">
-          {PUBLIC_NAV_LINKS.map((link) => {
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex" aria-label="Navigation principale">
+          {MAIN_NAV_LINKS.map((link) => {
             const active = isActive(pathname, link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={clsx(
-                  "relative shrink-0 whitespace-nowrap px-3 py-2.5 text-[0.95rem] font-semibold tracking-[-0.02em] transition-colors 2xl:px-4 2xl:text-[1.05rem]",
+                  "relative shrink-0 whitespace-nowrap rounded-full px-3 py-2.5 text-[0.9rem] font-semibold tracking-[-0.02em] transition 2xl:px-4",
                   active
-                    ? "text-sky-600"
-                    : "text-slate-600 hover:text-slate-900",
+                    ? "bg-white/10 text-sky-100 ring-1 ring-white/15"
+                    : "text-slate-300 hover:bg-white/8 hover:text-white",
                 )}
               >
                 {link.label}
-                {active && (
-                  <span className="absolute bottom-0 left-4 right-4 h-[2.5px] rounded-full bg-gradient-to-r from-sky-500 to-sky-400" />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-2 xl:flex 2xl:gap-3">
-          {!isAuthenticated ? (
-            <Link
-              href={loginHref}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-[0.9rem] font-semibold text-slate-700 transition hover:border-sky-400 hover:text-sky-600 2xl:px-5 2xl:text-[0.95rem]"
-            >
-              <UserCircle className="h-4 w-4" />
-              Se connecter
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/account/role"
-                className="inline-flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[0.88rem] font-semibold text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.06)] transition hover:border-sky-200 hover:shadow-[0_4px_14px_rgba(2,132,199,0.12)] hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 2xl:text-[0.92rem]"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-[0.7rem] font-bold text-white shadow-sm">
-                  {user?.email?.[0]?.toUpperCase() ?? "?"}
-                </span>
-                Compte
-              </Link>
-              <LogoutButton
-                redirectTo={pathname}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.88rem] font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 dark:text-slate-500 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
-              />
-            </>
-          )}
-
-          {showPrimaryCta ? (
-            <Link
-              href={primaryHref}
-                className="inline-flex min-w-[8.5rem] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#082f49_0%,#0284c7_52%,#38bdf8_100%)] px-4 py-3 text-[0.88rem] font-semibold text-white shadow-[0_18px_40px_rgba(2,132,199,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_rgba(2,132,199,0.3)] 2xl:min-w-[9rem] 2xl:px-5 2xl:text-[0.92rem]"
-            >
-              {primaryLabel}
-            </Link>
-          ) : null}
+        <div className="hidden shrink-0 items-center gap-2 xl:flex">
+          <a
+            href={KORYXA_ACCOUNT_URL}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-[0.88rem] font-semibold text-slate-100 transition hover:border-sky-300/50 hover:bg-sky-400/10 hover:text-white"
+          >
+            Compte KORYXA
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+          <Link
+            href={PUBLIC_ROUTES.ecosysteme}
+            className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#e0f2fe_0%,#38bdf8_45%,#0ea5e9_100%)] px-4 py-2.5 text-[0.88rem] font-bold text-slate-950 shadow-[0_16px_40px_rgba(56,189,248,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_52px_rgba(56,189,248,0.28)]"
+          >
+            Explorer l’écosystème
+          </Link>
         </div>
 
         <button
           type="button"
           onClick={() => setMobileOpen((current) => !current)}
-          className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/92 text-slate-700 xl:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/8 text-white xl:hidden"
           aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={mobileOpen}
         >
@@ -154,11 +97,9 @@ export default function PublicHeader() {
       </div>
 
       {mobileOpen ? (
-        <div className="border-t border-slate-200/80 bg-white/98 px-4 py-4 xl:hidden">
+        <div className="border-t border-white/10 bg-slate-950/96 px-4 py-4 xl:hidden">
           <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] flex-col gap-2">
-            <ThemeToggle showLabel={false} className="justify-center" />
-
-            {PUBLIC_NAV_LINKS.map((link) => {
+            {MAIN_NAV_LINKS.map((link) => {
               const active = isActive(pathname, link.href);
               return (
                 <Link
@@ -168,8 +109,8 @@ export default function PublicHeader() {
                   className={clsx(
                     "rounded-2xl border px-5 py-3.5 text-[1rem] font-semibold tracking-[-0.02em] transition",
                     active
-                      ? "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/50 dark:bg-sky-500/15 dark:text-sky-100"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-sky-400/60 dark:hover:text-sky-100",
+                      ? "border-sky-300/40 bg-sky-400/15 text-sky-100"
+                      : "border-white/10 bg-white/5 text-slate-200 hover:border-sky-300/40 hover:text-white",
                   )}
                 >
                   {link.label}
@@ -177,44 +118,22 @@ export default function PublicHeader() {
               );
             })}
 
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {!isAuthenticated ? (
-                <Link
-                  href={loginHref}
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[0.95rem] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                >
-                  <UserCircle className="h-4 w-4" />
-                  Se connecter
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/account/role"
-                    onClick={() => setMobileOpen(false)}
-                    className="inline-flex items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[0.95rem] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 text-[0.7rem] font-bold text-white">
-                      {user?.email?.[0]?.toUpperCase() ?? "?"}
-                    </span>
-                    Compte
-                  </Link>
-                  <LogoutButton
-                    redirectTo={pathname}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-[0.95rem] font-semibold text-rose-600 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-300"
-                  />
-                </>
-              )}
-
-              {showPrimaryCta ? (
-                <Link
-                  href={primaryHref}
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#082f49_0%,#0284c7_52%,#38bdf8_100%)] px-4 py-3 text-sm font-semibold text-white sm:col-span-2"
-                >
-                  {primaryLabel}
-                </Link>
-              ) : null}
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <a
+                href={KORYXA_ACCOUNT_URL}
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-[0.95rem] font-semibold text-white"
+              >
+                Compte KORYXA
+                <ExternalLink className="h-4 w-4" />
+              </a>
+              <Link
+                href={PUBLIC_ROUTES.ecosysteme}
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex items-center justify-center rounded-2xl bg-sky-300 px-4 py-3 text-[0.95rem] font-bold text-slate-950"
+              >
+                Explorer l’écosystème
+              </Link>
             </div>
           </div>
         </div>
@@ -222,4 +141,3 @@ export default function PublicHeader() {
     </header>
   );
 }
-
