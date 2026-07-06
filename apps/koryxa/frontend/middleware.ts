@@ -343,7 +343,7 @@ export async function middleware(request: NextRequest) {
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-  const csp = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self';";
+  const csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://clerk.koryxa.fr https://*.clerk.com https://*.clerk.services; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https: https://clerk.koryxa.fr https://accounts.koryxa.fr https://*.clerk.com https://*.clerk.services; frame-src 'self' https://accounts.koryxa.fr https://*.clerk.com https://*.clerk.services; frame-ancestors 'self'; object-src 'none'; base-uri 'self';";
   res.headers.set("Content-Security-Policy", csp);
   return res;
 }

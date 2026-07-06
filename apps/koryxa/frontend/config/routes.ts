@@ -1,4 +1,4 @@
-export const KORYXA_ACCOUNT_URL = "https://accounts.koryxa.fr/sign-in";
+export const KORYXA_ACCOUNT_URL = "https://accounts.koryxa.fr/sign-in?redirect_url=https%3A%2F%2Fwww.koryxa.fr%2F";
 
 export const PUBLIC_ROUTES = {
   home: "/",

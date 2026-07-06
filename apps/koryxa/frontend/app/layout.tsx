@@ -1,4 +1,5 @@
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { DM_Mono, DM_Sans, Playfair_Display } from "next/font/google";
@@ -6,6 +7,7 @@ import { headers } from "next/headers";
 
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import RouteShell from "@/components/layout/RouteShell";
+import { KORYXA_IDENTITY_SIGN_IN_URL, KORYXA_IDENTITY_SIGN_UP_URL } from "@/lib/koryxa-identity-auth-url";
 import { ThemeProvider, themeInitScript } from "@/components/theme/ThemeProvider";
 import PWARegister from "@/components/util/PWARegister";
 
@@ -98,12 +100,14 @@ export default async function RootLayout(props: { children: ReactNode }) {
         >
           Aller au contenu
         </a>
-        <ThemeProvider>
-          <AuthProvider>
-            <PWARegister />
-            <RouteShell autonomousChatlayaHost={autonomousChatlayaHost}>{children}</RouteShell>
-          </AuthProvider>
-        </ThemeProvider>
+        <ClerkProvider signInUrl={KORYXA_IDENTITY_SIGN_IN_URL} signUpUrl={KORYXA_IDENTITY_SIGN_UP_URL}>
+          <ThemeProvider>
+            <AuthProvider>
+              <PWARegister />
+              <RouteShell autonomousChatlayaHost={autonomousChatlayaHost}>{children}</RouteShell>
+            </AuthProvider>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { ExternalLink } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { KORYXA_ACCOUNT_URL, MAIN_NAV_LINKS, PUBLIC_ROUTES } from "@/config/routes";
@@ -12,6 +13,12 @@ import { KORYXA_ACCOUNT_URL, MAIN_NAV_LINKS, PUBLIC_ROUTES } from "@/config/rout
 function isActive(pathname: string, href: string): boolean {
   if (href === PUBLIC_ROUTES.home) return pathname === PUBLIC_ROUTES.home;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function buildAccountHref(pathname: string) {
+  const url = new URL(KORYXA_ACCOUNT_URL);
+  url.searchParams.set("redirect_url", new URL(pathname || "/", "https://www.koryxa.fr").toString());
+  return url.toString();
 }
 
 function IconMenu(props: SVGProps<SVGSVGElement>) {
@@ -33,6 +40,8 @@ function IconClose(props: SVGProps<SVGSVGElement>) {
 export default function PublicHeader() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isLoaded, isSignedIn } = useUser();
+  const accountHref = buildAccountHref(pathname || "/");
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e8eadf] bg-[#fffdf6]/95 shadow-[0_2px_24px_rgba(13,27,56,0.08)] backdrop-blur-2xl">
@@ -75,13 +84,20 @@ export default function PublicHeader() {
         </nav>
 
         <div className="hidden items-center justify-end gap-2 xl:flex">
-          <a
-            href={KORYXA_ACCOUNT_URL}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#14351f] px-4 py-2.5 text-[0.84rem] font-semibold text-[#14351f] transition hover:bg-[#14351f] hover:text-white"
-          >
-            Compte KORYXA
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+          {isLoaded && isSignedIn ? (
+            <div className="inline-flex items-center gap-2 rounded-lg border border-[#dfe5d8] bg-white px-3 py-2 shadow-sm">
+              <span className="text-[0.78rem] font-semibold text-[#14351f]">Compte actif</span>
+              <UserButton />
+            </div>
+          ) : (
+            <a
+              href={accountHref}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#14351f] px-4 py-2.5 text-[0.84rem] font-semibold text-[#14351f] transition hover:bg-[#14351f] hover:text-white"
+            >
+              Compte KORYXA
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
           <Link
             href={PUBLIC_ROUTES.ecosysteme}
             className="inline-flex items-center justify-center rounded-lg bg-[#00a86b] px-4 py-2.5 text-[0.84rem] font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.20)] transition hover:-translate-y-0.5 hover:bg-[#008b58]"
@@ -112,14 +128,21 @@ export default function PublicHeader() {
             })}
 
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <a
-                href={KORYXA_ACCOUNT_URL}
-                onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#14351f] px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]"
-              >
-                Compte KORYXA
-                <ExternalLink className="h-4 w-4" />
-              </a>
+              {isLoaded && isSignedIn ? (
+                <div className="inline-flex items-center justify-center gap-3 rounded-xl border border-[#dfe5d8] bg-white px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]">
+                  <span>Compte actif</span>
+                  <UserButton />
+                </div>
+              ) : (
+                <a
+                  href={accountHref}
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#14351f] px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]"
+                >
+                  Compte KORYXA
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              )}
               <Link
                 href={PUBLIC_ROUTES.ecosysteme}
                 onClick={() => setMobileOpen(false)}
