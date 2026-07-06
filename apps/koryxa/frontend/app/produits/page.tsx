@@ -120,7 +120,7 @@ export default function ProductsPage() {
             <h1>Les produits autonomes de l’écosystème KORYXA.</h1>
             <p>
               Chaque produit a son rôle, son public et son espace. KORYXA garde la cohérence globale : marque,
-              orientation, compte central et architecture d’orchestration.
+              orientation, compte KORYXA et écosystème connecté.
             </p>
             <div className="kx-pie-hero-ctas">
               <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-gold">
@@ -179,7 +179,7 @@ export default function ProductsPage() {
         <div className="kx-pie-container">
           <div className="kx-pie-section-header">
             <div className="kx-pie-section-label">Catalogue</div>
-            <h2>Un catalogue lisible, sans mélanger les rôles.</h2>
+            <h2>Un catalogue lisible, sans mélanger les usages.</h2>
             <p>
               La page produits sert à comprendre rapidement ce que chaque produit fait, à qui il s’adresse
               et comment y accéder.
@@ -219,10 +219,10 @@ export default function ProductsPage() {
 
       <section className="kx-pie-cta-section">
         <div className="kx-pie-container">
-          <div className="kx-pie-section-label">Accès central</div>
+          <div className="kx-pie-section-label">Compte KORYXA</div>
           <h2>Un seul compte pour ouvrir les bons produits.</h2>
           <p>
-            Le compte KORYXA centralise l’identité, les rôles et les accès produits.
+            Le compte KORYXA simplifie l’accès aux produits de l’écosystème.
           </p>
           <div className="kx-pie-cta-btns">
             <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-gold">

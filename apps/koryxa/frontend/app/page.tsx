@@ -8,7 +8,7 @@ import { productList } from "@/app/produits/data";
 export const metadata: Metadata = {
   title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
   description:
-    "KORYXA est la première plateforme d'orchestration IA en Afrique. Une vitrine centrale, un compte unique et un écosystème de produits autonomes connectés.",
+    "KORYXA est la première plateforme d'orchestration IA en Afrique. Un compte unique et un écosystème de produits utiles, clairs et connectés.",
   keywords: [
     "KORYXA",
     "orchestration IA Afrique",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
     description:
-      "Un écosystème IA africain connecté par une vitrine centrale, un compte unique et des produits autonomes.",
+      "Un écosystème IA africain relié par un compte unique et des produits autonomes.",
     url: "/",
     type: "website",
   },
@@ -116,7 +116,7 @@ export default function HomePage() {
                 <p>
                   <strong>Compte KORYXA</strong> : une seule identité pour accéder aux produits, espaces et services de l’écosystème.
                 </p>
-                <a href={KORYXA_ACCOUNT_URL}>Ouvrir le compte central →</a>
+                <a href={KORYXA_ACCOUNT_URL}>Accéder à mon compte →</a>
               </div>
             </div>
 
@@ -133,7 +133,7 @@ export default function HomePage() {
               <div className="kx-pie-card kx-pie-card-top">
                 <div className="kx-pie-card-header">
                   <div>
-                    <div className="kx-pie-card-kicker">Orchestration centrale</div>
+                    <div className="kx-pie-card-kicker">Écosystème connecté</div>
                     <div className="kx-pie-card-title">Écosystème KORYXA</div>
                   </div>
                   <div className="kx-pie-card-badge">● Actif</div>
@@ -182,10 +182,10 @@ export default function HomePage() {
           <div className="kx-pie-container">
             <div className="kx-pie-section-header">
               <div className="kx-pie-section-label">Pourquoi KORYXA existe</div>
-              <h2>Un point central pour un écosystème qui ne doit pas être dispersé.</h2>
+              <h2>Un point d’entrée clair pour un écosystème qui reste lisible.</h2>
               <p>
                 L’IA avance vite. Les outils, comptes, produits et projets se multiplient. KORYXA organise cette complexité
-                avec une vitrine claire, un compte central et des produits autonomes connectés.
+                avec une vitrine claire, un compte unique et des produits autonomes connectés.
               </p>
             </div>
             <div className="kx-pie-trust-grid">
@@ -209,7 +209,7 @@ export default function HomePage() {
               <div className="kx-pie-section-label">Produits autonomes</div>
               <h2>Chaque produit garde son autonomie. KORYXA garde la cohérence.</h2>
               <p>
-                La vitrine centrale présente les produits, explique leur rôle et oriente vers l’espace adapté.
+                La vitrine présente les produits, explique leur utilité et oriente vers l’espace adapté.
               </p>
             </div>
             <div className="kx-pie-services-grid">
@@ -239,11 +239,11 @@ export default function HomePage() {
                 <div className="kx-pie-section-label">Compte KORYXA</div>
                 <h2 className="kx-pie-section-title">Un seul compte pour accéder à l’écosystème.</h2>
                 <p className="kx-pie-section-lead">
-                  Le compte KORYXA centralise l’accès à l’écosystème. Les produits autonomes peuvent s’aligner sur une
+                  Le compte KORYXA simplifie l’accès à l’écosystème. Les produits autonomes peuvent s’aligner sur une
                   même identité pour offrir une expérience simple et cohérente.
                 </p>
                 <ul className="kx-pie-feature-list">
-                  <li>✓ Identité centrale</li>
+                  <li>✓ Identité unique</li>
                   <li>✓ Accès par produit</li>
                   <li>✓ Accès aux produits</li>
                   <li>✓ Expérience cohérente</li>
@@ -303,7 +303,7 @@ export default function HomePage() {
               {[
                 { icon: Globe2, title: "Comprendre", text: "Identifier le besoin réel et le contexte africain." },
                 { icon: Layers3, title: "Orienter", text: "Diriger vers le produit ou l’espace KORYXA adapté." },
-                { icon: ShieldCheck, title: "Accéder", text: "Passer par le compte KORYXA centralisé." },
+                { icon: ShieldCheck, title: "Accéder", text: "Passer par ton compte KORYXA." },
                 { icon: DatabaseZap, title: "Activer", text: "Utiliser le produit autonome sans perdre la cohérence globale." },
               ].map((step, index) => {
                 const Icon = step.icon;
@@ -324,7 +324,7 @@ export default function HomePage() {
           <div className="kx-pie-container">
             <h2>Entrez dans l’écosystème KORYXA.</h2>
             <p>
-              Découvrez les produits, comprenez l’architecture et accédez à votre compte central.
+              Découvrez les produits, comprenez l’architecture et accédez à votre compte KORYXA.
             </p>
             <div className="kx-pie-cta-btns">
               <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-gold">

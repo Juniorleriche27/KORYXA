@@ -51,7 +51,7 @@ export default function Footer() {
             </div>
           </div>
           <p className="mt-5 max-w-md text-sm leading-7 text-[#52615c]">
-            KORYXA est la première plateforme d'orchestration IA en Afrique : une vitrine centrale,
+            KORYXA est la première plateforme d'orchestration IA en Afrique : une vitrine claire,
             un accès unique et un écosystème de produits autonomes connectés.
           </p>
           <div className="mt-6">
@@ -85,7 +85,7 @@ export default function Footer() {
       <div className="border-t border-[#e4f2ea] bg-white/70">
         <div className="mx-auto flex w-full max-w-[var(--marketing-max-w)] flex-col gap-2 px-4 py-5 text-xs text-[#65746d] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>Copyright {year} KORYXA. Tous droits réservés.</p>
-          <p>Compte unique. Produits autonomes. Orchestration centrale.</p>
+          <p>Compte unique. Produits autonomes. Écosystème connecté.</p>
         </div>
       </div>
     </footer>

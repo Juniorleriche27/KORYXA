@@ -17,7 +17,7 @@ import { PUBLIC_ROUTES } from "@/config/routes";
 export const metadata: Metadata = {
   title: "À propos de KORYXA | Vision, mission et méthode",
   description:
-    "Découvrez la vision KORYXA : construire une infrastructure IA pensée pour les réalités africaines, avec une plateforme d’orchestration, un compte central et des produits autonomes.",
+    "Découvrez la vision KORYXA : construire une infrastructure IA pensée pour les réalités africaines, avec un compte unique et des produits autonomes connectés.",
 };
 
 const values = [
@@ -46,7 +46,7 @@ const values = [
 const method = [
   "Observer les besoins réels",
   "Structurer l’écosystème",
-  "Connecter le compte central",
+  "Connecter le compte KORYXA",
   "Déployer les produits autonomes",
   "Mesurer l’impact utile",
 ];
@@ -65,7 +65,7 @@ export default function AProposPage() {
             </div>
             <h1>KORYXA construit une infrastructure IA pensée pour les réalités africaines.</h1>
             <p>
-              KORYXA est la porte d’entrée publique, le point d’accès central et l’orchestrateur d’un écosystème
+              KORYXA est la porte d’entrée publique, le point d’accès public d’un écosystème
               de produits IA autonomes.
             </p>
             <div className="kx-pie-hero-ctas">
@@ -99,7 +99,7 @@ export default function AProposPage() {
               <div className="kx-pie-section-label">Vision</div>
               <h2>Faire de KORYXA la référence d’orchestration IA en Afrique.</h2>
               <p>
-                La vision est de créer un point central capable de présenter, relier et activer des produits IA
+                La vision est de créer un point d’entrée capable de présenter, relier et activer des produits IA
                 qui répondent aux réalités des talents, organisations, partenaires et projets africains.
               </p>
             </article>
@@ -108,7 +108,7 @@ export default function AProposPage() {
               <div className="kx-pie-section-label">Mission</div>
               <h2>Transformer idées, besoins et organisations en systèmes autonomes.</h2>
               <p>
-                La mission de KORYXA est d’orienter les utilisateurs vers les bons produits, de centraliser les accès
+                La mission de KORYXA est d’orienter les utilisateurs vers les bons produits, de simplifier les accès
                 et de maintenir une cohérence entre les projets de l’écosystème.
               </p>
             </article>
@@ -122,7 +122,7 @@ export default function AProposPage() {
             <div className="kx-pie-section-label">Valeurs</div>
             <h2>Ce qui guide l’écosystème KORYXA.</h2>
             <p>
-              La marque centrale porte une exigence : chaque produit doit être lisible, utile, autonome et connecté.
+              La marque KORYXA porte une exigence : chaque produit doit être lisible, utile, autonome et connecté.
             </p>
           </div>
           <div className="kx-about-values-grid">
@@ -186,7 +186,7 @@ export default function AProposPage() {
       <section className="kx-pie-cta-section">
         <div className="kx-pie-container">
           <div className="kx-pie-section-label">KORYXA</div>
-          <h2>Une vitrine centrale. Un compte unique. Des produits autonomes.</h2>
+          <h2>Une vitrine claire. Un compte unique. Des produits autonomes.</h2>
           <p>La plateforme donne de la cohérence à tout l’écosystème KORYXA.</p>
           <div className="kx-pie-cta-btns">
             <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-gold">

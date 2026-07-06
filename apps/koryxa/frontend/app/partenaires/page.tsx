@@ -44,7 +44,7 @@ const partnerTypes = [
   {
     icon: Rocket,
     title: "Startups",
-    description: "Accélérer des projets autonomes avec une logique d’orchestration et d’accès central.",
+    description: "Accélérer des projets autonomes avec une logique d’écosystème et d’accès simplifié.",
   },
   {
     icon: Wrench,
@@ -169,7 +169,7 @@ export default function PartenairesPage() {
           <div className="kx-partners-portal-card">
             <Network size={28} />
             <div>
-              <h2>Partner Portal centralise les collaborations.</h2>
+              <h2>Partner Portal organise les collaborations.</h2>
               <p>
                 Le portail partenaire sert d’espace de suivi pour les collaborations KORYXA : demandes,
                 accès, échanges, projets et relations actives.

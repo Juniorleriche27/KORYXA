@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const PRIVACY_POINTS = [
   "KORYXA collecte uniquement les donnees utiles au fonctionnement du produit et a son amelioration.",
   "Les metriques techniques servent a comprendre les usages, pas a exposer inutilement des informations sensibles.",
-  "Les preferences de contact, de notifications et de pilotage doivent rester lisibles et controlables.",
+  "Les preferences de contact, de notifications et de compte doivent rester lisibles et contrôlables.",
 ];
 
 export default function PrivacyPage() {

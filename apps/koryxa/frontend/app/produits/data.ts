@@ -1,4 +1,4 @@
-export type ProductStatus = "actif" | "construction" | "interne";
+export type ProductStatus = "actif" | "construction" | "construction";
 
 export type ProductInfo = {
   slug: string;
@@ -60,7 +60,7 @@ export const productCatalog: Record<string, ProductInfo> = {
     summary:
       "KORYXA API rassemble des agents IA, modèles ML, API de données, recherche intelligente, API métier et automatisations prêtes à intégrer dans des produits.",
     audience: "Développeurs, équipes produit, intégrateurs, organisations techniques",
-    status: "interne",
+    status: "construction",
     href: "https://api.koryxa.fr",
     stats: [
       { label: "Accès", value: "API" },
@@ -130,16 +130,16 @@ export const productCatalog: Record<string, ProductInfo> = {
     name: "Partner Portal",
     tagline: "Programme partenaire officiel KORYXA.",
     summary:
-      "Partner Portal permet de rejoindre le programme partenaire KORYXA, recevoir un code partenaire unique, partager un lien, suivre les gains depuis un dashboard et gérer les leads liés à la formation Python Data Analyst.",
+      "Partner Portal permet de rejoindre le programme partenaire KORYXA, recevoir un code partenaire unique, partager un lien, suivre les gains depuis un espace de suivi et gérer les leads liés à la formation Python Data Analyst.",
     audience: "Partenaires, ambassadeurs, apporteurs d’affaires, communautés et réseaux terrain",
     status: "actif",
     href: "https://partenaires.koryxa.fr",
     stats: [
       { label: "Commission", value: "5 000 FCFA" },
       { label: "Paiement", value: "48h" },
-      { label: "Accès", value: "Dashboard" },
+      { label: "Accès", value: "Espace de suivi" },
     ],
-    highlights: ["Code partenaire", "Dashboard de suivi", "Paiement Mobile Money"],
+    highlights: ["Code partenaire", "Espace de suivi", "Paiement Mobile Money"],
     primaryCta: { label: "Ouvrir Partner Portal", href: "https://partenaires.koryxa.fr" },
     useCases: ["Devenir partenaire", "Partager un lien", "Suivre les gains", "Gérer les leads"],
   },
@@ -157,7 +157,7 @@ export const productCatalog: Record<string, ProductInfo> = {
       { label: "Qualification", value: "72h" },
       { label: "Delivery", value: "Équipe dédiée" },
     ],
-    highlights: ["Pilotage business", "Automatisation", "Systèmes intégrés"],
+    highlights: ["Suivi business", "Automatisation", "Systèmes intégrés"],
     primaryCta: { label: "Voir la fiche", href: "/produits/services-ia" },
     useCases: ["Transformer un besoin métier", "Automatiser un processus", "Créer un système digital"],
   },

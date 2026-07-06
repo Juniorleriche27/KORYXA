@@ -20,7 +20,7 @@ import { productList } from "@/app/produits/data";
 export const metadata: Metadata = {
   title: "Écosystème KORYXA | Orchestration IA en Afrique",
   description:
-    "Découvrez comment KORYXA organise son écosystème IA : vitrine centrale, compte unique, produits autonomes, APIs, partenaires et systèmes connectés.",
+    "Découvrez comment KORYXA organise son écosystème IA : compte unique, produits autonomes, partenaires et systèmes connectés.",
 };
 
 const architectureLayers = [
@@ -33,7 +33,7 @@ const architectureLayers = [
   {
     icon: KeyRound,
     title: "Compte KORYXA",
-    description: "Une identité centrale pour accéder aux produits KORYXA avec une expérience cohérente.",
+    description: "Une identité unique pour accéder aux produits KORYXA avec une expérience cohérente.",
     items: ["Compte unique", "Produits", "Profil", "Accès"],
   },
   {
@@ -45,7 +45,7 @@ const architectureLayers = [
   {
     icon: DatabaseZap,
     title: "APIs et systèmes",
-    description: "La couche technique relie les données, les intégrations, les services et les flux internes.",
+    description: "La couche technique relie les données, les intégrations, les services et les expériences produit.",
     items: ["KORYXA API", "Connecteurs", "Automations", "Données"],
   },
   {
@@ -67,7 +67,7 @@ const orchestrationFlow = [
   },
   {
     label: "Accéder",
-    description: "Passer par le compte central pour ouvrir les droits et les rôles adaptés.",
+    description: "Passer par le compte KORYXA pour accéder aux espaces adaptés.",
   },
   {
     label: "Activer",
@@ -80,7 +80,7 @@ const orchestrationFlow = [
 ];
 
 const ecosystemMetrics = [
-  { value: "01", label: "marque centrale" },
+  { value: "01", label: "marque repère" },
   { value: "08", label: "produits et projets" },
   { value: "01", label: "compte KORYXA" },
   { value: "05", label: "couches d’écosystème" },
@@ -100,7 +100,7 @@ export default function EcosystemePage() {
             </div>
             <h1>Un écosystème IA autonome, connecté par KORYXA.</h1>
             <p>
-              KORYXA n’est pas un produit isolé. C’est la plateforme centrale qui présente, relie et organise
+              KORYXA n’est pas un produit isolé. C’est la plateforme qui présente, relie et organise
               les produits autonomes, le compte unique, les APIs, les partenaires et les systèmes de l’écosystème.
             </p>
             <div className="kx-pie-hero-ctas">
@@ -118,7 +118,7 @@ export default function EcosystemePage() {
             <div className="kx-ecosystem-map-core">
               <Sparkles size={22} />
               <strong>KORYXA</strong>
-              <span>orchestration centrale</span>
+              <span>écosystème connecté</span>
             </div>
             <div className="kx-ecosystem-orbit orbit-one">Compte</div>
             <div className="kx-ecosystem-orbit orbit-two">Produits</div>
@@ -148,7 +148,7 @@ export default function EcosystemePage() {
             <div className="kx-pie-section-label">Architecture</div>
             <h2>Les cinq couches qui donnent de la cohérence à KORYXA.</h2>
             <p>
-              La vitrine explique, le compte central autorise, les produits exécutent, les APIs relient,
+              La vitrine explique, le compte KORYXA ouvre l’accès, les produits exécutent, les intégrations relient,
               les partenaires amplifient.
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function EcosystemePage() {
             <h2>Les produits ont leur autonomie. L’écosystème garde une direction commune.</h2>
             <p>
               Chaque produit peut évoluer dans son propre dépôt, avec son propre périmètre. KORYXA garde la lisibilité,
-              la marque et l’accès central.
+              la marque et l’accès au compte KORYXA.
             </p>
           </div>
 
@@ -248,7 +248,7 @@ export default function EcosystemePage() {
               <div className="kx-pie-section-label">Compte KORYXA</div>
               <h2>Un seul compte KORYXA pour accéder aux espaces autorisés.</h2>
               <p>
-                Le compte KORYXA centralise la connexion aux produits de l’écosystème pour éviter de multiplier
+                Le compte KORYXA simplifie la connexion aux produits de l’écosystème pour éviter de multiplier
                 les systèmes d’identité et garder une expérience cohérente.
               </p>
             </div>

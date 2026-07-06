@@ -36,11 +36,11 @@ const useCases = [
   {
     icon: KeyRound,
     title: "Je veux accéder à mon compte KORYXA",
-    description: "Entrer dans l’espace central qui gère l’identité, les rôles et les accès aux produits.",
+    description: "Entrer dans l’espace KORYXA pour accéder aux produits adaptés.",
     product: "Compte KORYXA",
     href: KORYXA_ACCOUNT_URL,
     action: "Accéder au compte",
-    tag: "Accès central",
+    tag: "Compte KORYXA",
     external: true,
   },
   {
@@ -207,7 +207,7 @@ export default function CasUsagePage() {
               <h2>Un visiteur arrive avec un problème, pas avec une architecture.</h2>
               <p>
                 La logique KORYXA est de rendre l’écosystème lisible. Le visiteur part de son intention, puis la plateforme
-                le dirige vers le produit, le partenaire, l’API ou le compte central qui correspond.
+                le dirige vers le produit, le partenaire ou le compte KORYXA qui correspond.
               </p>
             </div>
             <div className="kx-usecases-method-list">
@@ -232,7 +232,7 @@ export default function CasUsagePage() {
           <div className="kx-usecases-account-grid">
             <article>
               <KeyRound size={26} />
-              <h3>Accès central</h3>
+              <h3>Compte KORYXA</h3>
               <p>Un seul compte KORYXA pour ouvrir les espaces autorisés.</p>
               <a href={KORYXA_ACCOUNT_URL}>Compte KORYXA →</a>
             </article>
