@@ -239,13 +239,13 @@ export default function HomePage() {
                 <div className="kx-pie-section-label">Compte KORYXA</div>
                 <h2 className="kx-pie-section-title">Un seul compte pour accéder à l’écosystème.</h2>
                 <p className="kx-pie-section-lead">
-                  KORYXA Admin porte l’authentification centrale. Les produits autonomes n’ont pas besoin de recréer chacun
-                  leur propre système d’identité : ils s’alignent sur le compte KORYXA.
+                  Le compte KORYXA centralise l’accès à l’écosystème. Les produits autonomes peuvent s’aligner sur une
+                  même identité pour offrir une expérience simple et cohérente.
                 </p>
                 <ul className="kx-pie-feature-list">
                   <li>✓ Identité centrale</li>
                   <li>✓ Accès par produit</li>
-                  <li>✓ Rôles et permissions</li>
+                  <li>✓ Accès aux produits</li>
                   <li>✓ Expérience cohérente</li>
                 </ul>
                 <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-primary">
@@ -276,8 +276,8 @@ export default function HomePage() {
                 </div>
                 <div className="kx-pie-checklist">
                   {[
-                    "Compte central validé",
-                    "Rôles et permissions",
+                    "Compte KORYXA prêt",
+                    "Accès aux produits",
                     "Accès produits autonomes",
                     "Portail partenaires",
                     "API et intégrations",

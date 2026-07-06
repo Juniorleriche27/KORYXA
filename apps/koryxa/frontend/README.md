@@ -18,7 +18,7 @@ Routes principales :
 
 ## Accès central
 
-Le bouton `Compte KORYXA` pointe vers l’accès central KORYXA Admin via `NEXT_PUBLIC_KORYXA_ACCOUNT_URL`.
+Le bouton `Compte KORYXA` pointe vers l’accès central public KORYXA via `NEXT_PUBLIC_KORYXA_ACCOUNT_URL`.
 
 ## Développement
 

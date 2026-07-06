@@ -25,7 +25,7 @@ const contactReasons = [
   {
     icon: UserRoundCog,
     title: "Compte KORYXA",
-    description: "Accès central, rôles, permissions ou orientation vers KORYXA Admin.",
+    description: "Connexion, inscription ou accès à tes produits avec ton compte KORYXA.",
   },
   {
     icon: Megaphone,
@@ -179,9 +179,9 @@ export default function ContactPage() {
               </div>
               <div>
                 <UserRoundCog size={24} />
-                <h3>Compte central</h3>
-                <p>Accès, rôles et permissions passent par KORYXA Admin.</p>
-                <a href={KORYXA_ACCOUNT_URL}>Ouvrir le Compte KORYXA →</a>
+                <h3>Compte KORYXA</h3>
+                <p>Un seul compte pour accéder à l’écosystème KORYXA et retrouver tes produits.</p>
+                <a href={KORYXA_ACCOUNT_URL}>Accéder à mon compte →</a>
               </div>
               <div>
                 <Building2 size={24} />

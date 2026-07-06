@@ -102,7 +102,7 @@ const useCases = [
 const routes = [
   "Besoin réel",
   "Orientation KORYXA",
-  "Compte central",
+  "Compte KORYXA",
   "Produit autonome",
   "Activation",
 ];

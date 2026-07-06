@@ -32,9 +32,9 @@ const architectureLayers = [
   },
   {
     icon: KeyRound,
-    title: "KORYXA Admin / Compte central",
-    description: "Le centre d’identité qui gère les comptes, les rôles, les permissions et les accès produits.",
-    items: ["Compte unique", "Rôles", "Permissions", "Accès"],
+    title: "Compte KORYXA",
+    description: "Une identité centrale pour accéder aux produits KORYXA avec une expérience cohérente.",
+    items: ["Compte unique", "Produits", "Profil", "Accès"],
   },
   {
     icon: Layers3,
@@ -245,17 +245,17 @@ export default function EcosystemePage() {
         <div className="kx-pie-container">
           <div className="kx-ecosystem-account-card">
             <div>
-              <div className="kx-pie-section-label">Compte central</div>
+              <div className="kx-pie-section-label">Compte KORYXA</div>
               <h2>Un seul compte KORYXA pour accéder aux espaces autorisés.</h2>
               <p>
-                KORYXA Admin porte l’auth centrale. Les produits s’appuient sur cette identité pour éviter de multiplier
-                les systèmes de connexion et garder une expérience cohérente.
+                Le compte KORYXA centralise la connexion aux produits de l’écosystème pour éviter de multiplier
+                les systèmes d’identité et garder une expérience cohérente.
               </p>
             </div>
             <div className="kx-ecosystem-account-points">
               {[
                 "Identité unique",
-                "Rôles et permissions",
+                "Accès aux produits",
                 "Accès produits",
                 "Portail partenaires",
               ].map((item) => (
