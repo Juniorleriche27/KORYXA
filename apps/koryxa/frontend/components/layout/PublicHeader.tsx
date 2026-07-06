@@ -8,6 +8,7 @@ import { useState } from "react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { ExternalLink } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import { KORYXA_ACCOUNT_URL, MAIN_NAV_LINKS, PUBLIC_ROUTES } from "@/config/routes";
 
 function isActive(pathname: string, href: string): boolean {
@@ -44,7 +45,7 @@ export default function PublicHeader() {
   const accountHref = buildAccountHref(pathname || "/");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e8eadf] bg-[#fffdf6]/95 shadow-[0_2px_24px_rgba(13,27,56,0.08)] backdrop-blur-2xl">
+    <header className="kx-public-header sticky top-0 z-50 border-b border-[#e8eadf] bg-[#fffdf6]/95 shadow-[0_2px_24px_rgba(13,27,56,0.08)] backdrop-blur-2xl">
       <div className="mx-auto grid h-[68px] w-full max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-start gap-3">
           <button
@@ -84,6 +85,7 @@ export default function PublicHeader() {
         </nav>
 
         <div className="hidden items-center justify-end gap-2 xl:flex">
+          <ThemeToggle showLabel={false} className="kx-theme-toggle" />
           {isLoaded && isSignedIn ? (
             <div className="inline-flex items-center gap-2 rounded-lg border border-[#dfe5d8] bg-white px-3 py-2 shadow-sm">
               <span className="text-[0.78rem] font-semibold text-[#14351f]">Compte actif</span>
@@ -128,6 +130,9 @@ export default function PublicHeader() {
             })}
 
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="inline-flex items-center justify-center rounded-xl border border-[#dfe5d8] bg-white px-4 py-2 dark:border-[#1f3d2c] dark:bg-[#0d1c13]">
+                <ThemeToggle showLabel={true} className="kx-theme-toggle" />
+              </div>
               {isLoaded && isSignedIn ? (
                 <div className="inline-flex items-center justify-center gap-3 rounded-xl border border-[#dfe5d8] bg-white px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]">
                   <span>Compte actif</span>

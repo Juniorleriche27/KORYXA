@@ -1,0 +1,312 @@
+/* KORYXA public dark mode — readable, premium, high contrast */
+html.dark body {
+  background: #050b08 !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .public-shell,
+html.dark .kx-pie-page {
+  background: #050b08 !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-public-header {
+  border-bottom-color: rgba(120, 255, 180, 0.14) !important;
+  background: rgba(5, 11, 8, 0.9) !important;
+  box-shadow: 0 2px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .kx-public-header a,
+html.dark .kx-public-header button,
+html.dark .kx-public-header span {
+  color: #ecfff4 !important;
+}
+
+html.dark .kx-public-header nav a:hover,
+html.dark .kx-public-header nav a[aria-current="page"] {
+  background: rgba(0, 168, 107, 0.16) !important;
+}
+
+html.dark .kx-public-header .kx-theme-toggle {
+  border-color: rgba(120, 255, 180, 0.22) !important;
+  background: rgba(13, 28, 19, 0.9) !important;
+  color: #ecfff4 !important;
+  box-shadow: none !important;
+}
+
+html.dark .kx-public-header [class*="bg-white"] {
+  background: rgba(13, 28, 19, 0.94) !important;
+  border-color: rgba(120, 255, 180, 0.18) !important;
+}
+
+html.dark .kx-public-header [class*="bg-[#fffdf6]"] {
+  background: rgba(5, 11, 8, 0.98) !important;
+  border-color: rgba(120, 255, 180, 0.18) !important;
+}
+
+html.dark .kx-pie-hero {
+  background:
+    radial-gradient(circle at 58% 38%, rgba(0, 168, 107, 0.22) 0%, rgba(0, 168, 107, 0.08) 35%, rgba(5, 11, 8, 0) 63%),
+    linear-gradient(180deg, #050b08 0%, #07140c 54%, #050b08 100%) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-hero::before,
+html.dark .kx-ecosystem-hero::before,
+html.dark .kx-products-hero::before,
+html.dark .kx-usecases-hero::before,
+html.dark .kx-partners-hero::before,
+html.dark .kx-about-hero::before,
+html.dark .kx-contact-hero::before {
+  background-image:
+    linear-gradient(rgba(120, 255, 180, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 255, 180, 0.05) 1px, transparent 1px) !important;
+  background-size: 48px 48px !important;
+}
+
+html.dark .kx-pie-hero::after {
+  background: linear-gradient(90deg, rgba(5, 11, 8, 0.42), rgba(5, 11, 8, 0.12), rgba(5, 11, 8, 0.52)) !important;
+  opacity: 0.85 !important;
+}
+
+html.dark .kx-pie-hero h1,
+html.dark .kx-ecosystem-hero-copy h1,
+html.dark .kx-products-hero-copy h1,
+html.dark .kx-usecases-hero-copy h1,
+html.dark .kx-partners-hero-copy h1,
+html.dark .kx-about-hero-copy h1,
+html.dark .kx-contact-hero-copy h1 {
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-hero h1 em {
+  color: #48e69a !important;
+  -webkit-text-fill-color: #48e69a !important;
+}
+
+html.dark .kx-pie-hero p,
+html.dark .kx-ecosystem-hero-copy p,
+html.dark .kx-products-hero-copy p,
+html.dark .kx-usecases-hero-copy p,
+html.dark .kx-partners-hero-copy p,
+html.dark .kx-about-hero-copy p,
+html.dark .kx-contact-hero-copy p,
+html.dark .kx-pie-section-header p,
+html.dark .kx-pie-section-lead {
+  color: #b7c9bf !important;
+}
+
+html.dark .kx-pie-badge {
+  background: rgba(0, 168, 107, 0.13) !important;
+  border-color: rgba(72, 230, 154, 0.36) !important;
+}
+
+html.dark .kx-pie-badge span:last-child,
+html.dark .kx-pie-section-label,
+html.dark .kx-pie-card-kicker,
+html.dark .kx-pie-steps-label,
+html.dark .kx-pie-dash-kicker {
+  color: #48e69a !important;
+}
+
+html.dark .kx-pie-dot {
+  background: #48e69a !important;
+}
+
+html.dark .kx-pie-stat-block,
+html.dark .kx-pie-card,
+html.dark .kx-products-card,
+html.dark .kx-products-segment-grid article,
+html.dark .kx-products-routing-card,
+html.dark .kx-ecosystem-layer-card,
+html.dark .kx-ecosystem-product-card,
+html.dark .kx-ecosystem-flow-card,
+html.dark .kx-ecosystem-account-card,
+html.dark .kx-usecases-card,
+html.dark .kx-usecases-method-card,
+html.dark .kx-usecases-account-grid article,
+html.dark .kx-partners-card,
+html.dark .kx-partners-method-card,
+html.dark .kx-partners-portal-card,
+html.dark .kx-about-value-card,
+html.dark .kx-about-method-card,
+html.dark .kx-about-africa-card,
+html.dark .kx-about-split article,
+html.dark .kx-contact-reason-card,
+html.dark .kx-contact-form-card,
+html.dark .kx-contact-side-card,
+html.dark .kx-contact-side-card div,
+html.dark .kx-contact-panel,
+html.dark .kx-products-hero-panel,
+html.dark .kx-usecases-route-card,
+html.dark .kx-partners-panel,
+html.dark .kx-about-manifesto-card,
+html.dark .kx-dashboard-preview,
+html.dark .kx-pie-dashboard-preview {
+  background: rgba(13, 28, 19, 0.92) !important;
+  border-color: rgba(120, 255, 180, 0.16) !important;
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.32) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-trust-band,
+html.dark .kx-pie-bg-gray,
+html.dark .kx-usecases-account-section,
+html.dark .kx-partners-portal-section,
+html.dark .kx-about-africa-section,
+html.dark .kx-contact-page,
+html.dark .kx-products-page,
+html.dark .kx-ecosystem-page,
+html.dark .kx-usecases-page,
+html.dark .kx-partners-page,
+html.dark .kx-about-page {
+  background: #07140c !important;
+}
+
+html.dark .kx-pie-section-header h2,
+html.dark .kx-pie-section-title,
+html.dark .kx-products-card h3,
+html.dark .kx-ecosystem-layer-card h3,
+html.dark .kx-ecosystem-product-card h3,
+html.dark .kx-usecases-card h3,
+html.dark .kx-partners-card h3,
+html.dark .kx-about-value-card h3,
+html.dark .kx-contact-reason-card h3,
+html.dark .kx-contact-form-card h2,
+html.dark .kx-contact-side-card h3,
+html.dark .kx-about-split h2,
+html.dark .kx-partners-portal-card h2,
+html.dark .kx-about-africa-card h2,
+html.dark .kx-products-routing-card h2,
+html.dark .kx-usecases-method-card h2,
+html.dark .kx-partners-method-card h2,
+html.dark .kx-about-method-card h2,
+html.dark .kx-ecosystem-account-card h2,
+html.dark .kx-pie-card-title,
+html.dark .kx-dash-title,
+html.dark .kx-pie-dash-title {
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-products-card p,
+html.dark .kx-ecosystem-layer-card p,
+html.dark .kx-ecosystem-product-card p,
+html.dark .kx-usecases-card p,
+html.dark .kx-partners-card p,
+html.dark .kx-about-value-card p,
+html.dark .kx-contact-reason-card p,
+html.dark .kx-contact-form-card > p,
+html.dark .kx-contact-side-card p,
+html.dark .kx-about-split p,
+html.dark .kx-partners-portal-card p,
+html.dark .kx-about-africa-card p,
+html.dark .kx-pie-stat-desc,
+html.dark .kx-pie-progress-row,
+html.dark .kx-pie-step-text {
+  color: #b7c9bf !important;
+}
+
+html.dark .kx-pie-stat-number,
+html.dark .kx-products-tagline,
+html.dark .kx-products-panel-head svg,
+html.dark .kx-usecases-route-head svg,
+html.dark .kx-partners-panel-head svg,
+html.dark .kx-contact-panel-head svg,
+html.dark .kx-about-manifesto-card svg,
+html.dark .kx-products-icon,
+html.dark .kx-contact-side-card svg {
+  color: #48e69a !important;
+}
+
+html.dark .kx-pie-tags span,
+html.dark .kx-pie-tags .green,
+html.dark .kx-products-highlight-row span,
+html.dark .kx-ecosystem-chip-row span,
+html.dark .kx-usecases-target,
+html.dark .kx-products-meta-grid div,
+html.dark .kx-contact-form input,
+html.dark .kx-contact-form select,
+html.dark .kx-contact-form textarea {
+  background: rgba(72, 230, 154, 0.08) !important;
+  border-color: rgba(72, 230, 154, 0.18) !important;
+  color: #eafff2 !important;
+}
+
+html.dark .kx-contact-form input::placeholder,
+html.dark .kx-contact-form textarea::placeholder {
+  color: #7f978a !important;
+}
+
+html.dark .kx-products-meta-grid span,
+html.dark .kx-usecases-target span,
+html.dark .kx-contact-form label span {
+  color: #86efac !important;
+}
+
+html.dark .kx-products-meta-grid strong,
+html.dark .kx-usecases-target strong {
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-bar {
+  background: rgba(120, 255, 180, 0.12) !important;
+}
+
+html.dark .kx-pie-bar span {
+  background: linear-gradient(90deg, #00a86b, #48e69a) !important;
+}
+
+html.dark .kx-pie-step,
+html.dark .kx-pie-step.done {
+  background: rgba(72, 230, 154, 0.08) !important;
+}
+
+html.dark .kx-pie-cta-section,
+html.dark .kx-ecosystem-hero,
+html.dark .kx-products-hero,
+html.dark .kx-usecases-hero,
+html.dark .kx-partners-hero,
+html.dark .kx-about-hero,
+html.dark .kx-contact-hero,
+html.dark .kx-products-strip,
+html.dark .kx-pie-marquee-section {
+  background: radial-gradient(circle at 50% 32%, rgba(0, 168, 107, 0.26), #07140c 56%, #050b08 100%) !important;
+}
+
+html.dark .kx-pie-btn-outline-white,
+html.dark .kx-pie-btn-outline {
+  background: rgba(13, 28, 19, 0.94) !important;
+  color: #f6fff9 !important;
+  border-color: rgba(120, 255, 180, 0.24) !important;
+}
+
+html.dark .kx-site-footer {
+  background: linear-gradient(180deg, #07140c 0%, #050b08 100%) !important;
+  border-top-color: rgba(120, 255, 180, 0.14) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-site-footer p,
+html.dark .kx-site-footer a,
+html.dark .kx-site-footer span {
+  color: #dceee5 !important;
+}
+
+html.dark .kx-site-footer [class*="text-[#006b43]"],
+html.dark .kx-site-footer [class*="text-[#00a86b]"] {
+  color: #48e69a !important;
+}
+
+html.dark .kx-site-footer [class*="bg-white"] {
+  background: rgba(13, 28, 19, 0.92) !important;
+  border-color: rgba(120, 255, 180, 0.16) !important;
+}
+
+html.dark .kx-site-footer > div:last-child {
+  background: rgba(5, 11, 8, 0.62) !important;
+  border-top-color: rgba(120, 255, 180, 0.14) !important;
+}
+
+html.dark .kx-site-footer a:hover {
+  color: #48e69a !important;
+}

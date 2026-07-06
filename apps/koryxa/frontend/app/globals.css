@@ -3,6 +3,7 @@
 /* Import shared design tokens and utility classes (buttons, chips, container) */
 @import "../styles/globals.css";
 @import "./koryxa-pieagency.css";
+@import "./koryxa-darkmode.css";
 
 :root {
   --background: #020617;

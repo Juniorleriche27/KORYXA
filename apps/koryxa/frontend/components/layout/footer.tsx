@@ -36,7 +36,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[#e4f2ea] bg-[linear-gradient(180deg,#ffffff_0%,#f5fbf7_100%)] text-[#17231d]">
+    <footer className="kx-site-footer border-t border-[#e4f2ea] bg-[linear-gradient(180deg,#ffffff_0%,#f5fbf7_100%)] text-[#17231d]">
       <div className="mx-auto grid w-full max-w-[var(--marketing-max-w)] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.25fr_2fr] lg:px-8 lg:py-14">
         <div>
           <div className="flex items-center gap-3">
