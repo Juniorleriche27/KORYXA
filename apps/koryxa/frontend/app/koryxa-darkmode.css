@@ -310,3 +310,28 @@ html.dark .kx-site-footer > div:last-child {
 html.dark .kx-site-footer a:hover {
   color: #48e69a !important;
 }
+
+/* Dark landing account note fix */
+html.dark .kx-pie-hero-note {
+  background: linear-gradient(135deg, rgba(13, 28, 19, 0.96), rgba(7, 20, 12, 0.94)) !important;
+  border: 1px solid rgba(72, 230, 154, 0.22) !important;
+  border-left: 3px solid #48e69a !important;
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.36) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-hero-note p {
+  color: #cfe3d8 !important;
+}
+
+html.dark .kx-pie-hero-note strong {
+  color: #48e69a !important;
+}
+
+html.dark .kx-pie-hero-note a {
+  color: #86efac !important;
+}
+
+html.dark .kx-pie-hero-note a:hover {
+  color: #f6fff9 !important;
+}
