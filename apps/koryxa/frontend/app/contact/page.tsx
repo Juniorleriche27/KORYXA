@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, Phone, UserRoundCog } from "lucide-react";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { KORYXA_CONTACT } from "@/config/contact";
+import { ContactForm } from "./ContactForm";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = {
@@ -127,33 +128,7 @@ export default function ContactPage() {
               <p>
                 Ce formulaire est prêt côté interface. La connexion backend sera câblée dans le chantier technique dédié.
               </p>
-              <form className="kx-contact-form">
-                <div className="kx-contact-field-grid">
-                  <label>
-                    <span>Nom</span>
-                    <input name="name" placeholder="Votre nom" />
-                  </label>
-                  <label>
-                    <span>Email</span>
-                    <input name="email" type="email" placeholder="vous@email.com" />
-                  </label>
-                </div>
-                <label>
-                  <span>Motif</span>
-                  <select name="reason" defaultValue="Partenariat">
-                    {contactReasons.map((reason) => (
-                      <option key={reason.title}>{reason.title}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  <span>Message</span>
-                  <textarea name="message" rows={6} placeholder="Décrivez votre demande..." />
-                </label>
-                <button type="button" className="kx-pie-btn kx-pie-btn-primary">
-                  Préparer l’envoi
-                </button>
-              </form>
+              <ContactForm />
             </div>
 
             <aside className="kx-contact-side-card">
