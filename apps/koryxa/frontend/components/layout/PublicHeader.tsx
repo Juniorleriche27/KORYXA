@@ -110,7 +110,7 @@ export default function PublicHeader() {
       </div>
 
       {mobileOpen ? (
-        <div className="border-t border-[#e8eadf] bg-[#fffdf6]/98 px-4 py-4 xl:hidden">
+        <div className="kx-mobile-menu border-t border-[#e8eadf] bg-[#fffdf6]/98 px-4 py-4 xl:hidden">
           <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-2">
             {MAIN_NAV_LINKS.map((link) => {
               const active = isActive(pathname, link.href);
@@ -120,8 +120,8 @@ export default function PublicHeader() {
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   className={clsx(
-                    "rounded-xl px-4 py-3 text-[1rem] font-semibold text-[#14351f] transition",
-                    active ? "bg-[#f4f1df]" : "hover:bg-[#f5f6ee]",
+                    "kx-mobile-menu-link rounded-xl px-4 py-3 text-[1rem] font-semibold text-[#14351f] transition",
+                    active ? "kx-mobile-menu-link-active bg-[#f4f1df]" : "hover:bg-[#f5f6ee]",
                   )}
                 >
                   {link.label}
@@ -129,12 +129,12 @@ export default function PublicHeader() {
               );
             })}
 
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <div className="inline-flex items-center justify-center rounded-xl border border-[#dfe5d8] bg-white px-4 py-2 dark:border-[#1f3d2c] dark:bg-[#0d1c13]">
+            <div className="kx-mobile-menu-actions mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="kx-mobile-theme-row inline-flex items-center justify-center rounded-xl border border-[#dfe5d8] bg-white px-4 py-2 dark:border-[#1f3d2c] dark:bg-[#0d1c13]">
                 <ThemeToggle showLabel={true} className="kx-theme-toggle" />
               </div>
               {isLoaded && isSignedIn ? (
-                <div className="inline-flex items-center justify-center gap-3 rounded-xl border border-[#dfe5d8] bg-white px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]">
+                <div className="kx-mobile-account inline-flex items-center justify-center gap-3 rounded-xl border border-[#dfe5d8] bg-white px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]">
                   <span>Compte actif</span>
                   <UserButton />
                 </div>
@@ -142,7 +142,7 @@ export default function PublicHeader() {
                 <a
                   href={accountHref}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#14351f] px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]"
+                  className="kx-mobile-account inline-flex items-center justify-center gap-2 rounded-xl border border-[#14351f] px-4 py-3 text-[0.95rem] font-semibold text-[#14351f]"
                 >
                   Compte KORYXA
                   <ExternalLink className="h-4 w-4" />
@@ -151,7 +151,7 @@ export default function PublicHeader() {
               <Link
                 href={PUBLIC_ROUTES.ecosysteme}
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center justify-center rounded-xl bg-[#00a86b] px-4 py-3 text-[0.95rem] font-bold text-white"
+                className="kx-mobile-ecosystem inline-flex items-center justify-center rounded-xl bg-[#00a86b] px-4 py-3 text-[0.95rem] font-bold text-white"
               >
                 Explorer l’écosystème
               </Link>

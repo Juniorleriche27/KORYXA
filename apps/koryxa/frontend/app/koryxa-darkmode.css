@@ -335,3 +335,89 @@ html.dark .kx-pie-hero-note a {
 html.dark .kx-pie-hero-note a:hover {
   color: #f6fff9 !important;
 }
+
+/* Mobile menu contrast fix */
+.kx-mobile-menu {
+  color: #14351f;
+}
+
+.kx-mobile-menu .kx-mobile-menu-link {
+  color: #14351f !important;
+}
+
+.kx-mobile-menu .kx-mobile-menu-link-active {
+  background: #f4f1df !important;
+  color: #14351f !important;
+}
+
+.kx-mobile-theme-row {
+  min-height: 58px;
+}
+
+.kx-mobile-theme-row .kx-theme-toggle {
+  width: auto !important;
+  min-width: 116px;
+  background: #ffffff !important;
+  color: #14351f !important;
+}
+
+.kx-mobile-account {
+  color: #14351f !important;
+  background: #ffffff !important;
+}
+
+.kx-mobile-account span,
+.kx-mobile-account svg {
+  color: #14351f !important;
+}
+
+.kx-mobile-ecosystem {
+  color: #ffffff !important;
+}
+
+html.dark .kx-mobile-menu {
+  background: #07140c !important;
+  border-top-color: rgba(120, 255, 180, 0.16) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-mobile-menu .kx-mobile-menu-link {
+  color: #dff8ea !important;
+  background: transparent !important;
+}
+
+html.dark .kx-mobile-menu .kx-mobile-menu-link:hover {
+  background: rgba(72, 230, 154, 0.1) !important;
+  color: #ffffff !important;
+}
+
+html.dark .kx-mobile-menu .kx-mobile-menu-link-active {
+  background: rgba(72, 230, 154, 0.14) !important;
+  color: #ffffff !important;
+}
+
+html.dark .kx-mobile-theme-row {
+  background: rgba(13, 28, 19, 0.92) !important;
+  border-color: rgba(120, 255, 180, 0.18) !important;
+}
+
+html.dark .kx-mobile-theme-row .kx-theme-toggle {
+  background: rgba(5, 11, 8, 0.75) !important;
+  border-color: rgba(120, 255, 180, 0.2) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-mobile-account {
+  background: rgba(13, 28, 19, 0.92) !important;
+  border-color: rgba(120, 255, 180, 0.18) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-mobile-account span,
+html.dark .kx-mobile-account svg {
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-mobile-ecosystem {
+  color: #ffffff !important;
+}
