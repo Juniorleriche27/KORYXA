@@ -421,3 +421,86 @@ html.dark .kx-mobile-account svg {
 html.dark .kx-mobile-ecosystem {
   color: #ffffff !important;
 }
+
+/* Final mobile menu readability fix — explicit light/dark states */
+@media (max-width: 1279px) {
+  html:not(.dark) .kx-mobile-menu {
+    background: #fffefa !important;
+    border-top-color: #e4f2ea !important;
+    box-shadow: 0 18px 42px rgba(0, 107, 67, 0.08) !important;
+  }
+
+  html:not(.dark) .kx-mobile-menu .kx-mobile-menu-link {
+    color: #07140c !important;
+    background: transparent !important;
+    text-shadow: none !important;
+  }
+
+  html:not(.dark) .kx-mobile-menu .kx-mobile-menu-link-active {
+    background: #eaf8f0 !important;
+    color: #006b43 !important;
+    border: 1px solid rgba(0, 168, 107, 0.18) !important;
+  }
+
+  html:not(.dark) .kx-mobile-menu .kx-mobile-menu-link:hover {
+    background: #f2fbf6 !important;
+    color: #006b43 !important;
+  }
+
+  html:not(.dark) .kx-mobile-theme-row {
+    min-height: 52px !important;
+    background: #f5fbf7 !important;
+    border-color: #d8eee1 !important;
+    box-shadow: none !important;
+  }
+
+  html:not(.dark) .kx-mobile-theme-row .kx-theme-toggle {
+    min-width: 104px !important;
+    background: #ffffff !important;
+    border-color: #d8eee1 !important;
+    color: #07140c !important;
+    box-shadow: 0 8px 22px rgba(0, 107, 67, 0.06) !important;
+  }
+
+  html:not(.dark) .kx-mobile-account {
+    background: #ffffff !important;
+    border-color: #d8eee1 !important;
+    color: #07140c !important;
+  }
+
+  html:not(.dark) .kx-mobile-account span,
+  html:not(.dark) .kx-mobile-account svg {
+    color: #07140c !important;
+  }
+
+  html.dark .kx-mobile-menu {
+    background: #050b08 !important;
+    border-top-color: rgba(120, 255, 180, 0.16) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  html.dark .kx-mobile-menu .kx-mobile-menu-link {
+    color: #f6fff9 !important;
+    background: transparent !important;
+    text-shadow: none !important;
+  }
+
+  html.dark .kx-mobile-menu .kx-mobile-menu-link-active {
+    background: rgba(72, 230, 154, 0.16) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(72, 230, 154, 0.28) !important;
+  }
+
+  html.dark .kx-mobile-theme-row {
+    min-height: 52px !important;
+    background: rgba(13, 28, 19, 0.72) !important;
+    border-color: rgba(120, 255, 180, 0.2) !important;
+  }
+
+  html.dark .kx-mobile-theme-row .kx-theme-toggle {
+    min-width: 104px !important;
+    background: rgba(5, 11, 8, 0.78) !important;
+    border-color: rgba(120, 255, 180, 0.22) !important;
+    color: #f6fff9 !important;
+  }
+}
