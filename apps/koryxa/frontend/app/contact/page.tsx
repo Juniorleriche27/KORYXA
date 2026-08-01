@@ -161,7 +161,7 @@ export default function ContactPage() {
               <div>
                 <Building2 size={24} />
                 <h3>Partenaires</h3>
-                <p>Les demandes de collaboration sont orientées vers Partner Portal.</p>
+                <p>Les demandes de collaboration sont orientées vers le Portail Partenaire.</p>
                 <Link href={PUBLIC_ROUTES.partenaires}>Voir la page partenaires →</Link>
               </div>
             </aside>

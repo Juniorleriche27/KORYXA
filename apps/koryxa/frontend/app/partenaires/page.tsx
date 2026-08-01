@@ -169,14 +169,14 @@ export default function PartenairesPage() {
           <div className="kx-partners-portal-card">
             <Network size={28} />
             <div>
-              <h2>Partner Portal organise les collaborations.</h2>
+              <h2>Le Portail Partenaire organise les collaborations.</h2>
               <p>
                 Le portail partenaire sert d’espace de suivi pour les collaborations KORYXA : demandes,
                 accès, échanges, projets et relations actives.
               </p>
             </div>
             <Link href="/produits/partner-portal" className="kx-pie-btn kx-pie-btn-primary">
-              Voir Partner Portal
+              Voir le Portail Partenaire
             </Link>
           </div>
         </div>

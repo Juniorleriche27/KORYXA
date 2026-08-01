@@ -1,4 +1,4 @@
-export type ProductStatus = "actif" | "construction" | "construction";
+export type ProductStatus = "actif" | "construction";
 
 export type ProductInfo = {
   slug: string;
@@ -127,10 +127,10 @@ export const productCatalog: Record<string, ProductInfo> = {
   },
   "partner-portal": {
     slug: "partner-portal",
-    name: "Partner Portal",
+    name: "Portail Partenaire",
     tagline: "Programme partenaire officiel KORYXA.",
     summary:
-      "Partner Portal permet de rejoindre le programme partenaire KORYXA, recevoir un code partenaire unique, partager un lien, suivre les gains depuis un espace de suivi et gérer les leads liés à la formation Python Data Analyst.",
+      "Le Portail Partenaire permet de rejoindre le programme partenaire KORYXA, recevoir un code partenaire unique, partager un lien, suivre les gains depuis un espace de suivi et gérer les leads liés à la formation Python Data Analyst.",
     audience: "Partenaires, ambassadeurs, apporteurs d’affaires, communautés et réseaux terrain",
     status: "actif",
     href: "https://partenaires.koryxa.fr",
@@ -140,17 +140,17 @@ export const productCatalog: Record<string, ProductInfo> = {
       { label: "Accès", value: "Espace de suivi" },
     ],
     highlights: ["Code partenaire", "Espace de suivi", "Paiement Mobile Money"],
-    primaryCta: { label: "Ouvrir Partner Portal", href: "https://partenaires.koryxa.fr" },
+    primaryCta: { label: "Ouvrir le Portail Partenaire", href: "https://partenaires.koryxa.fr" },
     useCases: ["Devenir partenaire", "Partager un lien", "Suivre les gains", "Gérer les leads"],
   },
   "services-ia": {
     slug: "services-ia",
-    name: "Services IA",
+    name: "Service IA",
     tagline: "Studio d’exécution KORYXA.",
     summary:
       "Services IA transforme les besoins métier en projets livrés : qualification, devis, équipe dédiée et delivery. Le repo présente 10 services IA autour du revenu, de la productivité, du digital, des systèmes et de la sécurité des données.",
     audience: "Entreprises, PME, organisations, porteurs de projets et équipes métier",
-    status: "actif",
+    status: "construction",
     href: "/produits/services-ia",
     stats: [
       { label: "Offres", value: "10 services" },
@@ -163,7 +163,15 @@ export const productCatalog: Record<string, ProductInfo> = {
   },
 };
 
-export const productList = Object.values(productCatalog);
+export const visibleProductSlugs = [
+  "neurokap",
+  "corabiz",
+  "formation",
+  "partner-portal",
+  "services-ia",
+] as const;
+
+export const productList = visibleProductSlugs.map((slug) => productCatalog[slug]);
 
 export const removedProductSlugs = new Set(["plusbook", "plusbooks", "koryxa-sante", "sante"]);
 

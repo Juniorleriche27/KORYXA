@@ -40,7 +40,7 @@ const architectureLayers = [
     icon: Layers3,
     title: "Produits autonomes",
     description: "Chaque produit garde son périmètre, son repo et son expérience, tout en restant relié à KORYXA.",
-    items: ["ChatLAYA", "Cora", "Formation", "Services IA"],
+    items: ["NeuroKap", "CoraBiz", "KORYXA Formation", "Services IA"],
   },
   {
     icon: DatabaseZap,
@@ -81,7 +81,7 @@ const orchestrationFlow = [
 
 const ecosystemMetrics = [
   { value: "01", label: "marque repère" },
-  { value: "08", label: "produits et projets" },
+  { value: String(productList.length).padStart(2, "0"), label: "produits visibles" },
   { value: "01", label: "compte KORYXA" },
   { value: "05", label: "couches d’écosystème" },
 ];

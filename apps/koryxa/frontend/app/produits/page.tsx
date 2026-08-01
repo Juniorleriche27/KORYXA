@@ -20,7 +20,7 @@ import { productList, type ProductInfo } from "@/app/produits/data";
 export const metadata: Metadata = {
   title: "Produits KORYXA | Catalogue des produits autonomes",
   description:
-    "Découvrez les produits autonomes de l’écosystème KORYXA : ChatLAYA, Cora, Partner Portal, KORYXA API, KORYXA Formation, Neurokap, Corabiz et Services IA.",
+    "Découvrez les produits visibles de l’écosystème KORYXA : NeuroKap, CoraBiz, KORYXA Formation, Portail Partenaire et Services IA.",
 };
 
 const productIcons: Record<string, typeof Bot> = {
@@ -37,18 +37,13 @@ const productIcons: Record<string, typeof Bot> = {
 const productGroups = [
   {
     label: "Usage direct",
-    description: "Produits pensés pour les utilisateurs, les talents et les organisations.",
-    slugs: ["chatlaya", "formation", "services-ia"],
+    description: "Produits pensés pour apprendre, progresser et développer une activité.",
+    slugs: ["neurokap", "formation", "corabiz"],
   },
   {
-    label: "Organisation",
-    description: "Espaces pour structurer les relations, les partenaires et les activités.",
-    slugs: ["cora", "partner-portal", "corabiz"],
-  },
-  {
-    label: "Systèmes",
-    description: "Briques techniques et projets IA rattachés à l’architecture KORYXA.",
-    slugs: ["api", "neurokap"],
+    label: "Partenaires et services",
+    description: "Espaces pour rejoindre KORYXA ou préparer un projet IA sur mesure.",
+    slugs: ["partner-portal", "services-ia"],
   },
 ];
 
@@ -137,7 +132,7 @@ export default function ProductsPage() {
             <div className="kx-products-panel-head">
               <div>
                 <span>Vue catalogue</span>
-                <strong>8 produits connectés</strong>
+                <strong>{productList.length} produits visibles</strong>
               </div>
               <Network size={24} />
             </div>

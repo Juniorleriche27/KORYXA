@@ -65,9 +65,9 @@ const useCases = [
     icon: Building2,
     title: "Je veux connecter une organisation",
     description: "Structurer une organisation, un partenaire, une équipe ou un espace métier dans l’écosystème.",
-    product: "Cora / Partner Portal",
+    product: "Cora / Portail Partenaire",
     href: "/produits/partner-portal",
-    action: "Voir Partner Portal",
+    action: "Voir le Portail Partenaire",
     tag: "Organisation",
   },
   {

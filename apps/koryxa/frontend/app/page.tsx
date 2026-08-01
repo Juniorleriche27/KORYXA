@@ -37,7 +37,7 @@ const organizationJsonLd = {
 };
 
 const heroStats = [
-  { value: "8", label: "produits autonomes" },
+  { value: String(productList.length), label: "produits visibles" },
   { value: "1", label: "compte KORYXA" },
   { value: "4", label: "couches d’orchestration" },
   { value: "100%", label: "vision Afrique" },
@@ -74,7 +74,7 @@ const processSteps = [
   "Suivre l’usage et l’impact",
 ];
 
-const featuredProducts = productList.slice(0, 6);
+const featuredProducts = productList;
 
 export default function HomePage() {
   return (
@@ -140,7 +140,7 @@ export default function HomePage() {
                 </div>
                 <div className="kx-pie-progress-row">
                   <span>Connexion des produits</span>
-                  <span>8 / 8</span>
+                  <span>{productList.length} / {productList.length}</span>
                 </div>
                 <div className="kx-pie-bar"><span /></div>
                 <div className="kx-pie-tags">
@@ -265,8 +265,8 @@ export default function HomePage() {
                 <div className="kx-pie-dash-grid">
                   <div className="kx-pie-dash-card">
                     <span>Produits actifs</span>
-                    <strong>8</strong>
-                    <small>connectés à KORYXA</small>
+                    <strong>{productList.length}</strong>
+                    <small>visibles dans l’écosystème</small>
                   </div>
                   <div className="kx-pie-dash-card">
                     <span>Identité</span>
