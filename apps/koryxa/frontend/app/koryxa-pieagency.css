@@ -139,11 +139,11 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 168, 107, 0.18);
-  border: 1px solid rgba(72, 230, 154, 0.45);
+  background: rgba(0, 168, 107, 0.1);
+  border: 1px solid rgba(0, 168, 107, 0.25);
   padding: 7px 16px;
   border-radius: 100px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
@@ -156,22 +156,15 @@
   left: -100%;
   width: 60%;
   height: 100%;
-  background: linear-gradient(105deg, transparent 20%, rgba(72, 230, 154, 0.35) 50%, transparent 80%);
+  background: linear-gradient(105deg, transparent 20%, rgba(0, 168, 107, 0.2) 50%, transparent 80%);
   animation: kxPieBadgeShimmer 3.2s ease-in-out infinite;
   animation-delay: 1.2s;
-}
-
-@keyframes kxPieBadgeShimmer {
-  0% { left: -80%; opacity: 0; }
-  10% { opacity: 1; }
-  60% { left: 130%; opacity: 1; }
-  100% { left: 130%; opacity: 0; }
 }
 
 .kx-pie-badge span:last-child {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #ecfff4;
+  color: #008b58;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -180,19 +173,19 @@
 .kx-pie-dot {
   width: 7px;
   height: 7px;
-  background: #22c55e;
+  background: #00a86b;
   border-radius: 50%;
   animation: kxPiePulse 2.4s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 @keyframes kxPiePulse {
-  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
-  50% { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 168, 107, 0.5); }
+  50% { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 0 5px rgba(0, 168, 107, 0); }
 }
 
 .kx-pie-hero h1 {
-  color: #ffffff;
+  color: #07140c;
   font-size: clamp(2.6rem, 6vw, 5.2rem);
   line-height: 1.02;
   margin-bottom: 22px;
@@ -200,16 +193,16 @@
 }
 
 .kx-pie-hero h1 em {
-  font-style: italic;
-  color: #86efac;
-  background: linear-gradient(90deg, #86efac, #ffffff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-style: normal;
+  color: #00a86b;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: #00a86b;
+  background-clip: initial;
 }
 
 .kx-pie-hero p {
-  color: #e2f5ea;
+  color: #334155;
   font-size: 1.08rem;
   line-height: 1.7;
   margin-bottom: 34px;
@@ -868,20 +861,22 @@
 }
 
 .kx-ecosystem-hero {
-  min-height: calc(100vh - 68px);
+  min-height: auto;
   display: flex;
   align-items: center;
-  background: radial-gradient(ellipse at 70% 50%, #1e4e2f 0%, var(--kx-pie-green) 55%, #07140c 100%);
+  padding-top: 32px;
+  padding-bottom: 48px;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 168, 107, 0.07) 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #ffffff 0%, #faf9f5 100%);
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: #07140c;
 }
 
 .kx-ecosystem-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(0, 168, 107, 0.015) 60px, rgba(0, 168, 107, 0.015) 61px);
   pointer-events: none;
 }
 
@@ -895,12 +890,12 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 32px;
+  padding: 42px 32px 64px;
 }
 
 .kx-ecosystem-hero-copy h1 {
   max-width: 720px;
-  color: #ffffff;
+  color: #07140c;
   font-size: clamp(2.6rem, 5.8vw, 5rem);
   line-height: 1.02;
   margin-bottom: 22px;
@@ -909,7 +904,7 @@
 
 .kx-ecosystem-hero-copy p {
   max-width: 640px;
-  color: #e2f5ea;
+  color: #334155;
   font-size: 1.08rem;
   line-height: 1.7;
   margin-bottom: 34px;
@@ -1380,20 +1375,22 @@
 }
 
 .kx-products-hero {
-  min-height: calc(100vh - 68px);
+  min-height: auto;
   display: flex;
   align-items: center;
-  background: radial-gradient(ellipse at 70% 50%, #1e4e2f 0%, var(--kx-pie-green) 55%, #07140c 100%);
+  padding-top: 32px;
+  padding-bottom: 48px;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 168, 107, 0.07) 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #ffffff 0%, #faf9f5 100%);
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: #07140c;
 }
 
 .kx-products-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(0, 168, 107, 0.015) 60px, rgba(0, 168, 107, 0.015) 61px);
   pointer-events: none;
 }
 
@@ -1407,12 +1404,12 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 32px;
+  padding: 42px 32px 64px;
 }
 
 .kx-products-hero-copy h1 {
   max-width: 760px;
-  color: #ffffff;
+  color: #07140c;
   font-size: clamp(2.6rem, 5.8vw, 5rem);
   line-height: 1.02;
   margin-bottom: 22px;
@@ -1421,7 +1418,7 @@
 
 .kx-products-hero-copy p {
   max-width: 640px;
-  color: #e2f5ea;
+  color: #334155;
   font-size: 1.08rem;
   line-height: 1.7;
   margin-bottom: 34px;
@@ -1827,20 +1824,22 @@
 }
 
 .kx-usecases-hero {
-  min-height: calc(100vh - 68px);
+  min-height: auto;
   display: flex;
   align-items: center;
-  background: radial-gradient(ellipse at 70% 50%, #1e4e2f 0%, var(--kx-pie-green) 55%, #07140c 100%);
+  padding-top: 32px;
+  padding-bottom: 48px;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 168, 107, 0.07) 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #ffffff 0%, #faf9f5 100%);
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: #07140c;
 }
 
 .kx-usecases-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(0, 168, 107, 0.015) 60px, rgba(0, 168, 107, 0.015) 61px);
   pointer-events: none;
 }
 
@@ -1854,12 +1853,12 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 32px;
+  padding: 42px 32px 64px;
 }
 
 .kx-usecases-hero-copy h1 {
   max-width: 760px;
-  color: #ffffff;
+  color: #07140c;
   font-size: clamp(2.6rem, 5.8vw, 5rem);
   line-height: 1.02;
   margin-bottom: 22px;
@@ -1868,7 +1867,7 @@
 
 .kx-usecases-hero-copy p {
   max-width: 640px;
-  color: #e2f5ea;
+  color: #334155;
   font-size: 1.08rem;
   line-height: 1.7;
   margin-bottom: 34px;
@@ -2236,13 +2235,15 @@
 .kx-partners-hero,
 .kx-about-hero,
 .kx-contact-hero {
-  min-height: calc(100vh - 68px);
+  min-height: auto;
   display: flex;
   align-items: center;
-  background: radial-gradient(ellipse at 70% 50%, #1e4e2f 0%, var(--kx-pie-green) 55%, #07140c 100%);
+  padding-top: 32px;
+  padding-bottom: 48px;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 168, 107, 0.07) 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #ffffff 0%, #faf9f5 100%);
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: #07140c;
 }
 
 .kx-partners-hero::after,
@@ -2251,7 +2252,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  background: repeating-linear-gradient(-55deg, transparent, transparent 60px, rgba(0, 168, 107, 0.015) 60px, rgba(0, 168, 107, 0.015) 61px);
   pointer-events: none;
 }
 
@@ -2267,14 +2268,14 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 32px;
+  padding: 42px 32px 64px;
 }
 
 .kx-partners-hero-copy h1,
 .kx-about-hero-copy h1,
 .kx-contact-hero-copy h1 {
   max-width: 780px;
-  color: #ffffff;
+  color: #07140c;
   font-size: clamp(2.6rem, 5.8vw, 5rem);
   line-height: 1.02;
   margin-bottom: 22px;
@@ -2285,7 +2286,7 @@
 .kx-about-hero-copy p,
 .kx-contact-hero-copy p {
   max-width: 640px;
-  color: #e2f5ea;
+  color: #334155;
   font-size: 1.08rem;
   line-height: 1.7;
   margin-bottom: 34px;

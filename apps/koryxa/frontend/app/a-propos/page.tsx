@@ -46,7 +46,7 @@ const coreValues = [
 
 export default function AProposPage() {
   return (
-    <main className="kx-pie-page kx-about-page">
+    <div className="kx-pie-page kx-about-page">
       {/* 1. Hero Section — Centered & Authoritative */}
       <section className="kx-about-hero relative overflow-hidden text-center py-16 sm:py-24">
         <div className="kx-pie-blob kx-pie-blob-one" />
@@ -58,25 +58,25 @@ export default function AProposPage() {
             <span>Vision & Mission Fondatrice</span>
           </div>
 
-          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">
             L'intelligence artificielle souveraine, utile et ancrée en Afrique.
           </h1>
 
-          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-[#cbd5e1] leading-relaxed">
             KORYXA est née d'une conviction fondamentale : l'Afrique ne doit pas être une simple consommatrice de modèles importés, mais le terrain d'avant-garde d'une infrastructure IA orchestrée pour transformer l'économie réelle.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
             <Link
               href={PUBLIC_ROUTES.ecosysteme}
-              className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.3)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
             >
               Comprendre l'écosystème
               <ArrowRight size={18} />
             </Link>
             <Link
               href={PUBLIC_ROUTES.produits}
-              className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
             >
               Explorer les produits
             </Link>
@@ -195,6 +195,6 @@ export default function AProposPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

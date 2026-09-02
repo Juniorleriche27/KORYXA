@@ -116,7 +116,7 @@ const PRODUCT_ICONS: Record<string, typeof Bot> = {
 
 export default function EcosystemePage() {
   return (
-    <main className="kx-pie-page kx-ecosystem-page">
+    <div className="kx-pie-page kx-ecosystem-page">
       {/* 1. Hero Section — Centered & Modern */}
       <section className="kx-ecosystem-hero relative overflow-hidden text-center py-16 sm:py-24">
         <div className="kx-pie-blob kx-pie-blob-one" />
@@ -385,6 +385,6 @@ export default function EcosystemePage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

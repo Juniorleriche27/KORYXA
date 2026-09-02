@@ -93,7 +93,7 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={organizationJsonLd} />
-      <main className="kx-pie-page">
+      <div className="kx-pie-page">
         {/* 1. HERO SECTION: REMOVED SMALL BADGE, REDUCED TOP PADDING, CLEAN LIGHT/DARK HERO */}
         <section className="kx-pie-hero relative overflow-hidden text-center pt-8 pb-16 sm:pt-12 sm:pb-24 transition-colors duration-200">
           <div className="kx-pie-blob kx-pie-blob-one" />
@@ -246,38 +246,38 @@ export default function HomePage() {
         </section>
 
         {/* 6. CTA SECTION PREMIUM */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#081f13] to-[#040c07] py-20 sm:py-28 text-center text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,168,107,0.3),transparent_70%)]" />
+        <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors duration-200">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 text-center">
+            <div className="relative overflow-hidden rounded-3xl border border-[#dfe5d8] dark:border-[#234b33] bg-gradient-to-r from-[#f7fbf8] to-[#edf6f0] dark:from-[#07190f] dark:to-[#040f09] p-8 sm:p-14 shadow-xl">
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#86efac]">
+                Rejoindre l’Écosystème
+              </span>
+              <h2 className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Prenez part à la transformation IA en Afrique.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-slate-600 dark:text-[#e2f5ea] leading-relaxed">
+                Créez votre compte unique KORYXA pour accéder instantanément à tous les produits ou contactez notre équipe pour déployer une solution dédiée.
+              </p>
 
-          <div className="relative mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#86efac]">
-              Rejoindre l’Écosystème
-            </span>
-            <h2 className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-white tracking-tight">
-              Prenez part à la transformation IA en Afrique.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-base text-[#e2f5ea] leading-relaxed">
-              Créez votre compte unique KORYXA pour accéder instantanément à tous les produits ou contactez notre équipe pour déployer une solution dédiée.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
-              <a
-                href={KORYXA_ACCOUNT_URL}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-4 text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
-              >
-                Créer mon Compte KORYXA
-                <ArrowRight className="h-4 w-4" />
-              </a>
-              <Link
-                href={PUBLIC_ROUTES.contact}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/15"
-              >
-                Contacter KORYXA
-              </Link>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+                <a
+                  href={KORYXA_ACCOUNT_URL}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-4 text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+                >
+                  Créer mon Compte KORYXA
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+                <Link
+                  href={PUBLIC_ROUTES.contact}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-white/25 bg-white dark:bg-white/5 px-7 py-4 text-sm font-bold text-slate-800 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/15"
+                >
+                  Contacter KORYXA
+                </Link>
+              </div>
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </>
   );
 }

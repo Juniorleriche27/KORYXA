@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function ProductsPage() {
   return (
-    <main className="kx-pie-page kx-products-page">
+    <div className="kx-pie-page kx-products-page">
       {/* 1. Products Hero — Hyper Premium & Centered */}
       <section className="kx-products-hero relative overflow-hidden text-center py-16 sm:py-24">
         <div className="kx-pie-blob kx-pie-blob-one" />
@@ -25,25 +25,25 @@ export default function ProductsPage() {
             <span>Suite Officielle & Briques Autonomes</span>
           </div>
 
-          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">
             La suite de technologies IA conçue pour performer.
           </h1>
 
-          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-[#cbd5e1] leading-relaxed">
             Chaque produit de l'écosystème KORYXA (<strong>MERQALOR</strong>, <strong>FlowCore</strong>, <strong>Service IA</strong>, <strong>ChatLAYA</strong>, <strong>CoraBiz</strong>) apporte une réponse ciblée avec son infrastructure dédiée et son compte unifié.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
             <a
               href={KORYXA_ACCOUNT_URL}
-              className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.3)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
             >
               Accéder au Compte KORYXA
               <ArrowRight size={18} />
             </a>
             <Link
               href={PUBLIC_ROUTES.casUsage}
-              className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
             >
               Trouver le bon produit par besoin
             </Link>
@@ -125,6 +125,6 @@ export default function ProductsPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

@@ -63,43 +63,43 @@ export default async function ProductDetailPage(props: ProductPageProps) {
   const isExternalPrimary = product.primaryCta.href.startsWith("http");
 
   return (
-    <main className="kx-pie-page min-h-screen">
+    <div className="kx-pie-page min-h-screen">
       {/* 1. Product Detail Hero — Centered & Immersive */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#07190f] to-[#040f09] text-white py-16 sm:py-24">
+      <section className="relative overflow-hidden bg-[#faf9f5] dark:bg-[#07190f] text-slate-900 dark:text-white py-16 sm:py-24 transition-colors duration-200">
         <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
         <div className="kx-pie-blob kx-pie-blob-two opacity-20" />
 
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb navigation */}
-          <nav className="mb-8 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-[#86efac]" aria-label="Fil d'Ariane">
-            <Link href={PUBLIC_ROUTES.home} className="hover:underline text-slate-300">
+          <nav className="mb-8 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-slate-500 dark:text-[#86efac]" aria-label="Fil d'Ariane">
+            <Link href={PUBLIC_ROUTES.home} className="hover:underline text-slate-600 dark:text-slate-300">
               Accueil
             </Link>
             <span>/</span>
-            <Link href={PUBLIC_ROUTES.produits} className="hover:underline text-slate-300">
+            <Link href={PUBLIC_ROUTES.produits} className="hover:underline text-slate-600 dark:text-slate-300">
               Produits
             </Link>
             <span>/</span>
-            <span className="text-white font-bold">{product.name}</span>
+            <span className="text-slate-900 dark:text-white font-bold">{product.name}</span>
           </nav>
 
           <div className="grid gap-10 lg:grid-cols-[1.3fr_0.9fr] items-center">
             {/* Left Hero Column */}
             <div className="text-center sm:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#00a86b]/40 bg-[#00a86b]/20 px-3.5 py-1 text-xs font-bold text-[#86efac] mb-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#00a86b]/30 bg-[#00a86b]/10 dark:border-[#00a86b]/40 dark:bg-[#00a86b]/20 px-3.5 py-1 text-xs font-bold text-[#008b58] dark:text-[#86efac] mb-5">
                 <IconComponent className="h-3.5 w-3.5" />
                 <span>{product.badge || product.status}</span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">
+              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 dark:text-white tracking-tight leading-tight">
                 {product.name}
               </h1>
 
-              <p className="mt-3 text-lg sm:text-xl font-bold text-[#86efac]">
+              <p className="mt-3 text-lg sm:text-xl font-bold text-[#008b58] dark:text-[#86efac]">
                 « {product.tagline} »
               </p>
 
-              <p className="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+              <p className="mt-5 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
                 {product.summary}
               </p>
 
@@ -127,7 +127,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
 
                 <a
                   href={KORYXA_ACCOUNT_URL}
-                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/15"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/15"
                 >
                   Accéder via Compte KORYXA
                 </a>
@@ -135,25 +135,25 @@ export default async function ProductDetailPage(props: ProductPageProps) {
             </div>
 
             {/* Right Card: Quick Identity Sheet */}
-            <div className="rounded-3xl border border-[#234b33] bg-[#07190f]/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-              <div className="flex items-center gap-4 border-b border-white/10 pb-5">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#00a86b]/20 text-[#4ade80] border border-[#00a86b]/40">
+            <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-8 shadow-xl dark:border-[#234b33] dark:bg-[#07190f]/90 dark:shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center gap-4 border-b border-slate-100 dark:border-white/10 pb-5">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:bg-[#00a86b]/20 dark:text-[#4ade80] border border-[#00a86b]/30">
                   <IconComponent className="h-7 w-7" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-xl font-bold text-white">{product.name}</h3>
-                  <p className="text-xs text-slate-400 font-mono mt-0.5">{product.audience}</p>
+                  <h3 className="font-serif text-xl font-bold text-slate-900 dark:text-white">{product.name}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{product.audience}</p>
                 </div>
               </div>
 
               {/* Stats matrix */}
               <div className="mt-6 grid grid-cols-3 gap-3 text-center">
                 {product.stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <span className="block font-serif text-lg sm:text-xl font-bold text-[#86efac]">
+                  <div key={stat.label} className="rounded-2xl border border-slate-100 bg-slate-50 dark:border-white/10 dark:bg-white/5 p-3">
+                    <span className="block font-serif text-lg sm:text-xl font-bold text-[#008b58] dark:text-[#86efac]">
                       {stat.value}
                     </span>
-                    <span className="block text-[10px] font-semibold text-slate-400 mt-0.5 truncate">
+                    <span className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                       {stat.label}
                     </span>
                   </div>
@@ -161,12 +161,12 @@ export default async function ProductDetailPage(props: ProductPageProps) {
               </div>
 
               {/* Security info */}
-              <div className="mt-6 pt-5 border-t border-white/10 space-y-2.5">
-                <div className="flex items-center gap-2 text-xs text-slate-300">
-                  <ShieldCheck className="h-4 w-4 text-[#4ade80] shrink-0" />
+              <div className="mt-6 pt-5 border-t border-slate-100 dark:border-white/10 space-y-2.5">
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                  <ShieldCheck className="h-4 w-4 text-[#00a86b] dark:text-[#4ade80] shrink-0" />
                   <span>Authentification sécurisée par <strong>Compte KORYXA</strong></span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-300">
+                <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                   <Zap className="h-4 w-4 text-[#eab308] shrink-0" />
                   <span>Haute disponibilité et souveraineté des données</span>
                 </div>
@@ -283,6 +283,6 @@ export default async function ProductDetailPage(props: ProductPageProps) {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
