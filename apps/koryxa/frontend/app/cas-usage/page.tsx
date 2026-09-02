@@ -186,26 +186,26 @@ export default function UseCasesPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-full min-w-0">
             {useCases.map((item) => {
               const Icon = item.icon;
 
               return (
                 <article
                   key={item.title}
-                  className="group flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-6 shadow-[0_8px_30px_rgba(20,53,31,0.06)] transition hover:-translate-y-1.5 hover:border-[#00a86b] hover:shadow-lg dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white text-center sm:text-left"
+                  className="group flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-5 sm:p-6 shadow-[0_8px_30px_rgba(20,53,31,0.06)] transition hover:-translate-y-1.5 hover:border-[#00a86b] hover:shadow-lg dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white text-left w-full max-w-full min-w-0 overflow-hidden box-border"
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="mx-auto sm:mx-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
+                  <div className="w-full min-w-0">
+                    <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-700 dark:text-[#86efac]">
+                      <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-700 dark:text-[#86efac] shrink-0 truncate max-w-[55%] text-right">
                         {item.tag}
                       </span>
                     </div>
 
-                    <h3 className="mt-4 font-serif text-lg font-bold group-hover:text-[#00a86b] dark:group-hover:text-[#86efac] transition leading-snug">
+                    <h3 className="mt-4 font-serif text-base sm:text-lg font-bold group-hover:text-[#00a86b] dark:group-hover:text-[#86efac] transition leading-snug">
                       {item.title}
                     </h3>
                     <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
