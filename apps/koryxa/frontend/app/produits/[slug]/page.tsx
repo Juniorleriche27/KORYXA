@@ -17,9 +17,14 @@ import {
   Sparkles,
   Wallet,
   Zap,
+  Cpu,
+  Lock,
+  Server,
+  Network,
 } from "lucide-react";
 import { productCatalog, removedProductSlugs, resolveProductSlug } from "@/app/produits/data";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
+import ProductInteractiveSimulator from "@/components/marketing/ProductInteractiveSimulator";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -42,9 +47,36 @@ const PRODUCT_ICONS: Record<string, typeof Bot> = {
 export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
   const { slug } = await props.params;
   const product = productCatalog[resolveProductSlug(slug)];
+  if (!product) {
+    return {
+      title: "Produit Introuvable | KORYXA",
+      description: "Le produit demandé n'existe pas dans l'écosystème KORYXA.",
+    };
+  }
+
+  const title = `${product.name} | Écosystème KORYXA`;
+  const description = product.summary;
+  const canonicalUrl = `https://koryxa.fr/produits/${product.slug}`;
+
   return {
-    title: `${product?.name ?? slug} | Écosystème KORYXA`,
-    description: product?.summary ?? "Produit d'intelligence artificielle KORYXA",
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${product.name} — ${product.tagline}`,
+      description,
+      url: canonicalUrl,
+      siteName: "KORYXA",
+      locale: "fr_FR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | KORYXA`,
+      description,
+    },
   };
 }
 
@@ -62,8 +94,35 @@ export default async function ProductDetailPage(props: ProductPageProps) {
   const IconComponent = PRODUCT_ICONS[product.slug] || Sparkles;
   const isExternalPrimary = product.primaryCta.href.startsWith("http");
 
+  // Schema.org Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: product.name,
+    description: product.summary,
+    applicationCategory: product.category,
+    operatingSystem: "Cloud, Web, Mobile",
+    url: `https://koryxa.fr/produits/${product.slug}`,
+    publisher: {
+      "@type": "Organization",
+      name: "KORYXA",
+      url: "https://koryxa.fr",
+    },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "XOF",
+    },
+  };
+
   return (
     <div className="kx-pie-page min-h-screen">
+      {/* Schema.org Script */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* 1. Product Detail Hero — Centered & Immersive */}
       <section className="relative overflow-hidden bg-[#faf9f5] dark:bg-[#07190f] text-slate-900 dark:text-white py-16 sm:py-24 transition-colors duration-200">
         <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
@@ -72,11 +131,11 @@ export default async function ProductDetailPage(props: ProductPageProps) {
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb navigation */}
           <nav className="mb-8 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-slate-500 dark:text-[#86efac]" aria-label="Fil d'Ariane">
-            <Link href={PUBLIC_ROUTES.home} className="hover:underline text-slate-600 dark:text-slate-300">
+            <Link href={PUBLIC_ROUTES.home} className="hover:underline text-slate-600 dark:text-slate-300 focus-visible:ring-2 focus-visible:ring-[#00a86b] rounded">
               Accueil
             </Link>
             <span>/</span>
-            <Link href={PUBLIC_ROUTES.produits} className="hover:underline text-slate-600 dark:text-slate-300">
+            <Link href={PUBLIC_ROUTES.produits} className="hover:underline text-slate-600 dark:text-slate-300 focus-visible:ring-2 focus-visible:ring-[#00a86b] rounded">
               Produits
             </Link>
             <span>/</span>
@@ -110,7 +169,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
                     href={product.primaryCta.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b] focus-visible:ring-offset-2"
                   >
                     <span>{product.primaryCta.label}</span>
                     <ExternalLink className="h-4 w-4" />
@@ -118,7 +177,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
                 ) : (
                   <Link
                     href={product.primaryCta.href}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b] focus-visible:ring-offset-2"
                   >
                     <span>{product.primaryCta.label}</span>
                     <ArrowRight className="h-4 w-4" />
@@ -127,7 +186,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
 
                 <a
                   href={KORYXA_ACCOUNT_URL}
-                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/15"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b]"
                 >
                   Accéder via Compte KORYXA
                 </a>
@@ -176,7 +235,26 @@ export default async function ProductDetailPage(props: ProductPageProps) {
         </div>
       </section>
 
-      {/* 2. Key Capabilities & Use Cases Section */}
+      {/* 2. Interactive Simulator & Demo Section */}
+      <section className="py-16 sm:py-24 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors duration-200">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
+              Expérimentation Interactive
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
+              Testez et visualisez la valeur de {product.name}
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
+              Ajustez les paramètres en direct pour observer les bénéfices concrets selon votre volume et vos besoins.
+            </p>
+          </div>
+
+          <ProductInteractiveSimulator product={product} />
+        </div>
+      </section>
+
+      {/* 3. Key Capabilities & Use Cases Section */}
       <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors duration-200">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 items-start">
@@ -242,8 +320,70 @@ export default async function ProductDetailPage(props: ProductPageProps) {
         </div>
       </section>
 
-      {/* 3. Bottom CTA Banner */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white border-t border-slate-200 dark:border-white/10 transition-colors">
+      {/* 4. Technical Specs & Governance Section */}
+      {product.techSpecs && (
+        <section className="py-16 sm:py-24 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white border-t border-slate-200/80 dark:border-white/10 transition-colors duration-200">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mb-10 text-center">
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
+                Architecture & Sécurité
+              </span>
+              <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
+                Spécifications Techniques et Souveraineté
+              </h2>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border border-slate-200/90 dark:border-[#234b33] bg-slate-50/70 dark:bg-[#07190f]/80 p-5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#008b58] dark:text-[#86efac]">
+                  <Cpu className="h-4 w-4" />
+                  <span>Protocoles & APIs</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                  {product.techSpecs.protocol}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 dark:border-[#234b33] bg-slate-50/70 dark:bg-[#07190f]/80 p-5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#008b58] dark:text-[#86efac]">
+                  <Server className="h-4 w-4" />
+                  <span>Déploiement & SLA</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                  {product.techSpecs.deployment} ({product.techSpecs.latency})
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 dark:border-[#234b33] bg-slate-50/70 dark:bg-[#07190f]/80 p-5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#008b58] dark:text-[#86efac]">
+                  <Lock className="h-4 w-4" />
+                  <span>Sécurité & Conformité</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                  {product.techSpecs.security}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200/90 dark:border-[#234b33] bg-slate-50/70 dark:bg-[#07190f]/80 p-5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#008b58] dark:text-[#86efac]">
+                  <Network className="h-4 w-4" />
+                  <span>Intégrations Actives</span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {product.techSpecs.integrations.map((itg) => (
+                    <span key={itg} className="rounded bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-slate-800 dark:text-slate-200">
+                      {itg}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 5. Bottom CTA Banner */}
+      <section className="py-16 sm:py-20 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white border-t border-slate-200 dark:border-white/10 transition-colors">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 text-center">
           <div className="rounded-3xl border border-[#dfe5d8] dark:border-[#234b33] bg-gradient-to-r from-[#f7fbf8] to-[#edf6f0] dark:from-[#07190f] dark:to-[#040f09] p-8 sm:p-12 shadow-xl">
             <h3 className="font-serif text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white">
@@ -259,7 +399,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
                   href={product.primaryCta.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#008b58]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#008b58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b] focus-visible:ring-offset-2"
                 >
                   Lancer {product.name}
                   <ExternalLink className="h-4 w-4" />
@@ -267,7 +407,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
               ) : (
                 <Link
                   href={product.primaryCta.href}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#008b58]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#008b58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b] focus-visible:ring-offset-2"
                 >
                   Lancer {product.name}
                   <ArrowRight className="h-4 w-4" />
@@ -275,7 +415,7 @@ export default async function ProductDetailPage(props: ProductPageProps) {
               )}
               <Link
                 href={PUBLIC_ROUTES.produits}
-                className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 px-6 py-3.5 text-sm font-bold text-slate-800 dark:text-white transition hover:bg-slate-50 dark:hover:bg-white/10"
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 px-6 py-3.5 text-sm font-bold text-slate-800 dark:text-white transition hover:bg-slate-50 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b]"
               >
                 Retour au catalogue
               </Link>
@@ -286,3 +426,4 @@ export default async function ProductDetailPage(props: ProductPageProps) {
     </div>
   );
 }
+

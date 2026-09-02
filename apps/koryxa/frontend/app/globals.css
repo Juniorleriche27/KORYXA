@@ -34,6 +34,11 @@ html.dark {
   box-sizing: border-box;
 }
 
+:focus-visible {
+  outline: 2px solid #00a86b !important;
+  outline-offset: 2px !important;
+}
+
 html {
   font-size: 100%;
   max-width: 100%;

@@ -1,5 +1,21 @@
 export type ProductStatus = "actif" | "construction";
 
+export type ProductTechSpecs = {
+  protocol: string;
+  deployment: string;
+  latency: string;
+  security: string;
+  integrations: string[];
+};
+
+export type ProductSimulatorType =
+  | "finance-cashflow"
+  | "crm-autopilot"
+  | "conversation-founder"
+  | "training-cert"
+  | "api-console"
+  | "general";
+
 export type ProductInfo = {
   slug: string;
   name: string;
@@ -16,6 +32,8 @@ export type ProductInfo = {
   secondaryCta?: { label: string; href: string };
   contact?: string;
   useCases: string[];
+  techSpecs?: ProductTechSpecs;
+  simulatorType?: ProductSimulatorType;
 };
 
 export const productCatalog: Record<string, ProductInfo> = {
@@ -39,6 +57,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     primaryCta: { label: "Accéder à MERQALOR", href: "https://merqalor.koryxa.fr" },
     secondaryCta: { label: "Comment ça marche ?", href: "https://merqalor.koryxa.fr" },
     useCases: ["Centraliser les comptes Wave et banques", "Prévoir sa trésorerie", "Consulter ses conseillers IA"],
+    simulatorType: "finance-cashflow",
+    techSpecs: {
+      protocol: "REST & Webhooks SSE",
+      deployment: "Cloud Souverain & Edge",
+      latency: "< 45ms (Reconnaissance auto)",
+      security: "Chiffrement AES-256 & mTLS",
+      integrations: ["Wave API", "Orange Money Webhook", "MTN MoMo", "Banques régionales"],
+    },
   },
   "service-ia": {
     slug: "service-ia",
@@ -60,6 +86,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     primaryCta: { label: "Parler de mon projet", href: "https://service-ia.koryxa.fr" },
     secondaryCta: { label: "Explorer les services", href: "https://service-ia.koryxa.fr" },
     useCases: ["Créer une plateforme web sur-mesure", "Intégrer des agents IA", "Automatiser ses opérations"],
+    simulatorType: "general",
+    techSpecs: {
+      protocol: "Next.js, FastAPI, gRPC & GraphQL",
+      deployment: "Infrastructures cloud hybrides & CI/CD",
+      latency: "SLA garanti 99.95%",
+      security: "Audit de sécurité & RGPD/Souveraineté",
+      integrations: ["PostgreSQL", "Redis", "Clerk SSO", "n8n / Make Engine"],
+    },
   },
   flowcore: {
     slug: "flowcore",
@@ -80,6 +114,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["WhatsApp Gateway & Email Outreach", "Autopilot 24/7 & Scoring IA", "Webhooks sortants n8n / Make"],
     primaryCta: { label: "Ouvrir FlowCore", href: "https://flowcore.koryxa.fr" },
     useCases: ["Capturer et qualifier des prospects", "Automatiser les relances WhatsApp & Email", "Piloter le CRM en autopilot"],
+    simulatorType: "crm-autopilot",
+    techSpecs: {
+      protocol: "Meta Graph API & WhatsApp Baileys Gateway",
+      deployment: "Workers distribués 24/7",
+      latency: "< 5s par relance autopilot",
+      security: "Isolation multi-tenant & Clés chiffrées",
+      integrations: ["WhatsApp Cloud API", "SMTP B2B", "Telegram Bot API", "n8n / Make"],
+    },
   },
   chatlaya: {
     slug: "chatlaya",
@@ -100,6 +142,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Contextes et langues africaines", "Cadrage de projets Founder", "Sauvegarde centralisée"],
     primaryCta: { label: "Ouvrir ChatLAYA", href: "https://chatlaya.koryxa.fr" },
     useCases: ["Converser avec une IA", "Rédiger des documents complexes", "Structurer un projet d'entreprise"],
+    simulatorType: "conversation-founder",
+    techSpecs: {
+      protocol: "Server-Sent Events (SSE) Streaming & WebSocket",
+      deployment: "Clusters d'inférence LLM optimisés",
+      latency: "< 120ms premier token",
+      security: "Données non utilisées pour le réentraînement externe",
+      integrations: ["Modèles KORYXA LLM", "Export Markdown & PDF", "Clerk Auth"],
+    },
   },
   corabiz: {
     slug: "corabiz",
@@ -120,6 +170,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Facturation & Devis intelligents", "Suivi des stocks & Trésorerie", "Relances IA automatiques"],
     primaryCta: { label: "Ouvrir CoraBiz", href: "https://corabiz.koryxa.fr" },
     useCases: ["Gérer les ventes et factures", "Suivre les stocks en temps réel", "Automatiser les encaissements"],
+    simulatorType: "general",
+    techSpecs: {
+      protocol: "REST API & Webhooks de paiement",
+      deployment: "Base PostgreSQL répliquée",
+      latency: "< 30ms transactions",
+      security: "Sauvegarde horaire & Journal d'audit",
+      integrations: ["Wave Checkout", "Orange Money", "Export comptable Excel/PDF"],
+    },
   },
   formation: {
     slug: "formation",
@@ -140,6 +198,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Python Data Analyst", "Prompt Engineering & IA Appliquée", "Projets réels & Mentorat"],
     primaryCta: { label: "Découvrir les formations", href: "https://formation.koryxa.fr" },
     useCases: ["Se former aux métiers de l'IA", "Monter en compétences en entreprise", "Valider une certification"],
+    simulatorType: "training-cert",
+    techSpecs: {
+      protocol: "LMS interactif & Labs Jupyter Cloud",
+      deployment: "Environnements sandbox conteneurisés",
+      latency: "Accès instantané aux notebooks",
+      security: "Badges et certificats signés cryptographiquement",
+      integrations: ["JupyterLab", "GitHub", "Vérification publique de diplôme"],
+    },
   },
   neurokap: {
     slug: "neurokap",
@@ -160,6 +226,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Entraînement de la mémoire", "Calcul rapide & Logique", "Suivi de progression cognitive"],
     primaryCta: { label: "Lancer NeuroKap", href: "https://neurokap.koryxa.fr" },
     useCases: ["Entraîner son cerveau", "Mesurer ses réflexes décisionnels", "Développer son potentiel"],
+    simulatorType: "training-cert",
+    techSpecs: {
+      protocol: "WebAudio, Canvas 2D & State Engine",
+      deployment: "PWA Offline-First",
+      latency: "< 16ms rendu 60 FPS",
+      security: "Stockage local chiffré & Synchro Compte KORYXA",
+      integrations: ["KORYXA Leaderboard", "Rapports d'évolution cognitive"],
+    },
   },
   "partner-portal": {
     slug: "partner-portal",
@@ -180,6 +254,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Supervision de cohortes", "Codes partenaires & Suivi", "Paiements automatisés 48h"],
     primaryCta: { label: "Rejoindre le réseau", href: "https://partenaires.koryxa.fr" },
     useCases: ["Piloter un partenariat régional", "Gérer des cohortes d'étudiants", "Suivre ses commissions"],
+    simulatorType: "api-console",
+    techSpecs: {
+      protocol: "Portail institutionnel multi-tenant",
+      deployment: "Infrastructure Cloud certifiée ISO/RGPD",
+      latency: "Temps réel SSE",
+      security: "2FA obligatoire & Rôles granulaires RBAC",
+      integrations: ["Paiements bancaires et Mobile Money", "Exports analytiques CSV/PDF"],
+    },
   },
   api: {
     slug: "api",
@@ -200,6 +282,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Endpoints d'inférence sécurisés", "Connecteurs Webhooks & SSE", "Quotas et clés unifiées"],
     primaryCta: { label: "Consulter la doc API", href: "https://api.koryxa.fr" },
     useCases: ["Intégrer l'IA dans une application", "Automatiser des pipelines de données", "Gérer des accès API"],
+    simulatorType: "api-console",
+    techSpecs: {
+      protocol: "gRPC (HTTP/2) & OpenAPI 3.1 REST",
+      deployment: "Edge Gateway mondial et points de présence africains",
+      latency: "< 25ms p95",
+      security: "Clés d'API avec rotation automatique & mTLS",
+      integrations: ["SDK Python", "SDK TypeScript / Node.js", "SDK Go", "cURL"],
+    },
   },
   cora: {
     slug: "cora",
@@ -220,6 +310,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Campagnes ciblées", "Gestion des prospects", "Fiches projets"],
     primaryCta: { label: "Ouvrir Cora", href: "https://cora.koryxa.fr" },
     useCases: ["Gérer ses campagnes", "Suivre ses prospects", "Organiser ses rendez-vous"],
+    simulatorType: "crm-autopilot",
+    techSpecs: {
+      protocol: "Webhooks & Sync multi-canal",
+      deployment: "Haute disponibilité 24/7",
+      latency: "< 50ms",
+      security: "Chiffrement de bout en bout",
+      integrations: ["WhatsApp", "Email", "Calendriers"],
+    },
   },
   "services-ia": {
     slug: "services-ia",
@@ -240,6 +338,14 @@ export const productCatalog: Record<string, ProductInfo> = {
     highlights: ["Développement sur-mesure", "Automatisation n8n/Make", "Sécurité des données"],
     primaryCta: { label: "Lancer un projet", href: "https://service-ia.koryxa.fr" },
     useCases: ["Digitaliser une activité", "Déployer un assistant métier", "Automatiser sa comptabilité"],
+    simulatorType: "general",
+    techSpecs: {
+      protocol: "Next.js, Python, FastAPI & n8n",
+      deployment: "Infrastructures modulaires",
+      latency: "SLA garanti",
+      security: "Conformité sécurité & protection des données",
+      integrations: ["PostgreSQL", "APIs tierces", "Portail KORYXA"],
+    },
   },
 };
 
