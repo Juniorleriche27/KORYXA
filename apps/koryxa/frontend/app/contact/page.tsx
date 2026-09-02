@@ -1,117 +1,116 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, Phone, UserRoundCog } from "lucide-react";
+import { ArrowRight, Building2, Mail, Megaphone, MessageSquare, PackageCheck, Phone, ShieldCheck, UserRoundCog } from "lucide-react";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { KORYXA_CONTACT } from "@/config/contact";
 import { ContactForm } from "./ContactForm";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
 export const metadata: Metadata = {
-  title: "Contact KORYXA | Partenariat, produit, compte et presse",
+  title: "Contact KORYXA | Équipe Officielle, Partenariats et Support",
   description:
-    "Contactez KORYXA par email, WhatsApp ou via les pages officielles Facebook et LinkedIn.",
+    "Contactez l'équipe KORYXA par email, WhatsApp ou via notre formulaire officiel pour vos partenariats, questions produits ou accès compte.",
 };
 
 const contactReasons = [
   {
     icon: Building2,
-    title: "Partenariat",
-    description: "Entreprise, institution, école, communauté ou organisation terrain.",
+    title: "Partenariat & Déploiement B2B",
+    description: "Entreprises, institutions publiques, universités, incubateurs ou partenaires techniques.",
   },
   {
     icon: PackageCheck,
-    title: "Produit",
-    description: "Question sur ChatLAYA, Cora, Formation, API, Services IA ou un autre produit.",
+    title: "Support Solutions & Produits",
+    description: "Questions sur MERQALOR, FlowCore, ChatLAYA, CoraBiz, la Formation ou nos APIs.",
   },
   {
     icon: UserRoundCog,
-    title: "Compte KORYXA",
-    description: "Connexion, inscription ou accès à tes produits avec ton compte KORYXA.",
+    title: "Compte KORYXA & Identité",
+    description: "Accès à vos espaces, gestion de vos abonnements ou configuration multi-tenant.",
   },
   {
     icon: Megaphone,
-    title: "Presse",
-    description: "Demande média, présentation officielle ou prise de parole.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Autre demande",
-    description: "Toute autre question liée à l’écosystème KORYXA.",
+    title: "Presse & Relations Médias",
+    description: "Demandes d'interviews, dossier de presse et prises de parole officielles.",
   },
 ];
 
 export default function ContactPage() {
   return (
     <main className="kx-pie-page kx-contact-page">
-      <section className="kx-contact-hero">
+      {/* 1. Hero Section — Centered & Clean */}
+      <section className="kx-contact-hero relative overflow-hidden text-center py-16 sm:py-24">
         <div className="kx-pie-blob kx-pie-blob-one" />
         <div className="kx-pie-blob kx-pie-blob-two" />
-        <div className="kx-contact-hero-inner">
-          <div className="kx-contact-hero-copy kx-pie-animate">
-            <div className="kx-pie-badge">
-              <span className="kx-pie-dot" />
-              <span>Contact KORYXA</span>
-            </div>
-            <h1>Contactez KORYXA.</h1>
-            <p>
-              Choisissez le bon motif de contact : partenariat, produit, compte KORYXA, presse ou autre demande.
-              L’objectif est d’orienter chaque message vers le bon espace de l’écosystème.
-            </p>
-            <div className="kx-pie-hero-ctas">
-              <a href={`mailto:${KORYXA_CONTACT.email}`} className="kx-pie-btn kx-pie-btn-gold">
-                Écrire à KORYXA
-                <ArrowRight size={18} />
-              </a>
-              <a href={KORYXA_CONTACT.whatsappUrl} target="_blank" rel="noreferrer" className="kx-pie-btn kx-pie-btn-outline-white">
-                WhatsApp KORYXA
-              </a>
-            </div>
+
+        <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center justify-center">
+          <div className="kx-pie-badge inline-flex items-center justify-center gap-2 mb-6">
+            <span className="kx-pie-dot" />
+            <span>Équipe Officielle KORYXA</span>
           </div>
 
-          <div className="kx-contact-panel kx-pie-animate kx-pie-delay-2">
-            <div className="kx-contact-panel-head">
-              <div>
-                <span>Point d’entrée</span>
-                <strong>Une demande, un bon canal</strong>
-              </div>
-              <Mail size={26} />
-            </div>
-            <div className="kx-contact-panel-list">
-              {contactReasons.map((reason, index) => {
-                const Icon = reason.icon;
-                return (
-                  <div key={reason.title} style={{ animationDelay: `${0.25 + index * 0.1}s` }}>
-                    <span>{index + 1}</span>
-                    <Icon size={18} />
-                    <p>{reason.title}</p>
-                  </div>
-                );
-              })}
-            </div>
+          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+            Contactez les équipes KORYXA.
+          </h1>
+
+          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+            Que vous souhaitiez déployer nos technologies, explorer un partenariat institutionnel ou obtenir une assistance sur vos espaces, nous nous engageons à vous répondre dans les plus brefs délais.
+          </p>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
+            <a
+              href={`mailto:${KORYXA_CONTACT.email}`}
+              className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+            >
+              Écrire par email
+              <ArrowRight size={18} />
+            </a>
+            <a
+              href={KORYXA_CONTACT.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+            >
+              WhatsApp Officiel
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="kx-pie-section kx-pie-trust-band">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-header">
-            <div className="kx-pie-section-label">Motifs de contact</div>
-            <h2>Chaque demande doit arriver au bon endroit.</h2>
-            <p>
-              KORYXA organise les échanges comme son écosystème : avec un motif clair, une orientation simple et un accès lisible.
+      {/* 2. Contact Channels & Reasons Section */}
+      <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors duration-200">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center mb-16">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
+              Orientation Rapide
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
+              Pour quel motif souhaitez-vous échanger ?
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
+              Chaque demande est directement transmise aux spécialistes dédiés.
             </p>
           </div>
 
-          <div className="kx-contact-reason-grid">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {contactReasons.map((reason) => {
               const Icon = reason.icon;
               return (
-                <article className="kx-contact-reason-card" key={reason.title}>
-                  <div className="kx-products-icon">
-                    <Icon size={24} />
+                <article
+                  key={reason.title}
+                  className="flex flex-col justify-between rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-white/95 dark:bg-[#07190f]/90 p-6 sm:p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#00a86b]"
+                >
+                  <div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] mb-5">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-serif text-lg font-bold text-slate-900 dark:text-white">
+                      {reason.title}
+                    </h3>
+                    <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {reason.description}
+                    </p>
                   </div>
-                  <h3>{reason.title}</h3>
-                  <p>{reason.description}</p>
                 </article>
               );
             })}
@@ -119,68 +118,75 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="kx-pie-section">
-        <div className="kx-pie-container">
-          <div className="kx-contact-main-grid">
-            <div className="kx-contact-form-card">
-              <div className="kx-pie-section-label">Message</div>
-              <h2>Envoyez une demande claire.</h2>
-              <p>
-                Ce formulaire est prêt côté interface. La connexion backend sera câblée dans le chantier technique dédié.
+      {/* 3. Form & Direct Cards Section */}
+      <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors duration-200">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[1.3fr_0.9fr] items-start">
+            {/* Left: Contact Form Card */}
+            <div className="rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-[#faf9f5] dark:bg-[#07190f]/90 p-8 sm:p-10 shadow-md">
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
+                Message Direct
+              </span>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-bold font-serif tracking-tight">
+                Transmettez votre demande
+              </h2>
+              <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-8">
+                Remplissez les informations ci-dessous et notre équipe vous recontactera sous 24h ouvrées.
               </p>
+
               <ContactForm />
             </div>
 
-            <aside className="kx-contact-side-card">
-              <div>
-                <Mail size={24} />
-                <h3>Email officiel</h3>
-                <p>{KORYXA_CONTACT.email}</p>
-                <a href={`mailto:${KORYXA_CONTACT.email}`}>Écrire par email →</a>
-              </div>
-              <div>
-                <Phone size={24} />
-                <h3>WhatsApp officiel</h3>
-                <p>{KORYXA_CONTACT.phoneDisplay}</p>
-                <a href={KORYXA_CONTACT.whatsappUrl} target="_blank" rel="noreferrer">Ouvrir WhatsApp →</a>
-              </div>
-              <div>
-                <Mail size={24} />
-                <h3>Réseaux officiels</h3>
-                <p>Suivre KORYXA sur Facebook, LinkedIn, WhatsApp et email.</p>
-                <div className="mt-4">
-                  <SocialLinks />
+            {/* Right: Direct Coordinates */}
+            <aside className="space-y-6">
+              <div className="rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-white/95 dark:bg-[#07190f]/90 p-7 shadow-sm">
+                <div className="flex items-center gap-3 text-slate-900 dark:text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80]">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-base font-bold">Email Officiel</h3>
+                    <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{KORYXA_CONTACT.email}</p>
+                  </div>
                 </div>
+                <a
+                  href={`mailto:${KORYXA_CONTACT.email}`}
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#00a86b] dark:text-[#4ade80] hover:underline"
+                >
+                  Envoyer un email directement →
+                </a>
               </div>
-              <div>
-                <UserRoundCog size={24} />
-                <h3>Compte KORYXA</h3>
-                <p>Un seul compte pour accéder à l’écosystème KORYXA et retrouver tes produits.</p>
-                <a href={KORYXA_ACCOUNT_URL}>Accéder à mon compte →</a>
+
+              <div className="rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-white/95 dark:bg-[#07190f]/90 p-7 shadow-sm">
+                <div className="flex items-center gap-3 text-slate-900 dark:text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80]">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-base font-bold">WhatsApp & Ligne Directe</h3>
+                    <p className="font-mono text-xs text-slate-500 dark:text-slate-400">{KORYXA_CONTACT.phoneDisplay}</p>
+                  </div>
+                </div>
+                <a
+                  href={KORYXA_CONTACT.whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#00a86b] dark:text-[#4ade80] hover:underline"
+                >
+                  Ouvrir la conversation WhatsApp →
+                </a>
               </div>
-              <div>
-                <Building2 size={24} />
-                <h3>Partenaires</h3>
-                <p>Les demandes de collaboration sont orientées vers le Portail Partenaire.</p>
-                <Link href={PUBLIC_ROUTES.partenaires}>Voir la page partenaires →</Link>
+
+              <div className="rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-white/95 dark:bg-[#07190f]/90 p-7 shadow-sm">
+                <h3 className="font-serif text-base font-bold text-slate-900 dark:text-white mb-2">
+                  Canaux & Réseaux Officiels
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">
+                  Suivez les actualités et déploiements KORYXA sur nos plateformes officielles.
+                </p>
+                <SocialLinks compact />
               </div>
             </aside>
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-pie-cta-section">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-label">Orientation</div>
-          <h2>Vous voulez d’abord comprendre où aller ?</h2>
-          <p>La page Cas d’usage permet de partir du besoin et d’être orienté vers le bon espace.</p>
-          <div className="kx-pie-cta-btns">
-            <Link href={PUBLIC_ROUTES.casUsage} className="kx-pie-btn kx-pie-btn-gold">
-              Voir les cas d’usage
-            </Link>
-            <Link href={PUBLIC_ROUTES.produits} className="kx-pie-btn kx-pie-btn-outline-white">
-              Voir les produits
-            </Link>
           </div>
         </div>
       </section>
