@@ -507,3 +507,60 @@ html.dark .kx-mobile-ecosystem {
     color: #f6fff9 !important;
   }
 }
+
+/* GLOBAL UNIFIED DARK MODE OVERRIDES */
+html.dark main,
+html.dark .kx-pie-page {
+  background-color: #050b08 !important;
+  color: #f6fff9 !important;
+}
+
+html.dark section {
+  background-color: #050b08 !important;
+  color: #f6fff9 !important;
+}
+
+html.dark section[class*="bg-[#faf9f5]"],
+html.dark section[class*="bg-white"] {
+  background-color: #07140c !important;
+  color: #f6fff9 !important;
+}
+
+html.dark div[class*="bg-white"],
+html.dark article[class*="bg-white"],
+html.dark aside[class*="bg-white"] {
+  background-color: #07190f !important;
+  border-color: #234b33 !important;
+  color: #f6fff9 !important;
+}
+
+html.dark div[class*="bg-slate-50"],
+html.dark article[class*="bg-slate-50"],
+html.dark div[class*="bg-[#faf9f5]"] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(72, 230, 154, 0.18) !important;
+  color: #f6fff9 !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark [class*="text-slate-900"],
+html.dark [class*="text-slate-950"],
+html.dark [class*="text-slate-800"] {
+  color: #f6fff9 !important;
+}
+
+html.dark p,
+html.dark [class*="text-slate-600"],
+html.dark [class*="text-slate-700"],
+html.dark [class*="text-slate-500"] {
+  color: #cbd5e1 !important;
+}
+
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-100"] {
+  border-color: #234b33 !important;
+}
+

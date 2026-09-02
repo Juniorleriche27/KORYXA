@@ -93,7 +93,7 @@ export default async function RootLayout(props: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script dangerouslySetInnerHTML={{ __html: pwaResetScript }} />
       </head>
-      <body className="min-h-screen overflow-x-hidden bg-[#fffdf6] text-[#1a1f2e] antialiased transition-colors duration-300">
+      <body className="min-h-screen overflow-x-hidden bg-[#faf9f5] text-slate-900 antialiased transition-colors duration-200 dark:bg-[#050b08] dark:text-[#f6fff9]">
         <a
           href="#page-content"
           className="sr-only z-50 rounded bg-slate-900 px-3 py-2 text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-16"

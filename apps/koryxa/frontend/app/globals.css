@@ -1,4 +1,6 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Import shared design tokens and utility classes (buttons, chips, container) */
 @import "../styles/globals.css";
