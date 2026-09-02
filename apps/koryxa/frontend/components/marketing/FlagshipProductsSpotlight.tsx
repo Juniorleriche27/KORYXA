@@ -102,38 +102,38 @@ const FLAGSHIP_PILLARS = [
 
 export default function FlagshipProductsSpotlight() {
   return (
-    <div className="w-full">
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       {/* 2x2 Flagships Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-5 sm:gap-6 lg:grid-cols-2 w-full max-w-full min-w-0">
         {FLAGSHIP_PILLARS.map((pillar) => {
           const Icon = pillar.icon;
 
           return (
             <article
               key={pillar.id}
-              className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-8 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-[#00a86b] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,168,107,0.15)] dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_12px_36px_rgba(0,0,0,0.3)] dark:hover:border-[#4ade80]"
+              className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-5 sm:p-8 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-[#00a86b] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,168,107,0.15)] dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_12px_36px_rgba(0,0,0,0.3)] dark:hover:border-[#4ade80] w-full max-w-full min-w-0 overflow-hidden box-border"
             >
-              <div>
+              <div className="w-full min-w-0">
                 {/* Header: Icon, Category & Badge */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl shadow-sm transition duration-300 group-hover:scale-105"
+                      className="flex h-11 w-11 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl shadow-sm transition duration-300 group-hover:scale-105"
                       style={{ backgroundColor: pillar.accentBg, color: pillar.color }}
                     >
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
-                    <div>
-                      <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <div className="min-w-0">
+                      <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
                         {pillar.category}
                       </span>
-                      <h3 className="font-serif text-2xl font-bold tracking-tight text-slate-900 transition group-hover:text-[#00a86b] dark:text-white dark:group-hover:text-[#86efac]">
+                      <h3 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-slate-900 transition group-hover:text-[#00a86b] dark:text-white dark:group-hover:text-[#86efac] truncate">
                         {pillar.name}
                       </h3>
                     </div>
                   </div>
 
-                  <span className="rounded-full bg-[#00a86b]/10 px-3 py-1 text-[11px] font-bold text-[#008b58] border border-[#00a86b]/20 dark:bg-[#00a86b]/20 dark:text-[#86efac] shrink-0">
+                  <span className="rounded-full bg-[#00a86b]/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-bold text-[#008b58] border border-[#00a86b]/20 dark:bg-[#00a86b]/20 dark:text-[#86efac] shrink-0 truncate max-w-[45%] text-right">
                     {pillar.badge}
                   </span>
                 </div>

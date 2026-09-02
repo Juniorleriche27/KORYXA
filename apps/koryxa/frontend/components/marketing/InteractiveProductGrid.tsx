@@ -85,11 +85,11 @@ export default function InteractiveProductGrid({
   }, [selectedCategory, searchQuery, limit]);
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       {/* Search & Filter Header */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Category Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none w-full sm:flex-wrap">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full max-w-full min-w-0">
+        {/* Category Tabs — Mobile horizontal scroll without expanding parent */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none w-full max-w-full min-w-0 shrink">
           {CATEGORIES.map((cat) => {
             const isSelected = cat.id === selectedCategory;
             return (
@@ -97,7 +97,7 @@ export default function InteractiveProductGrid({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold transition duration-200 ${
+                className={`shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold transition duration-200 ${
                   isSelected
                     ? "bg-[#00a86b] text-white shadow-[0_4px_16px_rgba(0,168,107,0.35)] scale-102"
                     : "border border-slate-200 bg-white/90 text-slate-700 hover:border-[#00a86b]/40 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
@@ -110,7 +110,7 @@ export default function InteractiveProductGrid({
         </div>
 
         {/* Local Search Input */}
-        <div className="relative w-full sm:w-72 shrink-0">
+        <div className="relative w-full sm:w-72 shrink-0 min-w-0">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -128,29 +128,29 @@ export default function InteractiveProductGrid({
           <p className="text-sm font-semibold">Aucun produit ne correspond à vos critères de recherche.</p>
         </div>
       ) : (
-        <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full min-w-0">
           {filteredProducts.map((product) => {
             const Icon = PRODUCT_ICONS[product.slug] || Sparkles;
 
             return (
               <article
                 key={product.slug}
-                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-5 sm:p-7 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-[#00a86b] hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(0,168,107,0.18)] dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_12px_36px_rgba(0,0,0,0.3)] dark:hover:border-[#4ade80]"
+                className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-5 sm:p-7 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-[#00a86b] hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(0,168,107,0.18)] dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_12px_36px_rgba(0,0,0,0.3)] dark:hover:border-[#4ade80] w-full max-w-full min-w-0 overflow-hidden box-border"
               >
-                <div>
+                <div className="w-full min-w-0">
                   {/* Top row: Icon & Status Badge */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-black/5 bg-[#00a86b]/10 text-[#00a86b] transition duration-300 group-hover:bg-[#00a86b] group-hover:text-white shadow-sm dark:border-white/10 dark:bg-[#00a86b]/20 dark:text-[#4ade80]">
-                      <Icon className="h-6 w-6" />
+                  <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                    <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-black/5 bg-[#00a86b]/10 text-[#00a86b] transition duration-300 group-hover:bg-[#00a86b] group-hover:text-white shadow-sm dark:border-white/10 dark:bg-[#00a86b]/20 dark:text-[#4ade80]">
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
-                    <span className="rounded-full bg-[#00a86b]/10 px-3 py-1 text-[10px] sm:text-[11px] font-bold text-[#008b58] border border-[#00a86b]/20 dark:bg-[#00a86b]/20 dark:text-[#86efac] shrink-0 max-w-[160px] truncate text-right">
+                    <span className="rounded-full bg-[#00a86b]/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-bold text-[#008b58] border border-[#00a86b]/20 dark:bg-[#00a86b]/20 dark:text-[#86efac] shrink-0 truncate max-w-[55%] text-right">
                       {product.badge || product.status}
                     </span>
                   </div>
 
                   {/* Title & Tagline */}
-                  <div className="mt-4 text-left">
-                    <h3 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-slate-900 transition group-hover:text-[#00a86b] dark:text-white dark:group-hover:text-[#86efac]">
+                  <div className="mt-4 text-left w-full min-w-0">
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-slate-900 transition group-hover:text-[#00a86b] dark:text-white dark:group-hover:text-[#86efac] truncate">
                       {product.name}
                     </h3>
                     <p className="mt-1 text-xs font-bold text-[#008b58] dark:text-[#86efac] leading-snug">
