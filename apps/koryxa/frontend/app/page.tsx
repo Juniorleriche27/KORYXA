@@ -17,7 +17,7 @@ import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 import { productList } from "@/app/produits/data";
 import EcosystemOrchestrationVisualizer from "@/components/marketing/EcosystemOrchestrationVisualizer";
 import InteractivePersonaRouter from "@/components/marketing/InteractivePersonaRouter";
-import InteractiveProductGrid from "@/components/marketing/InteractiveProductGrid";
+import FlagshipProductsSpotlight from "@/components/marketing/FlagshipProductsSpotlight";
 import LiveEcosystemMetrics from "@/components/marketing/LiveEcosystemMetrics";
 
 export const metadata: Metadata = {
@@ -187,22 +187,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4. SECTION CATALOGUE PRODUITS INTERACTIF */}
+        {/* 4. SECTION SOLUTIONS & PRODUITS PHARES */}
         <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors duration-200">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-12">
               <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
-                Catalogue Officiel de la Suite
+                Piliers & Solutions Phares
               </span>
               <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
-                Des produits autonomes, une cohérence totale.
+                L’excellence technologique au service de vos opérations.
               </h2>
               <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                Chaque brique répond à un besoin concret : finance intelligente, prospection autopilot, conversation IA, ERP ou formation.
+                Explorez les 4 piliers technologiques majeurs de l'écosystème : finance intelligente, prospection autopilot, conversation IA et infrastructure.
               </p>
             </div>
 
-            <InteractiveProductGrid />
+            <FlagshipProductsSpotlight />
           </div>
         </section>
 

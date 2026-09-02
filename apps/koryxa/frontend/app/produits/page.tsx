@@ -51,21 +51,21 @@ export default function ProductsPage() {
 
           {/* Quick Pillar Highlights */}
           <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 w-full max-w-3xl">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">
-              <span className="block font-serif text-xl font-bold text-white">9+</span>
-              <span className="text-[11px] font-semibold text-[#86efac]">Produits actifs</span>
+            <div className="rounded-2xl border border-slate-200/90 bg-white/95 dark:border-white/15 dark:bg-white/10 p-3.5 shadow-sm backdrop-blur-md">
+              <span className="block font-serif text-xl sm:text-2xl font-bold text-[#00a86b] dark:text-white">9+</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-[#86efac]">Produits actifs</span>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">
-              <span className="block font-serif text-xl font-bold text-white">1</span>
-              <span className="text-[11px] font-semibold text-[#86efac]">Identité unique</span>
+            <div className="rounded-2xl border border-slate-200/90 bg-white/95 dark:border-white/15 dark:bg-white/10 p-3.5 shadow-sm backdrop-blur-md">
+              <span className="block font-serif text-xl sm:text-2xl font-bold text-[#00a86b] dark:text-white">1</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-[#86efac]">Identité unique</span>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">
-              <span className="block font-serif text-xl font-bold text-white">24/7</span>
-              <span className="text-[11px] font-semibold text-[#86efac]">Autopilot CRM</span>
+            <div className="rounded-2xl border border-slate-200/90 bg-white/95 dark:border-white/15 dark:bg-white/10 p-3.5 shadow-sm backdrop-blur-md">
+              <span className="block font-serif text-xl sm:text-2xl font-bold text-[#00a86b] dark:text-white">24/7</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-[#86efac]">Autopilot CRM</span>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md">
-              <span className="block font-serif text-xl font-bold text-white">100%</span>
-              <span className="text-[11px] font-semibold text-[#86efac]">Souveraineté</span>
+            <div className="rounded-2xl border border-slate-200/90 bg-white/95 dark:border-white/15 dark:bg-white/10 p-3.5 shadow-sm backdrop-blur-md">
+              <span className="block font-serif text-xl sm:text-2xl font-bold text-[#00a86b] dark:text-white">100%</span>
+              <span className="text-[11px] font-semibold text-slate-700 dark:text-[#86efac]">Souveraineté</span>
             </div>
           </div>
         </div>
