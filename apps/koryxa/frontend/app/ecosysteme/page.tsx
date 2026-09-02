@@ -172,12 +172,12 @@ export default function EcosystemePage() {
                 key={`${product.slug}-${index}`}
               >
                 <div className="flex items-center justify-between">
-                  <span>{product.name}</span>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-[#86efac]">
+                  <span className="font-bold text-slate-900 dark:text-white">{product.name}</span>
+                  <span className="rounded-full bg-[#00a86b]/10 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-[#008b58] dark:text-[#86efac]">
                     {product.badge || "Actif"}
                   </span>
                 </div>
-                <small className="truncate">{product.tagline}</small>
+                <small className="truncate text-slate-600 dark:text-[#86efac]">{product.tagline}</small>
               </a>
             ))}
           </div>

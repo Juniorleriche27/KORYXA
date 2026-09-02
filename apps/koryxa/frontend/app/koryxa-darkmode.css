@@ -271,9 +271,36 @@ html.dark .kx-usecases-hero,
 html.dark .kx-partners-hero,
 html.dark .kx-about-hero,
 html.dark .kx-contact-hero,
-html.dark .kx-products-strip,
-html.dark .kx-pie-marquee-section {
+html.dark .kx-products-strip {
   background: radial-gradient(circle at 50% 32%, rgba(0, 168, 107, 0.26), #07140c 56%, #050b08 100%) !important;
+}
+
+html.dark .kx-pie-marquee-section {
+  background: #07140c !important;
+  border-top-color: rgba(72, 230, 154, 0.16) !important;
+  border-bottom-color: rgba(72, 230, 154, 0.16) !important;
+}
+
+html.dark .kx-pie-marquee-section::before {
+  background: linear-gradient(to right, #07140c, transparent) !important;
+}
+
+html.dark .kx-pie-marquee-section::after {
+  background: linear-gradient(to left, #07140c, transparent) !important;
+}
+
+html.dark .kx-pie-mini-card {
+  background: rgba(13, 28, 19, 0.92) !important;
+  border-color: rgba(72, 230, 154, 0.22) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .kx-pie-mini-card span {
+  color: #f6fff9 !important;
+}
+
+html.dark .kx-pie-mini-card small {
+  color: #86efac !important;
 }
 
 html.dark .kx-pie-btn-outline-white,
