@@ -12,6 +12,7 @@ const FOOTER_GROUPS = [
     links: [
       { label: "MERQALOR (Finance)", href: "https://merqalor.koryxa.fr", external: true },
       { label: "FlowCore (CRM & Autopilot)", href: "https://flowcore.koryxa.fr", external: true },
+      { label: "Cora (Cockpit IA)", href: "https://cora.koryxa.fr", external: true },
       { label: "Service IA & Web", href: "https://service-ia.koryxa.fr", external: true },
       { label: "ChatLAYA (Conversation)", href: "https://chatlaya.koryxa.fr", external: true },
       { label: "CoraBiz (ERP PME)", href: "https://corabiz.koryxa.fr", external: true },

@@ -71,6 +71,16 @@ const useCases = [
     external: true,
   },
   {
+    icon: Sparkles,
+    title: "Je veux un cockpit modulaire pour mes assistants et agents IA",
+    description: "6 espaces de travail, assistants IA et agents opérationnels avec gouvernance des actions sensibles.",
+    product: "Cora",
+    href: "https://cora.koryxa.fr",
+    action: "Ouvrir Cora",
+    tag: "Cockpit IA Modulaire",
+    external: true,
+  },
+  {
     icon: BriefcaseBusiness,
     title: "Je veux gérer la facturation et les stocks de ma PME",
     description: "ERP IA, devis instantanés, stocks et encaissements centralisés pour entreprises.",

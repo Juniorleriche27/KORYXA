@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { PUBLIC_ROUTES } from "@/config/routes";
+import { productList } from "@/app/produits/data";
 
 const FLAGSHIP_PILLARS = [
   {
@@ -205,9 +206,9 @@ export default function FlagshipProductsSpotlight() {
           <div className="mt-5">
             <Link
               href={PUBLIC_ROUTES.produits}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.3)] transition hover:bg-[#008b58] hover:-translate-y-0.5 w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.3)] transition hover:bg-[#008b58] hover:-translate-y-0.5 w-full sm:w-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a86b]"
             >
-              <span>Accéder au catalogue officiel (9 produits)</span>
+              <span>Accéder au catalogue officiel ({productList.length} produits)</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
