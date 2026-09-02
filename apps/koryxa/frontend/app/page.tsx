@@ -14,30 +14,33 @@ import {
 } from "lucide-react";
 import JsonLd from "@/components/seo/JsonLd";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
+import { productList } from "@/app/produits/data";
 import EcosystemOrchestrationVisualizer from "@/components/marketing/EcosystemOrchestrationVisualizer";
 import InteractivePersonaRouter from "@/components/marketing/InteractivePersonaRouter";
 import InteractiveProductGrid from "@/components/marketing/InteractiveProductGrid";
 import LiveEcosystemMetrics from "@/components/marketing/LiveEcosystemMetrics";
 
 export const metadata: Metadata = {
-  title: "KORYXA | Première Plateforme d'Orchestration IA en Afrique",
+  title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
   description:
-    "KORYXA unifie et orchestre l'écosystème d'intelligence artificielle en Afrique : un compte unique, des produits autonomes (ChatLAYA, NeuroKap, CoraBiz) et une infrastructure souveraine.",
+    "KORYXA est la première plateforme d'orchestration IA en Afrique. Un compte unique et un écosystème de produits autonomes connectés : MERQALOR, FlowCore, ChatLAYA, CoraBiz, KORYXA Formation et APIs.",
   keywords: [
     "KORYXA",
+    "première plateforme d'orchestration IA en Afrique",
     "orchestration IA Afrique",
     "plateforme IA Afrique",
+    "MERQALOR",
+    "FlowCore",
     "ChatLAYA",
-    "NeuroKap",
     "CoraBiz",
     "compte KORYXA",
     "écosystème IA africain",
     "infrastructure IA souveraine",
   ],
   openGraph: {
-    title: "KORYXA | Première Plateforme d'Orchestration IA en Afrique",
+    title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
     description:
-      "L’infrastructure souveraine qui relie produits IA autonomes, talents, entreprises et décideurs avec un compte unique.",
+      "La première plateforme d'orchestration IA en Afrique reliant produits autonomes, entreprises, créateurs et institutions sous une identité unique.",
     url: "/",
     type: "website",
   },
@@ -52,7 +55,7 @@ const organizationJsonLd = {
   areaServed: "Africa",
   knowsAbout: [
     "Intelligence artificielle",
-    "Orchestration de systèmes",
+    "Orchestration de systèmes IA",
     "Produits autonomes",
     "Identité numérique souveraine",
     "Écosystème technologique africain",
@@ -64,7 +67,7 @@ const pillars = [
     icon: Workflow,
     title: "Orchestrer",
     description:
-      "KORYXA structure la complexité technologique en reliant chaque besoin au système ou produit adapté sans dispersion.",
+      "KORYXA structure la complexité technologique en reliant chaque besoin au bon produit sans dispersion ni silos.",
   },
   {
     icon: KeyRound,
@@ -76,7 +79,7 @@ const pillars = [
     icon: Network,
     title: "Connecter",
     description:
-      "Chaque produit conserve son autonomie et sa roadmap, tout en partageant la même identité, sécurité et architecture.",
+      "Chaque produit conserve son autonomie et sa roadmap, tout en partageant la même identité, sécurité et passerelle.",
   },
   {
     icon: Zap,
@@ -91,63 +94,91 @@ export default function HomePage() {
     <>
       <JsonLd data={organizationJsonLd} />
       <main className="kx-pie-page">
-        {/* 1. HERO SECTION WITH INTERACTIVE ARCHITECTURE VISUALIZER */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#06150c] via-[#081f13] to-[#040c07] pt-8 pb-16 text-white sm:pt-12 sm:pb-24">
-          <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
-          <div className="kx-pie-blob kx-pie-blob-two opacity-20" />
+        {/* 1. HERO SECTION WITH EXACT PHRASE RESTORED & MOBILE CENTERED */}
+        <section className="kx-pie-hero relative overflow-hidden text-center">
+          <div className="kx-pie-blob kx-pie-blob-one" />
+          <div className="kx-pie-blob kx-pie-blob-two" />
 
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Hero Top Copy */}
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#4ade80]/40 bg-[#00a86b]/15 px-4 py-1.5 backdrop-blur-md">
-                <span className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[#ecfff4]">
-                  Infrastructure & Hub IA Souverain
-                </span>
-              </div>
-
-              <h1 className="mt-6 font-serif text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
-                L'orchestration IA pensée pour les réalités africaines.
-              </h1>
-
-              <p className="mt-5 text-base sm:text-lg text-[#e2f5ea] leading-relaxed max-w-2xl mx-auto">
-                KORYXA relie vos produits autonomes (<strong>ChatLAYA</strong>, <strong>NeuroKap</strong>, <strong>CoraBiz</strong>), vos équipes et vos partenaires sous une identité unique et une gouvernance claire.
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
-                <Link
-                  href={PUBLIC_ROUTES.ecosysteme}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-6 py-3.5 text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
-                >
-                  Explorer l’écosystème
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a
-                  href={KORYXA_ACCOUNT_URL}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/15"
-                >
-                  Ouvrir mon Compte KORYXA
-                </a>
-              </div>
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 py-12 sm:py-20 relative z-10 flex flex-col items-center justify-center">
+            {/* Centered Top Badge */}
+            <div className="kx-pie-badge inline-flex items-center justify-center gap-2 mb-6">
+              <span className="kx-pie-dot" />
+              <span>Plateforme d’orchestration IA en Afrique</span>
             </div>
 
-            {/* Interactive Architecture Hub Visualizer */}
-            <div className="mt-14 sm:mt-16">
+            {/* Main Headline - Exact sentence prominent */}
+            <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.08] tracking-tight">
+              KORYXA
+              <br />
+              <em className="italic text-[#86efac] dark:text-[#4ade80]">
+                la première plateforme d'orchestration IA en Afrique.
+              </em>
+            </h1>
+
+            {/* Paragraph lead */}
+            <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+              KORYXA connecte et orchestre les produits autonomes de sa suite (<strong>MERQALOR</strong>, <strong>FlowCore</strong>, <strong>ChatLAYA</strong>, <strong>CoraBiz</strong>, <strong>Formation</strong>) sous un compte unique et une gouvernance claire.
+            </p>
+
+            {/* Centered Action CTAs */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
+              <Link
+                href={PUBLIC_ROUTES.ecosysteme}
+                className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+              >
+                Explorer l’écosystème
+                <ArrowRight size={18} />
+              </Link>
+              <a
+                href={KORYXA_ACCOUNT_URL}
+                className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+              >
+                Accéder au Compte KORYXA
+              </a>
+            </div>
+
+            {/* Live Interactive Architecture Visualizer */}
+            <div className="mt-14 sm:mt-16 w-full text-left">
               <EcosystemOrchestrationVisualizer />
             </div>
 
             {/* Live Metrics Bar */}
-            <div className="mt-12 sm:mt-16">
+            <div className="mt-12 sm:mt-16 w-full">
               <LiveEcosystemMetrics />
             </div>
           </div>
         </section>
 
-        {/* 2. SECTION ROUTEUR DE CAS D'USAGE GUIDÉ */}
+        {/* 2. CONTINUOUS ANIMATED MARQUEE OF ALL PRODUCTS */}
+        <section className="kx-pie-marquee-section" aria-label="Suite de produits KORYXA">
+          <div className="kx-pie-marquee-track">
+            <div className="kx-pie-marquee-inner">
+              {[...productList, ...productList].map((product, index) => (
+                <a
+                  href={product.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="kx-pie-mini-card transition hover:border-[#00a86b] hover:scale-105"
+                  key={`${product.slug}-${index}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{product.name}</span>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold text-[#86efac]">
+                      {product.badge || "Actif"}
+                    </span>
+                  </div>
+                  <small className="truncate">{product.tagline}</small>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 3. SECTION ROUTEUR DE CAS D'USAGE GUIDÉ */}
         <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 text-center sm:text-left">
             <div className="mx-auto max-w-2xl text-center mb-12">
-              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
                 Orientation Personnalisée
               </span>
               <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
@@ -162,18 +193,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 3. SECTION CATALOGUE PRODUITS INTERACTIF */}
+        {/* 4. SECTION CATALOGUE PRODUITS INTERACTIF */}
         <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-12">
-              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
-                Catalogue de la Suite
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
+                Catalogue Officiel de la Suite
               </span>
               <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
                 Des produits autonomes, une cohérence totale.
               </h2>
               <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                Chaque produit répond à un usage précis : conversation, analyse de marché, ERP, formation ou intégration API.
+                Chaque brique répond à un besoin concret : finance intelligente, prospection autopilot, conversation IA, ERP ou formation.
               </p>
             </div>
 
@@ -181,11 +212,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4. SECTION POURQUOI KORYXA & PILIERS */}
+        {/* 5. SECTION POURQUOI KORYXA & PILIERS */}
         <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-16">
-              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+              <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
                 Fondations Technologiques
               </span>
               <h2 className="mt-2 text-2xl sm:text-4xl font-bold font-serif tracking-tight">
@@ -202,10 +233,10 @@ export default function HomePage() {
                 return (
                   <article
                     key={item.title}
-                    className="flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-[#234b33] bg-white dark:bg-[#07190f]/90 p-6 shadow-sm dark:shadow-md transition hover:-translate-y-1 hover:border-[#00a86b]"
+                    className="flex flex-col justify-between rounded-3xl border border-slate-200/90 dark:border-[#234b33] bg-white/95 dark:bg-[#07190f]/90 p-6 sm:p-7 shadow-sm transition hover:-translate-y-1.5 hover:border-[#00a86b] hover:shadow-lg text-center sm:text-left"
                   >
                     <div>
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80]">
+                      <div className="mx-auto sm:mx-0 flex h-13 w-13 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80]">
                         <Icon className="h-6 w-6" />
                       </div>
                       <h3 className="mt-5 font-serif text-xl font-bold">{item.title}</h3>
@@ -220,9 +251,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5. CTA SECTION PREMIUM */}
+        {/* 6. CTA SECTION PREMIUM */}
         <section className="relative overflow-hidden bg-gradient-to-b from-[#081f13] to-[#040c07] py-20 sm:py-28 text-center text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,168,107,0.25),transparent_70%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,168,107,0.3),transparent_70%)]" />
 
           <div className="relative mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#86efac]">
@@ -235,17 +266,17 @@ export default function HomePage() {
               Créez votre compte unique KORYXA pour accéder instantanément à tous les produits ou contactez notre équipe pour déployer une solution dédiée.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
               <a
                 href={KORYXA_ACCOUNT_URL}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-6 py-3.5 text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-4 text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
               >
                 Créer mon Compte KORYXA
                 <ArrowRight className="h-4 w-4" />
               </a>
               <Link
                 href={PUBLIC_ROUTES.contact}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/15"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/15"
               >
                 Contacter KORYXA
               </Link>

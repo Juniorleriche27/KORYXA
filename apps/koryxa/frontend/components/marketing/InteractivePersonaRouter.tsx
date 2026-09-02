@@ -15,6 +15,10 @@ import {
   CheckCircle2,
   Users,
   Compass,
+  Wallet,
+  Globe,
+  Radio,
+  ExternalLink,
 } from "lucide-react";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 
@@ -30,191 +34,203 @@ interface PersonaConfig {
     slug: string;
     tagline: string;
     icon: typeof Bot;
+    href: string;
   }[];
   steps: string[];
   ctaText: string;
   ctaHref: string;
-  isExternal?: boolean;
 }
 
 const PERSONAS: PersonaConfig[] = [
+  {
+    id: "finance",
+    label: "Particulier & Trésorerie",
+    badge: "Finance & Mobile Money",
+    icon: Wallet,
+    title: "Pilotez vos flux Wave, Orange Money, MTN et vos banques",
+    description:
+      "Centralisez tous vos comptes et bénéficiez de prévisions de trésorerie automatiques avec 4 conseillers IA dédiés pour faire grandir votre argent.",
+    recommendedProducts: [
+      {
+        name: "MERQALOR",
+        slug: "merqalor",
+        tagline: "Pilotage financier intelligent",
+        icon: Wallet,
+        href: "https://merqalor.koryxa.fr",
+      },
+      {
+        name: "ChatLAYA",
+        slug: "chatlaya",
+        tagline: "Assistant conversationnel souverain",
+        icon: Bot,
+        href: "https://chatlaya.koryxa.fr",
+      },
+    ],
+    steps: [
+      "Connexion sécurisée via votre Compte KORYXA",
+      "Connexion automatique de vos comptes Wave, OM et banques",
+      "Activation des alertes et conseils IA de trésorerie",
+    ],
+    ctaText: "Accéder à MERQALOR",
+    ctaHref: "https://merqalor.koryxa.fr",
+  },
   {
     id: "business",
     label: "Entreprise & Organisation",
     badge: "B2B & PME",
     icon: Building2,
-    title: "Optimisez vos opérations et structurez vos flux IA",
+    title: "Automatisez vos ventes, votre CRM et votre gestion globale",
     description:
-      "Vous dirigez une entreprise, une institution ou une PME : KORYXA centralise vos outils de gestion intelligente, automatise vos processus et sécurise vos données.",
+      "Vous dirigez une entreprise ou une PME : KORYXA centralise la prospection multicanale, la facturation et les projets sur-mesure sous une seule gouvernance.",
     recommendedProducts: [
+      {
+        name: "FlowCore",
+        slug: "flowcore",
+        tagline: "Autopilot CRM WhatsApp / Email",
+        icon: Radio,
+        href: "https://flowcore.koryxa.fr",
+      },
       {
         name: "CoraBiz",
         slug: "corabiz",
-        tagline: "ERP IA & Automatisation PME",
+        tagline: "ERP IA & Gestion de facturation",
         icon: BriefcaseBusiness,
+        href: "https://corabiz.koryxa.fr",
       },
       {
-        name: "Services IA",
-        slug: "services-ia",
-        tagline: "Projets et intégrations sur-mesure",
-        icon: Sparkles,
-      },
-      {
-        name: "Portail Partenaire",
-        slug: "partner-portal",
-        tagline: "Supervision et gestion d'accès",
-        icon: Building2,
+        name: "Service IA & Web",
+        slug: "service-ia",
+        tagline: "Studio d'ingénierie numérique",
+        icon: Globe,
+        href: "https://service-ia.koryxa.fr",
       },
     ],
     steps: [
-      "Création du compte d'organisation KORYXA",
-      "Activation de l'espace CoraBiz ou audit de projet IA",
-      "Connexion sécurisée aux outils existants (API / Connecteurs)",
+      "Activation de votre espace d’organisation KORYXA",
+      "Lancement de l'Autopilot CRM FlowCore ou CoraBiz",
+      "Connexion aux passerelles WhatsApp et passerelles de paiement",
     ],
     ctaText: "Déployer pour mon organisation",
-    ctaHref: "/produits/corabiz",
+    ctaHref: "https://flowcore.koryxa.fr",
   },
   {
     id: "individual",
-    label: "Utilisateur & Créateur",
-    badge: "Usage Quotidien",
+    label: "Créateur & Porteur de Projet",
+    badge: "Conversation & Founder",
     icon: Bot,
-    title: "Discutez, créez et accélérez vos projets au quotidien",
+    title: "Discutez, cadrez et accélérez vos projets en français & contextes locaux",
     description:
-      "Vous souhaitez converser avec une IA intelligente en français et contextes africains, rédiger des documents, structurer des idées ou apprendre plus vite.",
+      "Pour les créateurs, fondateurs et professionnels qui souhaitent converser avec des modèles IA souverains et structurer un dossier d'entreprise complet.",
     recommendedProducts: [
       {
         name: "ChatLAYA",
         slug: "chatlaya",
-        tagline: "Assistant conversationnel intelligent",
+        tagline: "Assistant conversationnel souverain",
         icon: Bot,
+        href: "https://chatlaya.koryxa.fr",
       },
       {
-        name: "Compte KORYXA",
-        slug: "account",
-        tagline: "Pass universel pour tous vos accès",
-        icon: ShieldCheck,
+        name: "Service IA & Web",
+        slug: "service-ia",
+        tagline: "Studio d'exécution digitale",
+        icon: Globe,
+        href: "https://service-ia.koryxa.fr",
       },
     ],
     steps: [
-      "Connexion instantanée avec votre Compte KORYXA",
-      "Ouverture de ChatLAYA sans configuration complexe",
-      "Sauvegarde centralisée de vos sessions et espaces",
+      "Connexion instantanée avec votre compte KORYXA",
+      "Ouverture de ChatLAYA et de l'espace Founder",
+      "Génération et export de vos livrables de projet",
     ],
-    ctaText: "Ouvrir ChatLAYA gratuitement",
-    ctaHref: "/produits/chatlaya",
-  },
-  {
-    id: "finance",
-    label: "Finance & Marchés",
-    badge: "Analytique & Data",
-    icon: CircuitBoard,
-    title: "Exploitez l'intelligence prédictive sur les marchés",
-    description:
-      "Pour les analystes, investisseurs et institutions financières qui nécessitent des insights précis sur les tendances économiques et financières africaines.",
-    recommendedProducts: [
-      {
-        name: "NeuroKap",
-        slug: "neurokap",
-        tagline: "Intelligence financière et marchés",
-        icon: CircuitBoard,
-      },
-      {
-        name: "KORYXA API",
-        slug: "api",
-        tagline: "Flux de données et modèles temps réel",
-        icon: Code2,
-      },
-    ],
-    steps: [
-      "Identification des sources et indicateurs clés",
-      "Accès aux tableaux de bord analytiques NeuroKap",
-      "Intégration des flux prédictifs par API",
-    ],
-    ctaText: "Découvrir NeuroKap",
-    ctaHref: "/produits/neurokap",
+    ctaText: "Ouvrir ChatLAYA",
+    ctaHref: "https://chatlaya.koryxa.fr",
   },
   {
     id: "talent",
     label: "Étudiant & Talent IA",
     badge: "Formation & Upskilling",
     icon: GraduationCap,
-    title: "Montez en compétences sur les technologies de demain",
+    title: "Montez en compétences et validez des certifications pratiques",
     description:
-      "Vous souhaitez vous former aux outils d'IA générative, à l'ingénierie de prompt ou développer des solutions concrètes pour le marché du travail.",
+      "Acquérez les compétences les plus recherchées du marché en Data Analysis, Prompt Engineering et automatisation d'agents IA par la pratique.",
     recommendedProducts: [
       {
         name: "KORYXA Formation",
         slug: "formation",
-        tagline: "Programmes certifiants et ateliers pratiques",
+        tagline: "Formations pratiques certifiantes",
         icon: GraduationCap,
+        href: "https://formation.koryxa.fr",
       },
       {
-        name: "ChatLAYA Lab",
-        slug: "chatlaya",
-        tagline: "Environnement d'expérimentation IA",
-        icon: Bot,
+        name: "NeuroKap",
+        slug: "neurokap",
+        tagline: "Entraînement cognitif & score",
+        icon: CircuitBoard,
+        href: "https://neurokap.koryxa.fr",
       },
     ],
     steps: [
-      "Évaluation de votre niveau et de vos objectifs",
-      "Inscription à une cohorte ou un parcours e-learning",
-      "Validation de certification officielle KORYXA",
+      "Choix du parcours certifiant (Python, IA, Data)",
+      "Participation aux ateliers immersifs et mentorat",
+      "Obtention de la certification KORYXA vérifiable",
     ],
     ctaText: "Consulter les formations",
-    ctaHref: "/produits/formation",
+    ctaHref: "https://formation.koryxa.fr",
   },
   {
     id: "developer",
     label: "Développeur & Tech",
     badge: "API & Infrastructure",
     icon: Code2,
-    title: "Bâtissez sur l'infrastructure d'orchestration KORYXA",
+    title: "Bâtissez sur l'infrastructure d'orchestration et connecteurs KORYXA",
     description:
-      "Accédez à nos endpoints d'inférence, SDKs et passerelles de données pour intégrer des fonctionnalités IA robustes dans vos propres applications.",
+      "Accédez aux endpoints d'inférence gRPC / REST, SDKs et passerelles de données pour intégrer des fonctionnalités IA robustes dans vos propres applications.",
     recommendedProducts: [
       {
         name: "KORYXA API",
         slug: "api",
-        tagline: "Endpoints unifiés et connecteurs souverains",
+        tagline: "Moteur et connecteurs unifiés",
         icon: Code2,
+        href: "https://api.koryxa.fr",
       },
       {
-        name: "Compte KORYXA Developer",
-        slug: "account",
-        tagline: "Gestion des clés d'API et quotas",
-        icon: ShieldCheck,
+        name: "Portail Partenaire",
+        slug: "partner-portal",
+        tagline: "Supervision et multi-tenant",
+        icon: Building2,
+        href: "https://partenaires.koryxa.fr",
       },
     ],
     steps: [
-      "Génération de vos clés d'accès développeur",
-      "Test des endpoints via la documentation interactive",
+      "Génération de vos clés API sécurisées",
+      "Intégration via les SDKs et connecteurs OpenAPI",
       "Déploiement en production avec supervision des quotas",
     ],
-    ctaText: "Accéder à l’API KORYXA",
-    ctaHref: "/produits/api",
+    ctaText: "Accéder à l’API",
+    ctaHref: "https://api.koryxa.fr",
   },
 ];
 
 export default function InteractivePersonaRouter() {
-  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("business");
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("finance");
   const currentPersona = PERSONAS.find((p) => p.id === selectedPersonaId) || PERSONAS[0];
 
   return (
-    <div className="w-full rounded-3xl border border-[#234b33] bg-[#07190f]/90 p-6 sm:p-8 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+    <div className="w-full rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-8 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] text-slate-900 dark:text-white">
       {/* Persona Selector Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-5">
+      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 border-b border-slate-100 dark:border-white/10 pb-5">
         {PERSONAS.map((persona) => {
           const isSelected = persona.id === selectedPersonaId;
           const Icon = persona.icon;
           return (
             <button
               key={persona.id}
+              type="button"
               onClick={() => setSelectedPersonaId(persona.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all ${
+              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-200 ${
                 isSelected
                   ? "bg-[#00a86b] text-white shadow-[0_4px_16px_rgba(0,168,107,0.35)] scale-102"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                  : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#00a86b]/40 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -225,47 +241,50 @@ export default function InteractivePersonaRouter() {
       </div>
 
       {/* Selected Persona Detail Grid */}
-      <div className="mt-6 grid gap-8 lg:grid-cols-2 items-center">
+      <div className="mt-7 grid gap-8 lg:grid-cols-2 items-center">
         {/* Left: Persona narrative & recommended products */}
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#4ade80]/30 bg-[#00a86b]/15 px-3 py-1 text-xs font-bold text-[#86efac]">
+        <div className="text-center sm:text-left">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#00a86b]/30 bg-[#00a86b]/10 px-3.5 py-1 text-xs font-bold text-[#008b58] dark:bg-[#00a86b]/15 dark:text-[#86efac]">
             <Compass className="h-3.5 w-3.5" />
             <span>Orientation : {currentPersona.badge}</span>
           </div>
 
-          <h3 className="mt-3 font-serif text-2xl font-bold text-white sm:text-3xl leading-snug">
+          <h3 className="mt-3 font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white leading-snug">
             {currentPersona.title}
           </h3>
 
-          <p className="mt-3 text-sm text-slate-300 leading-relaxed">
+          <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
             {currentPersona.description}
           </p>
 
           <div className="mt-6">
-            <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-              Produits recommandés pour ce profil :
+            <span className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+              Solutions recommandées :
             </span>
-            <div className="grid gap-2.5 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               {currentPersona.recommendedProducts.map((prod) => {
                 const Icon = prod.icon;
                 return (
-                  <Link
-                    key={prod.slug}
-                    href={`/produits/${prod.slug}`}
-                    className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition hover:border-[#4ade80]/40 hover:bg-[#0d2818]"
+                  <a
+                    key={prod.name}
+                    href={prod.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 transition hover:border-[#00a86b] hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-[#4ade80]/40 dark:hover:bg-[#0d2818]"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#00a86b]/20 text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
-                      <Icon className="h-4 w-4" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] transition group-hover:bg-[#00a86b] group-hover:text-white dark:bg-[#00a86b]/20 dark:text-[#4ade80]">
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block text-xs font-bold text-white truncate">
+                    <div className="min-w-0 flex-1 text-left">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#00a86b]">
                         {prod.name}
                       </span>
-                      <span className="block text-[10px] text-slate-400 truncate">
+                      <span className="block text-[11px] text-slate-500 dark:text-slate-400 truncate">
                         {prod.tagline}
                       </span>
                     </div>
-                  </Link>
+                    <ExternalLink className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#00a86b] shrink-0" />
+                  </a>
                 );
               })}
             </div>
@@ -273,35 +292,37 @@ export default function InteractivePersonaRouter() {
         </div>
 
         {/* Right: Step-by-Step Trajectory Card */}
-        <div className="rounded-2xl border border-[#234b33] bg-gradient-to-b from-[#0d2818] to-[#040f09] p-6 shadow-inner">
-          <span className="block font-serif text-xs font-bold uppercase tracking-widest text-[#86efac]">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-[#f8faf8] to-[#edf4f0] p-6 sm:p-7 shadow-md dark:border-[#234b33] dark:bg-gradient-to-b dark:from-[#0d2818] dark:to-[#040f09]">
+          <span className="block font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#86efac] text-center sm:text-left">
             Trajectoire d’activation KORYXA
           </span>
 
           <div className="mt-4 space-y-3.5">
             {currentPersona.steps.map((step, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00a86b] text-xs font-black text-white shadow-sm">
+              <div key={index} className="flex items-start gap-3.5">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00a86b] text-xs font-black text-white shadow-sm mt-0.5">
                   {index + 1}
                 </div>
-                <p className="text-xs text-slate-200 font-medium pt-0.5 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                   {step}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center gap-3">
-            <Link
+          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center gap-3">
+            <a
               href={currentPersona.ctaHref}
-              className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-5 py-3 text-xs font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-5 py-3.5 text-xs font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
             >
               {currentPersona.ctaText}
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </a>
             <a
               href={KORYXA_ACCOUNT_URL}
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/10"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-xs font-bold text-slate-800 shadow-sm transition hover:bg-slate-100 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
             >
               Compte KORYXA
             </a>

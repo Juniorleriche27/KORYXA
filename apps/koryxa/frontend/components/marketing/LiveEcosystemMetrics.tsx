@@ -8,64 +8,64 @@ export default function LiveEcosystemMetrics() {
   return (
     <div className="w-full">
       {/* Live System Status Bar */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#234b33] bg-[#07190f]/80 px-5 py-3.5 backdrop-blur-xl shadow-md">
+      <div className="mb-6 flex flex-wrap items-center justify-center sm:justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white/95 px-5 py-3.5 shadow-md backdrop-blur-xl dark:border-[#234b33] dark:bg-[#07190f]/80 text-slate-900 dark:text-white">
         <div className="flex items-center gap-3">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
           </span>
-          <span className="text-xs font-bold text-white">
+          <span className="text-xs font-bold text-slate-900 dark:text-white">
             Infrastructure KORYXA opérationnelle
           </span>
-          <span className="hidden rounded bg-[#00a86b]/20 px-2 py-0.5 text-[10px] font-bold text-[#86efac] border border-[#00a86b]/40 sm:inline-block">
+          <span className="rounded bg-[#00a86b]/15 px-2.5 py-0.5 text-[10px] font-bold text-[#008b58] border border-[#00a86b]/30 dark:bg-[#00a86b]/20 dark:text-[#86efac]">
             99.98% uptime
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-semibold text-slate-300">
+        <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 dark:text-slate-300">
           <span className="flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-[#4ade80]" />
+            <ShieldCheck className="h-4 w-4 text-[#00a86b] dark:text-[#4ade80]" />
             SSO Clerk Identity
           </span>
           <span className="hidden items-center gap-1.5 sm:flex">
-            <Zap className="h-4 w-4 text-[#fbbf24]" />
+            <Zap className="h-4 w-4 text-[#eab308]" />
             Réseau Souverain
           </span>
         </div>
       </div>
 
       {/* 4 Pillars Metric Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        <div className="rounded-2xl border border-[#234b33] bg-[#07190f]/90 p-4 sm:p-5 text-center transition hover:border-[#4ade80]/40">
-          <div className="font-serif text-3xl sm:text-4xl font-black text-white">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5 text-center">
+        <div className="rounded-2xl border border-slate-200/90 bg-white/95 p-4 sm:p-6 shadow-sm transition hover:border-[#00a86b] hover:shadow-md dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white">
+          <div className="font-serif text-3xl sm:text-4xl font-black text-[#00a86b] dark:text-white">
             <CountUp to={productList.length} />
           </div>
-          <p className="mt-1 text-xs font-bold text-[#86efac]">Produits actifs</p>
-          <p className="mt-0.5 text-[11px] text-slate-400">interconnectés</p>
+          <p className="mt-1 text-xs font-bold text-slate-900 dark:text-[#86efac]">Produits actifs</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">interconnectés</p>
         </div>
 
-        <div className="rounded-2xl border border-[#234b33] bg-[#07190f]/90 p-4 sm:p-5 text-center transition hover:border-[#4ade80]/40">
-          <div className="font-serif text-3xl sm:text-4xl font-black text-white">
+        <div className="rounded-2xl border border-slate-200/90 bg-white/95 p-4 sm:p-6 shadow-sm transition hover:border-[#00a86b] hover:shadow-md dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white">
+          <div className="font-serif text-3xl sm:text-4xl font-black text-[#00a86b] dark:text-white">
             1
           </div>
-          <p className="mt-1 text-xs font-bold text-[#86efac]">Compte KORYXA</p>
-          <p className="mt-0.5 text-[11px] text-slate-400">pass universel</p>
+          <p className="mt-1 text-xs font-bold text-slate-900 dark:text-[#86efac]">Compte KORYXA</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">pass universel</p>
         </div>
 
-        <div className="rounded-2xl border border-[#234b33] bg-[#07190f]/90 p-4 sm:p-5 text-center transition hover:border-[#4ade80]/40">
-          <div className="font-serif text-3xl sm:text-4xl font-black text-white">
-            5
+        <div className="rounded-2xl border border-slate-200/90 bg-white/95 p-4 sm:p-6 shadow-sm transition hover:border-[#00a86b] hover:shadow-md dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white">
+          <div className="font-serif text-3xl sm:text-4xl font-black text-[#00a86b] dark:text-white">
+            4
           </div>
-          <p className="mt-1 text-xs font-bold text-[#86efac]">Couches système</p>
-          <p className="mt-0.5 text-[11px] text-slate-400">d’orchestration</p>
+          <p className="mt-1 text-xs font-bold text-slate-900 dark:text-[#86efac]">Canaux CRM</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">WhatsApp / Email</p>
         </div>
 
-        <div className="rounded-2xl border border-[#234b33] bg-[#07190f]/90 p-4 sm:p-5 text-center transition hover:border-[#4ade80]/40">
-          <div className="font-serif text-3xl sm:text-4xl font-black text-white">
+        <div className="rounded-2xl border border-slate-200/90 bg-white/95 p-4 sm:p-6 shadow-sm transition hover:border-[#00a86b] hover:shadow-md dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white">
+          <div className="font-serif text-3xl sm:text-4xl font-black text-[#00a86b] dark:text-white">
             100%
           </div>
-          <p className="mt-1 text-xs font-bold text-[#86efac]">Vision Afrique</p>
-          <p className="mt-0.5 text-[11px] text-slate-400">réalités terrain</p>
+          <p className="mt-1 text-xs font-bold text-slate-900 dark:text-[#86efac]">Vision Afrique</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">réalités terrain</p>
         </div>
       </div>
     </div>

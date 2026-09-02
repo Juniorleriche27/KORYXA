@@ -19,6 +19,9 @@ import {
   ExternalLink,
   Sun,
   Moon,
+  Wallet,
+  Globe,
+  Radio,
 } from "lucide-react";
 import { productList } from "@/app/produits/data";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
@@ -40,7 +43,7 @@ const STATIC_ITEMS: CommandItem[] = [
     id: "nav-home",
     title: "Accueil KORYXA",
     category: "Navigation",
-    description: "Porte d’entrée de la plateforme d’orchestration IA",
+    description: "La première plateforme d'orchestration IA en Afrique",
     icon: Sparkles,
     href: PUBLIC_ROUTES.home,
   },
@@ -104,6 +107,9 @@ const STATIC_ITEMS: CommandItem[] = [
 ];
 
 const PRODUCT_ICONS: Record<string, typeof Bot> = {
+  merqalor: Wallet,
+  "service-ia": Globe,
+  flowcore: Radio,
   chatlaya: Bot,
   cora: Workflow,
   "partner-portal": Building2,
@@ -111,7 +117,7 @@ const PRODUCT_ICONS: Record<string, typeof Bot> = {
   formation: GraduationCap,
   neurokap: CircuitBoard,
   corabiz: BriefcaseBusiness,
-  "services-ia": PackageCheck,
+  "services-ia": Globe,
 };
 
 export default function CommandMenu({
@@ -134,12 +140,13 @@ export default function CommandMenu({
       category: "Produits",
       description: `${p.tagline} — ${p.audience}`,
       icon: PRODUCT_ICONS[p.slug] || Sparkles,
-      href: `/produits/${p.slug}`,
+      href: p.href,
+      isExternal: p.href.startsWith("http"),
     }));
 
     const themeItem: CommandItem = {
       id: "action-theme",
-      title: theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre",
+      title: theme === "dark" ? "Basculer en Mode Jour" : "Basculer en Mode Nuit",
       category: "Actions",
       description: `Actuellement en thème ${theme === "dark" ? "Sombre" : "Clair"}`,
       icon: theme === "dark" ? Sun : Moon,
@@ -186,6 +193,23 @@ export default function CommandMenu({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, filteredItems, selectedIndex, onClose]);
 
+  // Global Cmd+K trigger
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        if (isOpen) {
+          onClose();
+        } else {
+          const event = new CustomEvent("open-command-menu");
+          window.dispatchEvent(event);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isOpen, onClose]);
+
   // Reset index when query changes
   useEffect(() => {
     setSelectedIndex(0);
@@ -206,33 +230,33 @@ export default function CommandMenu({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pt-20 backdrop-blur-md transition-all sm:pt-28"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 px-4 pt-16 backdrop-blur-md transition-all sm:pt-24"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-[#234b33] bg-[#07160e]/95 text-white shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all"
+        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200 bg-white/98 text-slate-900 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-all dark:border-[#234b33] dark:bg-[#07160e]/95 dark:text-white dark:shadow-[0_24px_80px_rgba(0,0,0,0.6)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Bar Input */}
-        <div className="flex items-center gap-3 border-b border-[#1b3d29] px-5 py-4">
-          <Search className="h-5 w-5 text-[#4ade80]" />
+        <div className="flex items-center gap-3 border-b border-slate-100 dark:border-[#1b3d29] px-5 py-4">
+          <Search className="h-5 w-5 text-[#00a86b]" />
           <input
             type="text"
-            placeholder="Rechercher un produit, une fonction, un cas d’usage..."
+            placeholder="Rechercher MERQALOR, FlowCore, ChatLAYA, Service IA..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-base text-white placeholder-slate-400 focus:outline-none"
+            className="flex-1 bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
             autoFocus
           />
           {query ? (
             <button
               onClick={() => setQuery("")}
-              className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
             >
               <X className="h-4 w-4" />
             </button>
           ) : (
-            <kbd className="hidden rounded bg-white/10 px-2 py-0.5 text-xs text-slate-300 sm:inline-block">
+            <kbd className="hidden rounded bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-xs text-slate-500 dark:text-slate-300 sm:inline-block">
               ESC
             </kbd>
           )}
@@ -244,7 +268,7 @@ export default function CommandMenu({
             <div className="p-8 text-center text-slate-400">
               <p className="text-sm">Aucun résultat trouvé pour « {query} »</p>
               <p className="mt-1 text-xs text-slate-500">
-                Essayez avec « ChatLAYA », « Formation », « API » ou « Compte »
+                Essayez avec « MERQALOR », « FlowCore », « ChatLAYA » ou « Compte »
               </p>
             </div>
           ) : (
@@ -257,32 +281,32 @@ export default function CommandMenu({
                     key={item.id}
                     onClick={() => handleSelect(item)}
                     onMouseEnter={() => setSelectedIndex(index)}
-                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
+                    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition ${
                       isSelected
-                        ? "bg-[#00a86b]/20 text-white shadow-[inset_0_0_0_1px_rgba(74,222,128,0.4)]"
-                        : "text-slate-200 hover:bg-white/5"
+                        ? "bg-[#00a86b]/15 text-[#008b58] dark:bg-[#00a86b]/20 dark:text-white shadow-[inset_0_0_0_1px_rgba(0,168,107,0.4)]"
+                        : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-white/5"
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0 flex-1">
                       <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
                           isSelected
-                            ? "border-[#4ade80]/50 bg-[#00a86b]/30 text-[#4ade80]"
-                            : "border-white/10 bg-white/5 text-slate-300"
+                            ? "border-[#00a86b]/50 bg-[#00a86b]/20 text-[#00a86b] dark:text-[#4ade80]"
+                            : "border-slate-200 bg-slate-100 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-white">
+                          <span className="font-bold text-sm text-slate-900 dark:text-white">
                             {item.title}
                           </span>
-                          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium text-[#86efac]">
+                          <span className="rounded-md bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-[#008b58] dark:text-[#86efac]">
                             {item.category}
                           </span>
                         </div>
-                        <p className="truncate text-xs text-slate-400 mt-0.5">
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                           {item.description}
                         </p>
                       </div>
@@ -293,7 +317,7 @@ export default function CommandMenu({
                       ) : (
                         <ArrowRight
                           className={`h-4 w-4 transition ${
-                            isSelected ? "translate-x-1 text-[#4ade80]" : "opacity-0"
+                            isSelected ? "translate-x-1 text-[#00a86b]" : "opacity-0"
                           }`}
                         />
                       )}
@@ -306,17 +330,17 @@ export default function CommandMenu({
         </div>
 
         {/* Footer shortcuts */}
-        <div className="flex items-center justify-between border-t border-[#1b3d29] bg-[#05100a] px-5 py-2.5 text-xs text-slate-400">
+        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 dark:border-[#1b3d29] dark:bg-[#05100a] px-5 py-2.5 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-3">
             <span>
-              <kbd className="rounded bg-white/10 px-1.5 py-0.5">↑</kbd>{" "}
-              <kbd className="rounded bg-white/10 px-1.5 py-0.5">↓</kbd> Naviguer
+              <kbd className="rounded bg-slate-200 dark:bg-white/10 px-1.5 py-0.5">↑</kbd>{" "}
+              <kbd className="rounded bg-slate-200 dark:bg-white/10 px-1.5 py-0.5">↓</kbd> Naviguer
             </span>
             <span>
-              <kbd className="rounded bg-white/10 px-1.5 py-0.5">↵</kbd> Ouvrir
+              <kbd className="rounded bg-slate-200 dark:bg-white/10 px-1.5 py-0.5">↵</kbd> Ouvrir
             </span>
           </div>
-          <span>KORYXA Hub Global</span>
+          <span className="font-semibold text-[#008b58] dark:text-[#86efac]">KORYXA Hub Global</span>
         </div>
       </div>
     </div>

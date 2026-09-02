@@ -15,6 +15,10 @@ import {
   Rocket,
   ShieldCheck,
   Sparkles,
+  Wallet,
+  Globe,
+  Radio,
+  ExternalLink,
 } from "lucide-react";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
 import InteractivePersonaRouter from "@/components/marketing/InteractivePersonaRouter";
@@ -22,123 +26,145 @@ import InteractivePersonaRouter from "@/components/marketing/InteractivePersonaR
 export const metadata: Metadata = {
   title: "Cas d’usage KORYXA | Trouver le Produit et la Trajectoire Adaptés",
   description:
-    "Trouvez le bon produit KORYXA selon votre besoin : converser avec une IA souveraine, optimiser vos flux d'entreprise, former des équipes, intégrer des APIs ou devenir partenaire.",
+    "Trouvez le bon produit KORYXA selon votre besoin : piloter votre trésorerie (MERQALOR), automatiser vos ventes (FlowCore), converser avec une IA souveraine (ChatLAYA), ou former vos équipes.",
 };
 
 const useCases = [
   {
+    icon: Wallet,
+    title: "Je veux piloter ma trésorerie et mes Mobile Money",
+    description: "Centraliser Wave, Orange Money, MTN et mes banques avec 4 conseillers IA dédiés.",
+    product: "MERQALOR",
+    href: "https://merqalor.koryxa.fr",
+    action: "Ouvrir MERQALOR",
+    tag: "Finance & Mobile Money",
+    external: true,
+  },
+  {
+    icon: Radio,
+    title: "Je veux automatiser ma prospection WhatsApp & Email",
+    description: "Autopilot 24/7, scoring de prospects, WhatsApp Gateway et relances automatiques.",
+    product: "FlowCore",
+    href: "https://flowcore.koryxa.fr",
+    action: "Ouvrir FlowCore",
+    tag: "CRM & Autopilot",
+    external: true,
+  },
+  {
+    icon: Globe,
+    title: "Je veux concevoir une application ou un projet IA sur-mesure",
+    description: "Conception web, intégration d'agents intelligents et automatisation de processus métier.",
+    product: "Service IA & Web",
+    href: "https://service-ia.koryxa.fr",
+    action: "Lancer mon projet",
+    tag: "Studio Numérique",
+    external: true,
+  },
+  {
     icon: Bot,
-    title: "Je veux converser avec une IA intelligente",
-    description: "Explorer une idée, rédiger des synthèses, cadrer une demande ou accélérer votre travail au quotidien.",
+    title: "Je veux converser avec une IA et cadrer un projet",
+    description: "Assistant conversationnel en français et langues locales, espace Founder Lab pour structurer un projet.",
     product: "ChatLAYA",
-    href: "/produits/chatlaya",
+    href: "https://chatlaya.koryxa.fr",
     action: "Découvrir ChatLAYA",
-    tag: "Conversation & Assistants",
+    tag: "Conversation Souveraine",
+    external: true,
   },
   {
     icon: BriefcaseBusiness,
-    title: "Je veux automatiser la gestion de mon entreprise",
-    description: "Facturation intelligente, stocks, comptabilité et suivi de trésorerie connectés.",
+    title: "Je veux gérer la facturation et les stocks de ma PME",
+    description: "ERP IA, devis instantanés, stocks et encaissements centralisés pour entreprises.",
     product: "CoraBiz",
-    href: "/produits/corabiz",
+    href: "https://corabiz.koryxa.fr",
     action: "Découvrir CoraBiz",
-    tag: "ERP & Automatisation",
+    tag: "ERP & Gestion",
+    external: true,
   },
   {
     icon: GraduationCap,
     title: "Je veux former ou certifier mes talents",
-    description: "Acquisition de compétences pratiques en IA, ingénierie de prompt et automatisation pour équipes et apprenants.",
+    description: "Acquisition de compétences pratiques en Data, ingénierie de prompt et automatisation IA.",
     product: "KORYXA Formation",
-    href: "/produits/formation",
+    href: "https://formation.koryxa.fr",
     action: "Voir les Formations",
     tag: "Talents & Écoles",
+    external: true,
   },
   {
     icon: Code2,
     title: "Je veux intégrer des modèles IA par API",
     description: "Endpoints d'inférence sécurisés, connecteurs de données et passerelle d'orchestration pour vos applications.",
     product: "KORYXA API",
-    href: "/produits/api",
-    action: "Consulter la documentation API",
+    href: "https://api.koryxa.fr",
+    action: "Consulter la doc API",
     tag: "Système & Infrastructure",
-  },
-  {
-    icon: Building2,
-    title: "Je veux superviser un réseau d'utilisateurs ou une cohorte",
-    description: "Espace institutionnel pour universités, incubateurs et ministères afin de piloter les accès à grande échelle.",
-    product: "Portail Partenaire",
-    href: "/produits/partner-portal",
-    action: "Accéder au Portail",
-    tag: "Institution & Réseau",
-  },
-  {
-    icon: Rocket,
-    title: "Je veux déployer un projet IA sur-mesure",
-    description: "Accompagnement expert pour concevoir et intégrer un pipeline IA adapté aux spécificités de votre organisation.",
-    product: "Services IA",
-    href: "/produits/services-ia",
-    action: "Découvrir les Services IA",
-    tag: "Projets & Accompagnement",
-  },
-  {
-    icon: KeyRound,
-    title: "Je veux gérer mon identité et mes abonnements",
-    description: "Un seul compte KORYXA pour sécuriser vos accès, vos espaces produits et vos quotas d'utilisation.",
-    product: "Compte KORYXA",
-    href: KORYXA_ACCOUNT_URL,
-    action: "Ouvrir mon Compte",
-    tag: "Identité & Sécurité",
     external: true,
   },
   {
-    icon: Network,
-    title: "Je veux devenir partenaire écosystème",
-    description: "Collaborer avec KORYXA en tant qu'entreprise technologique, école, fonds d'investissement ou acteur régional.",
-    product: "Partenaires",
-    href: PUBLIC_ROUTES.partenaires,
+    icon: Building2,
+    title: "Je veux superviser un réseau ou devenir partenaire",
+    description: "Espace officiel pour universités, incubateurs et ministères pour piloter les accès à grande échelle.",
+    product: "Portail Partenaire",
+    href: "https://partenaires.koryxa.fr",
     action: "Rejoindre le Réseau",
-    tag: "Alliance Stratégique",
+    tag: "Institution & Réseau",
+    external: true,
   },
 ];
 
 export default function UseCasesPage() {
   return (
     <main className="kx-pie-page kx-usecases-page">
-      {/* Hero Header */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#06150c] via-[#081f13] to-[#040c07] pt-12 pb-20 text-white sm:pt-16 sm:pb-28">
-        <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
-        <div className="kx-pie-blob kx-pie-blob-two opacity-20" />
+      {/* Hero Header — Centered & High Contrast */}
+      <section className="kx-usecases-hero relative overflow-hidden text-center py-16 sm:py-24">
+        <div className="kx-pie-blob kx-pie-blob-one" />
+        <div className="kx-pie-blob kx-pie-blob-two" />
 
-        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#4ade80]/40 bg-[#00a86b]/15 px-4 py-1.5 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#ecfff4]">
-                Routeur Intelligent de Besoins
-              </span>
-            </div>
+        <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center justify-center">
+          <div className="kx-pie-badge inline-flex items-center justify-center gap-2 mb-6">
+            <span className="kx-pie-dot" />
+            <span>Routeur Intelligent de Besoins</span>
+          </div>
 
-            <h1 className="mt-6 font-serif text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-              Trouvez la solution adaptée à votre situation.
-            </h1>
+          <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight">
+            Trouvez la solution adaptée à votre situation.
+          </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-[#e2f5ea] leading-relaxed max-w-2xl mx-auto">
-              L'écosystème KORYXA est conçu pour clarifier vos choix : explorez par profil d'utilisateur ou par intention précise.
-            </p>
+          <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+            L'écosystème KORYXA est conçu pour clarifier vos choix : explorez par profil d'utilisateur ou par intention concrète.
+          </p>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
+            <Link
+              href={PUBLIC_ROUTES.produits}
+              className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+            >
+              Voir tous les produits ({useCases.length})
+              <ArrowRight size={18} />
+            </Link>
+            <a
+              href={KORYXA_ACCOUNT_URL}
+              className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+            >
+              Mon Compte KORYXA
+            </a>
           </div>
         </div>
       </section>
 
       {/* 1. Interactive Persona Router */}
-      <section className="py-16 sm:py-24 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
+      <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center">
-            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+          <div className="mb-12 text-center">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
               Étape 1 : Choisissez votre profil
             </span>
-            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold">
+            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold tracking-tight">
               Une trajectoire guidée pour chaque acteur
             </h2>
+            <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+              Chaque persona accède à une combinaison personnalisée d’outils et d’espaces d’action.
+            </p>
           </div>
 
           <InteractivePersonaRouter />
@@ -146,75 +172,66 @@ export default function UseCasesPage() {
       </section>
 
       {/* 2. Intent-Based Specific Use Case Grid */}
-      <section className="py-16 sm:py-24 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors">
+      <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
               Étape 2 : Exploration par intention directe
             </span>
-            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold">
-              Que souhaitez-vous accomplir ?
+            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold tracking-tight">
+              Que souhaitez-vous accomplir aujourd'hui ?
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
               Chaque cas d'usage vous relie directement à l'espace produit ou au compte correspondant.
             </p>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {useCases.map((item, index) => {
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {useCases.map((item) => {
               const Icon = item.icon;
-              const isExternal = "external" in item && item.external;
 
               return (
                 <article
                   key={item.title}
-                  className="group flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-[#234b33] bg-white dark:bg-[#07190f]/90 p-5 shadow-sm dark:shadow-md transition hover:-translate-y-1 hover:border-[#00a86b]"
+                  className="group flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-6 shadow-[0_8px_30px_rgba(20,53,31,0.06)] transition hover:-translate-y-1.5 hover:border-[#00a86b] hover:shadow-lg dark:border-[#234b33] dark:bg-[#07190f]/90 text-slate-900 dark:text-white text-center sm:text-left"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
+                      <div className="mx-auto sm:mx-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-[#86efac]">
+                      <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-700 dark:text-[#86efac]">
                         {item.tag}
                       </span>
                     </div>
 
-                    <h3 className="mt-4 font-serif text-base font-bold group-hover:text-[#00a86b] dark:group-hover:text-[#86efac] transition">
+                    <h3 className="mt-4 font-serif text-lg font-bold group-hover:text-[#00a86b] dark:group-hover:text-[#86efac] transition leading-snug">
                       {item.title}
                     </h3>
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                       {item.description}
                     </p>
 
-                    <div className="mt-4 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-2 text-xs">
-                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="mt-4 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-2.5 text-xs">
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Solution Cible
                       </span>
-                      <strong className="block text-slate-900 dark:text-white mt-0.5">
+                      <strong className="block text-slate-900 dark:text-white mt-0.5 font-bold">
                         {item.product}
                       </strong>
                     </div>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/10">
-                    {isExternal ? (
-                      <a
-                        href={item.href}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#008b58]"
-                      >
-                        {item.action}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </a>
-                    ) : (
-                      <Link
-                        href={item.href}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#008b58]"
-                      >
-                        {item.action}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    )}
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/10">
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-4 py-3 text-xs font-bold text-white shadow-[0_4px_14px_rgba(0,168,107,0.25)] transition hover:bg-[#008b58]"
+                    >
+                      {item.action}
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
                   </div>
                 </article>
               );
