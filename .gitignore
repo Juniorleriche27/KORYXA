@@ -32,3 +32,8 @@ __pycache__/
 /*.cookies
 
 /supabase/
+node_modules/
+.claude/
+.codex/
+.superpowers/
+chatlaya/prepared/

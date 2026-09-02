@@ -16,7 +16,7 @@ function PublicShell({ children }: { children: ReactNode }) {
     pathname === "/cas-usage";
 
   return (
-    <div className="public-shell kx-grid-backdrop relative flex min-h-screen flex-col overflow-hidden text-slate-900 transition-colors duration-300 dark:text-slate-100">
+    <div className="public-shell kx-grid-backdrop relative flex min-h-screen flex-col overflow-x-clip text-slate-900 transition-colors duration-300 dark:text-slate-100">
       {!isChatPage ? (
         <>
           <div aria-hidden className="kx-animated-grid pointer-events-none absolute inset-0 opacity-[0.14] dark:opacity-[0.18]" />
@@ -84,12 +84,6 @@ export default function RouteShell({
   children: ReactNode;
   autonomousChatlayaHost?: boolean;
 }) {
-  const pathname = usePathname();
-
-  if (pathname.startsWith("/cas-usage")) {
-    return <>{children}</>;
-  }
-
   if (autonomousChatlayaHost) {
     return <>{children}</>;
   }

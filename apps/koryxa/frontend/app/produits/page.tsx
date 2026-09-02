@@ -1,231 +1,111 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bot,
-  BriefcaseBusiness,
-  Building2,
-  CircuitBoard,
-  Code2,
-  GraduationCap,
-  Network,
-  PackageCheck,
-  Sparkles,
-  Target,
-  Workflow,
-} from "lucide-react";
+import { ArrowRight, Layers3, Network, Sparkles, ShieldCheck } from "lucide-react";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
-import { productList, type ProductInfo } from "@/app/produits/data";
+import { productList } from "@/app/produits/data";
+import InteractiveProductGrid from "@/components/marketing/InteractiveProductGrid";
 
 export const metadata: Metadata = {
-  title: "Produits KORYXA | Catalogue des produits autonomes",
+  title: "Produits KORYXA | Suite Complète des Produits IA Autonomes",
   description:
-    "Découvrez les produits visibles de l’écosystème KORYXA : NeuroKap, CoraBiz, KORYXA Formation, Portail Partenaire et Services IA.",
+    "Explorez les produits IA de l’écosystème KORYXA : ChatLAYA, NeuroKap, CoraBiz, KORYXA Formation, Portail Partenaire, APIs et Services IA.",
 };
-
-const productIcons: Record<string, typeof Bot> = {
-  chatlaya: Bot,
-  cora: Workflow,
-  "partner-portal": Building2,
-  api: Code2,
-  formation: GraduationCap,
-  neurokap: CircuitBoard,
-  corabiz: BriefcaseBusiness,
-  "services-ia": PackageCheck,
-};
-
-const productGroups = [
-  {
-    label: "Usage direct",
-    description: "Produits pensés pour apprendre, progresser et développer une activité.",
-    slugs: ["neurokap", "formation", "corabiz"],
-  },
-  {
-    label: "Partenaires et services",
-    description: "Espaces pour rejoindre KORYXA ou préparer un projet IA sur mesure.",
-    slugs: ["partner-portal", "services-ia"],
-  },
-];
-
-function ProductCard({ product, index }: { product: ProductInfo; index: number }) {
-  const Icon = productIcons[product.slug] ?? Sparkles;
-
-  return (
-    <article className="kx-products-card">
-      <div className="kx-products-card-top">
-        <div className="kx-products-icon">
-          <Icon size={24} />
-        </div>
-        <span>{product.status}</span>
-      </div>
-
-      <div className="kx-products-card-number">{String(index + 1).padStart(2, "0")}</div>
-      <h3>{product.name}</h3>
-      <p className="kx-products-tagline">{product.tagline}</p>
-      <p>{product.summary}</p>
-
-      <div className="kx-products-meta-grid">
-        <div>
-          <span>Public</span>
-          <strong>{product.audience}</strong>
-        </div>
-        <div>
-          <span>Accès</span>
-          <strong>Compte KORYXA</strong>
-        </div>
-      </div>
-
-      <div className="kx-products-highlight-row">
-        {product.highlights.slice(0, 3).map((highlight) => (
-          <span key={highlight}>{highlight}</span>
-        ))}
-      </div>
-
-      <div className="kx-products-actions">
-        <Link href={`/produits/${product.slug}`} className="kx-pie-btn kx-pie-btn-primary kx-pie-btn-sm">
-          Voir la fiche
-        </Link>
-        <a href={product.href} className="kx-pie-btn kx-pie-btn-outline kx-pie-btn-sm">
-          Ouvrir
-        </a>
-      </div>
-    </article>
-  );
-}
 
 export default function ProductsPage() {
-  const groupedProducts = productGroups.map((group) => ({
-    ...group,
-    products: group.slugs
-      .map((slug) => productList.find((product) => product.slug === slug))
-      .filter(Boolean) as ProductInfo[],
-  }));
-
   return (
     <main className="kx-pie-page kx-products-page">
-      <section className="kx-products-hero">
-        <div className="kx-pie-blob kx-pie-blob-one" />
-        <div className="kx-pie-blob kx-pie-blob-two" />
-        <div className="kx-products-hero-inner">
-          <div className="kx-products-hero-copy kx-pie-animate">
-            <div className="kx-pie-badge">
-              <span className="kx-pie-dot" />
-              <span>Catalogue produits KORYXA</span>
+      {/* Products Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#06150c] via-[#081f13] to-[#040c07] pt-12 pb-20 text-white sm:pt-16 sm:pb-28">
+        <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
+        <div className="kx-pie-blob kx-pie-blob-two opacity-20" />
+
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#4ade80]/40 bg-[#00a86b]/15 px-4 py-1.5 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-widest text-[#ecfff4]">
+                Catalogue Officiel de la Suite
+              </span>
             </div>
-            <h1>Les produits autonomes de l’écosystème KORYXA.</h1>
-            <p>
-              Chaque produit a son rôle, son public et son espace. KORYXA garde la cohérence globale : marque,
-              orientation, compte KORYXA et écosystème connecté.
+
+            <h1 className="mt-6 font-serif text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Des produits autonomes, une cohérence d’ensemble.
+            </h1>
+
+            <p className="mt-5 text-base sm:text-lg text-[#e2f5ea] leading-relaxed max-w-2xl mx-auto">
+              Chaque produit de la suite KORYXA est développé avec un périmètre d'excellence précis, tout en s'alignant sur l'identité unique et la passerelle d'orchestration commune.
             </p>
-            <div className="kx-pie-hero-ctas">
-              <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-gold">
-                Compte KORYXA
-                <ArrowRight size={18} />
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+              <a
+                href={KORYXA_ACCOUNT_URL}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-[0_10px_28px_rgba(0,168,107,0.35)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+              >
+                Accéder au Compte KORYXA
+                <ArrowRight className="h-4 w-4" />
               </a>
-              <Link href={PUBLIC_ROUTES.casUsage} className="kx-pie-btn kx-pie-btn-outline-white">
+              <Link
+                href={PUBLIC_ROUTES.casUsage}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-xs sm:text-sm font-bold text-white transition hover:bg-white/15"
+              >
                 Trouver par besoin
               </Link>
             </div>
           </div>
-
-          <div className="kx-products-hero-panel kx-pie-animate kx-pie-delay-2">
-            <div className="kx-products-panel-head">
-              <div>
-                <span>Vue catalogue</span>
-                <strong>{productList.length} produits visibles</strong>
-              </div>
-              <Network size={24} />
-            </div>
-            <div className="kx-products-panel-grid">
-              {productList.map((product, index) => {
-                const Icon = productIcons[product.slug] ?? Sparkles;
-                return (
-                  <div key={product.slug} style={{ animationDelay: `${0.24 + index * 0.07}s` }}>
-                    <Icon size={18} />
-                    <span>{product.name}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </section>
 
-      <section className="kx-products-strip" aria-label="Segments produits KORYXA">
-        <div className="kx-pie-container">
-          <div className="kx-products-segment-grid">
-            {groupedProducts.map((group) => (
-              <article key={group.label}>
-                <div className="kx-products-segment-kicker">{group.products.length} produits</div>
-                <h2>{group.label}</h2>
-                <p>{group.description}</p>
-                <div>
-                  {group.products.map((product) => (
-                    <span key={product.slug}>{product.name}</span>
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-pie-section kx-pie-trust-band">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-header">
-            <div className="kx-pie-section-label">Catalogue</div>
-            <h2>Un catalogue lisible, sans mélanger les usages.</h2>
-            <p>
-              La page produits sert à comprendre rapidement ce que chaque produit fait, à qui il s’adresse
-              et comment y accéder.
+      {/* Interactive Catalog Section */}
+      <section className="py-16 sm:py-24 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+              Exploration & Filtres
+            </span>
+            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold">
+              Tous les produits connectés
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Sélectionnez une catégorie ou effectuez une recherche par mot-clé.
             </p>
           </div>
 
-          <div className="kx-products-grid">
-            {productList.map((product, index) => (
-              <ProductCard key={product.slug} product={product} index={index} />
-            ))}
-          </div>
+          <InteractiveProductGrid />
         </div>
       </section>
 
-      <section className="kx-pie-section">
-        <div className="kx-pie-container">
-          <div className="kx-products-routing-card">
-            <div>
-              <div className="kx-pie-section-label">Orientation</div>
-              <h2>Vous ne connaissez pas encore le bon produit ?</h2>
-              <p>
-                La page Cas d’usage permet de partir du besoin : discuter avec une IA, former des talents,
-                devenir partenaire, accéder à une API ou lancer un projet IA.
+      {/* Account Gateway Banner */}
+      <section className="py-16 sm:py-20 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white border-t border-slate-200 dark:border-white/10 transition-colors">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-[#234b33] bg-gradient-to-r from-[#07190f] to-[#040f09] p-8 sm:p-12 text-white shadow-xl flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-[#86efac]">
+                <ShieldCheck className="h-4 w-4" />
+                <span>Pass Universel</span>
+              </div>
+              <h3 className="mt-2 font-serif text-2xl sm:text-3xl font-bold">
+                Un seul compte pour ouvrir toute la suite KORYXA.
+              </h3>
+              <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Ne multipliez plus les identifiants et les mots de passe. Votre compte KORYXA gère vos autorisations, vos abonnements et vos quotas d'API de façon unifiée.
               </p>
             </div>
-            <div className="kx-products-routing-actions">
-              <Link href={PUBLIC_ROUTES.casUsage} className="kx-pie-btn kx-pie-btn-gold">
-                Voir les cas d’usage
-              </Link>
-              <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-outline-white">
-                Comprendre l’écosystème
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+              <a
+                href={KORYXA_ACCOUNT_URL}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-md transition hover:bg-[#008b58]"
+              >
+                Créer mon compte KORYXA
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <Link
+                href={PUBLIC_ROUTES.contact}
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-xs sm:text-sm font-bold text-white transition hover:bg-white/15"
+              >
+                Contacter l'équipe
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-pie-cta-section">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-label">Compte KORYXA</div>
-          <h2>Un seul compte pour ouvrir les bons produits.</h2>
-          <p>
-            Le compte KORYXA simplifie l’accès aux produits de l’écosystème.
-          </p>
-          <div className="kx-pie-cta-btns">
-            <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-gold">
-              Accéder au Compte KORYXA
-            </a>
-            <Link href={PUBLIC_ROUTES.contact} className="kx-pie-btn kx-pie-btn-outline-white">
-              Contacter KORYXA
-            </Link>
           </div>
         </div>
       </section>

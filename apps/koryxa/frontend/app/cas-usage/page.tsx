@@ -13,259 +13,212 @@ import {
   Lightbulb,
   Network,
   Rocket,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { KORYXA_ACCOUNT_URL, PUBLIC_ROUTES } from "@/config/routes";
+import InteractivePersonaRouter from "@/components/marketing/InteractivePersonaRouter";
 
 export const metadata: Metadata = {
-  title: "Cas d’usage KORYXA | Trouver le bon produit",
+  title: "Cas d’usage KORYXA | Trouver le Produit et la Trajectoire Adaptés",
   description:
-    "Trouvez le bon produit KORYXA selon votre besoin : discuter avec une IA, accéder au compte KORYXA, former des talents, connecter une organisation, utiliser une API ou devenir partenaire.",
+    "Trouvez le bon produit KORYXA selon votre besoin : converser avec une IA souveraine, optimiser vos flux d'entreprise, former des équipes, intégrer des APIs ou devenir partenaire.",
 };
 
 const useCases = [
   {
     icon: Bot,
-    title: "Je veux discuter avec une IA",
-    description: "Démarrer une conversation, explorer une idée, cadrer une demande ou accélérer une réflexion.",
+    title: "Je veux converser avec une IA intelligente",
+    description: "Explorer une idée, rédiger des synthèses, cadrer une demande ou accélérer votre travail au quotidien.",
     product: "ChatLAYA",
     href: "/produits/chatlaya",
-    action: "Ouvrir ChatLAYA",
-    tag: "Conversation IA",
+    action: "Découvrir ChatLAYA",
+    tag: "Conversation & Assistants",
   },
   {
-    icon: KeyRound,
-    title: "Je veux accéder à mon compte KORYXA",
-    description: "Entrer dans l’espace KORYXA pour accéder aux produits adaptés.",
-    product: "Compte KORYXA",
-    href: KORYXA_ACCOUNT_URL,
-    action: "Accéder au compte",
-    tag: "Compte KORYXA",
-    external: true,
-  },
-  {
-    icon: Layers3,
-    title: "Je veux utiliser un produit autonome",
-    description: "Comprendre les produits disponibles et choisir l’espace KORYXA adapté à votre situation.",
-    product: "Catalogue produits",
-    href: PUBLIC_ROUTES.produits,
-    action: "Voir les produits",
-    tag: "Produit autonome",
+    icon: BriefcaseBusiness,
+    title: "Je veux automatiser la gestion de mon entreprise",
+    description: "Facturation intelligente, stocks, comptabilité et suivi de trésorerie connectés.",
+    product: "CoraBiz",
+    href: "/produits/corabiz",
+    action: "Découvrir CoraBiz",
+    tag: "ERP & Automatisation",
   },
   {
     icon: GraduationCap,
-    title: "Je veux former ou accompagner des talents",
-    description: "Orienter des apprenants, des communautés ou des profils vers la montée en compétence IA.",
+    title: "Je veux former ou certifier mes talents",
+    description: "Acquisition de compétences pratiques en IA, ingénierie de prompt et automatisation pour équipes et apprenants.",
     product: "KORYXA Formation",
     href: "/produits/formation",
-    action: "Voir Formation",
-    tag: "Talents IA",
-  },
-  {
-    icon: Building2,
-    title: "Je veux connecter une organisation",
-    description: "Structurer une organisation, un partenaire, une équipe ou un espace métier dans l’écosystème.",
-    product: "Cora / Portail Partenaire",
-    href: "/produits/partner-portal",
-    action: "Voir le Portail Partenaire",
-    tag: "Organisation",
+    action: "Voir les Formations",
+    tag: "Talents & Écoles",
   },
   {
     icon: Code2,
-    title: "Je veux utiliser une API",
-    description: "Accéder à la couche technique, aux intégrations et aux fondations système de KORYXA.",
+    title: "Je veux intégrer des modèles IA par API",
+    description: "Endpoints d'inférence sécurisés, connecteurs de données et passerelle d'orchestration pour vos applications.",
     product: "KORYXA API",
     href: "/produits/api",
-    action: "Voir l’API",
-    tag: "Système",
+    action: "Consulter la documentation API",
+    tag: "Système & Infrastructure",
   },
   {
-    icon: Network,
-    title: "Je veux devenir partenaire",
-    description: "Collaborer avec KORYXA comme entreprise, école, institution, communauté ou acteur terrain.",
-    product: "Partenaires",
-    href: PUBLIC_ROUTES.partenaires,
-    action: "Voir partenaires",
-    tag: "Partenariat",
+    icon: Building2,
+    title: "Je veux superviser un réseau d'utilisateurs ou une cohorte",
+    description: "Espace institutionnel pour universités, incubateurs et ministères afin de piloter les accès à grande échelle.",
+    product: "Portail Partenaire",
+    href: "/produits/partner-portal",
+    action: "Accéder au Portail",
+    tag: "Institution & Réseau",
   },
   {
     icon: Rocket,
-    title: "Je veux lancer un projet IA",
-    description: "Transformer une demande, un besoin métier ou une idée en prestation IA cadrée et exécutable.",
+    title: "Je veux déployer un projet IA sur-mesure",
+    description: "Accompagnement expert pour concevoir et intégrer un pipeline IA adapté aux spécificités de votre organisation.",
     product: "Services IA",
     href: "/produits/services-ia",
-    action: "Voir Services IA",
-    tag: "Exécution IA",
+    action: "Découvrir les Services IA",
+    tag: "Projets & Accompagnement",
+  },
+  {
+    icon: KeyRound,
+    title: "Je veux gérer mon identité et mes abonnements",
+    description: "Un seul compte KORYXA pour sécuriser vos accès, vos espaces produits et vos quotas d'utilisation.",
+    product: "Compte KORYXA",
+    href: KORYXA_ACCOUNT_URL,
+    action: "Ouvrir mon Compte",
+    tag: "Identité & Sécurité",
+    external: true,
+  },
+  {
+    icon: Network,
+    title: "Je veux devenir partenaire écosystème",
+    description: "Collaborer avec KORYXA en tant qu'entreprise technologique, école, fonds d'investissement ou acteur régional.",
+    product: "Partenaires",
+    href: PUBLIC_ROUTES.partenaires,
+    action: "Rejoindre le Réseau",
+    tag: "Alliance Stratégique",
   },
 ];
 
-const routes = [
-  "Besoin réel",
-  "Orientation KORYXA",
-  "Compte KORYXA",
-  "Produit autonome",
-  "Activation",
-];
-
-export default function CasUsagePage() {
+export default function UseCasesPage() {
   return (
     <main className="kx-pie-page kx-usecases-page">
-      <section className="kx-usecases-hero">
-        <div className="kx-pie-blob kx-pie-blob-one" />
-        <div className="kx-pie-blob kx-pie-blob-two" />
-        <div className="kx-usecases-hero-inner">
-          <div className="kx-usecases-hero-copy kx-pie-animate">
-            <div className="kx-pie-badge">
-              <span className="kx-pie-dot" />
-              <span>Orientation par besoin</span>
-            </div>
-            <h1>Trouvez le bon produit KORYXA selon votre besoin.</h1>
-            <p>
-              Vous n’avez pas besoin de connaître le nom exact d’un produit. Dites ce que vous voulez faire :
-              KORYXA vous oriente vers le bon espace, le bon accès ou la bonne trajectoire.
-            </p>
-            <div className="kx-pie-hero-ctas">
-              <Link href={PUBLIC_ROUTES.produits} className="kx-pie-btn kx-pie-btn-gold">
-                Explorer les produits
-                <ArrowRight size={18} />
-              </Link>
-              <a href={KORYXA_ACCOUNT_URL} className="kx-pie-btn kx-pie-btn-outline-white">
-                Compte KORYXA
-              </a>
-            </div>
-          </div>
+      {/* Hero Header */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#06150c] via-[#081f13] to-[#040c07] pt-12 pb-20 text-white sm:pt-16 sm:pb-28">
+        <div className="kx-pie-blob kx-pie-blob-one opacity-30" />
+        <div className="kx-pie-blob kx-pie-blob-two opacity-20" />
 
-          <div className="kx-usecases-route-card kx-pie-animate kx-pie-delay-2">
-            <div className="kx-usecases-route-head">
-              <div>
-                <span>Parcours guidé</span>
-                <strong>Du besoin au bon produit</strong>
-              </div>
-              <Compass size={24} />
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#4ade80]/40 bg-[#00a86b]/15 px-4 py-1.5 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-[#22c55e] animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-widest text-[#ecfff4]">
+                Routeur Intelligent de Besoins
+              </span>
             </div>
-            <div className="kx-usecases-route-list">
-              {routes.map((route, index) => (
-                <div key={route} style={{ animationDelay: `${0.25 + index * 0.1}s` }}>
-                  <span>{index + 1}</span>
-                  <p>{route}</p>
-                </div>
-              ))}
-            </div>
+
+            <h1 className="mt-6 font-serif text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Trouvez la solution adaptée à votre situation.
+            </h1>
+
+            <p className="mt-5 text-base sm:text-lg text-[#e2f5ea] leading-relaxed max-w-2xl mx-auto">
+              L'écosystème KORYXA est conçu pour clarifier vos choix : explorez par profil d'utilisateur ou par intention précise.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="kx-pie-section kx-pie-trust-band">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-header">
-            <div className="kx-pie-section-label">Cas d’usage</div>
-            <h2>Choisissez d’abord l’intention. KORYXA fait le tri.</h2>
-            <p>
-              Cette page sert de routeur : elle relie un besoin concret à un produit, une page partenaire ou au Compte KORYXA.
+      {/* 1. Interactive Persona Router */}
+      <section className="py-16 sm:py-24 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+              Étape 1 : Choisissez votre profil
+            </span>
+            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold">
+              Une trajectoire guidée pour chaque acteur
+            </h2>
+          </div>
+
+          <InteractivePersonaRouter />
+        </div>
+      </section>
+
+      {/* 2. Intent-Based Specific Use Case Grid */}
+      <section className="py-16 sm:py-24 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#00a86b] dark:text-[#4ade80]">
+              Étape 2 : Exploration par intention directe
+            </span>
+            <h2 className="mt-2 font-serif text-2xl sm:text-4xl font-bold">
+              Que souhaitez-vous accomplir ?
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+              Chaque cas d'usage vous relie directement à l'espace produit ou au compte correspondant.
             </p>
           </div>
 
-          <div className="kx-usecases-grid">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {useCases.map((item, index) => {
               const Icon = item.icon;
               const isExternal = "external" in item && item.external;
-              const CardLink = isExternal ? "a" : Link;
-              const linkProps = isExternal ? { href: item.href } : { href: item.href };
 
               return (
-                <article className="kx-usecases-card" key={item.title}>
-                  <div className="kx-usecases-card-top">
-                    <div className="kx-products-icon">
-                      <Icon size={24} />
+                <article
+                  key={item.title}
+                  className="group flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-[#234b33] bg-white dark:bg-[#07190f]/90 p-5 shadow-sm dark:shadow-md transition hover:-translate-y-1 hover:border-[#00a86b]"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a86b]/15 text-[#00a86b] dark:text-[#4ade80] group-hover:bg-[#00a86b] group-hover:text-white transition">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-[#86efac]">
+                        {item.tag}
+                      </span>
                     </div>
-                    <span>{item.tag}</span>
+
+                    <h3 className="mt-4 font-serif text-base font-bold group-hover:text-[#00a86b] dark:group-hover:text-[#86efac] transition">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {item.description}
+                    </p>
+
+                    <div className="mt-4 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-2 text-xs">
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Solution Cible
+                      </span>
+                      <strong className="block text-slate-900 dark:text-white mt-0.5">
+                        {item.product}
+                      </strong>
+                    </div>
                   </div>
-                  <div className="kx-products-card-number">{String(index + 1).padStart(2, "0")}</div>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                  <div className="kx-usecases-target">
-                    <span>Orientation</span>
-                    <strong>{item.product}</strong>
-                  </div>
-                  <div className="kx-usecases-actions">
-                    <CardLink {...linkProps} className="kx-pie-btn kx-pie-btn-primary kx-pie-btn-sm">
-                      {item.action}
-                    </CardLink>
+
+                  <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/10">
+                    {isExternal ? (
+                      <a
+                        href={item.href}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#008b58]"
+                      >
+                        {item.action}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </a>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#008b58]"
+                      >
+                        {item.action}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    )}
                   </div>
                 </article>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-pie-section">
-        <div className="kx-pie-container">
-          <div className="kx-usecases-method-card">
-            <div>
-              <div className="kx-pie-section-label">Méthode</div>
-              <h2>Un visiteur arrive avec un problème, pas avec une architecture.</h2>
-              <p>
-                La logique KORYXA est de rendre l’écosystème lisible. Le visiteur part de son intention, puis la plateforme
-                le dirige vers le produit, le partenaire ou le compte KORYXA qui correspond.
-              </p>
-            </div>
-            <div className="kx-usecases-method-list">
-              {[
-                "Clarifier le besoin",
-                "Identifier le bon espace",
-                "Ouvrir l’accès adapté",
-                "Activer le produit autonome",
-              ].map((step, index) => (
-                <div key={step}>
-                  <span>{index + 1}</span>
-                  <strong>{step}</strong>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-usecases-account-section">
-        <div className="kx-pie-container">
-          <div className="kx-usecases-account-grid">
-            <article>
-              <KeyRound size={26} />
-              <h3>Compte KORYXA</h3>
-              <p>Un seul compte KORYXA pour ouvrir les espaces autorisés.</p>
-              <a href={KORYXA_ACCOUNT_URL}>Compte KORYXA →</a>
-            </article>
-            <article>
-              <BriefcaseBusiness size={26} />
-              <h3>Partenaires</h3>
-              <p>Une entrée claire pour collaborer avec KORYXA.</p>
-              <Link href={PUBLIC_ROUTES.partenaires}>Devenir partenaire →</Link>
-            </article>
-            <article>
-              <Lightbulb size={26} />
-              <h3>Produits</h3>
-              <p>Un catalogue lisible pour comprendre chaque produit autonome.</p>
-              <Link href={PUBLIC_ROUTES.produits}>Voir les produits →</Link>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="kx-pie-cta-section">
-        <div className="kx-pie-container">
-          <div className="kx-pie-section-label">Prochaine étape</div>
-          <h2>Vous connaissez maintenant le besoin. Choisissez le bon chemin.</h2>
-          <p>
-            KORYXA vous oriente vers le produit, le compte ou l’espace partenaire adapté.
-          </p>
-          <div className="kx-pie-cta-btns">
-            <Link href={PUBLIC_ROUTES.produits} className="kx-pie-btn kx-pie-btn-gold">
-              Explorer les produits
-            </Link>
-            <Link href={PUBLIC_ROUTES.ecosysteme} className="kx-pie-btn kx-pie-btn-outline-white">
-              Comprendre l’écosystème
-            </Link>
           </div>
         </div>
       </section>
