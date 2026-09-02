@@ -60,12 +60,12 @@ const FLAGSHIP_PILLARS = [
   },
   {
     id: "chatlaya",
-    name: "ChatLAYA & Studio IA",
-    category: "Conversation & Studio",
+    name: "ChatLAYA",
+    category: "IA Conversationnelle & Cadrage",
     badge: "IA Souveraine",
-    tagline: "Assistant conversationnel souverain et studio d'exécution digitale",
+    tagline: "Assistant conversationnel souverain et cadrage d'idées",
     description:
-      "Bénéficiez de modèles d'IA conversationnels adaptés aux contextes locaux et d'un accompagnement studio pour concevoir vos applications sur-mesure.",
+      "Explorez, rédigez, analysez et structurez vos projets avec une IA conversationnelle souveraine adaptée aux langues et réalités locales.",
     icon: Bot,
     href: "https://chatlaya.koryxa.fr",
     detailHref: "/produits/chatlaya",
@@ -74,7 +74,7 @@ const FLAGSHIP_PILLARS = [
     features: [
       "Modèles conversationnels optimisés en français et contextes africains",
       "Espace Founder pour structurer et exporter des dossiers complets",
-      "Studio Service IA & Web pour vos développements digitaux dédiés",
+      "Analyses documentaires, synthèses stratégiques et cadrage de projets",
     ],
     stat: "Multi-Modèles",
   },
