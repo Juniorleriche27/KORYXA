@@ -94,56 +94,50 @@ export default function HomePage() {
     <>
       <JsonLd data={organizationJsonLd} />
       <main className="kx-pie-page">
-        {/* 1. HERO SECTION WITH EXACT PHRASE RESTORED & MOBILE CENTERED */}
-        <section className="kx-pie-hero relative overflow-hidden text-center">
+        {/* 1. HERO SECTION: REMOVED SMALL BADGE, REDUCED TOP PADDING, CLEAN LIGHT/DARK HERO */}
+        <section className="kx-pie-hero relative overflow-hidden text-center pt-8 pb-16 sm:pt-12 sm:pb-24 transition-colors duration-200">
           <div className="kx-pie-blob kx-pie-blob-one" />
           <div className="kx-pie-blob kx-pie-blob-two" />
 
-          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 py-12 sm:py-20 relative z-10 flex flex-col items-center justify-center">
-            {/* Centered Top Badge */}
-            <div className="kx-pie-badge inline-flex items-center justify-center gap-2 mb-6">
-              <span className="kx-pie-dot" />
-              <span>Plateforme d’orchestration IA en Afrique</span>
-            </div>
-
-            {/* Main Headline - Exact sentence prominent */}
-            <h1 className="max-w-4xl mx-auto font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-[1.08] tracking-tight">
+          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center justify-center">
+            {/* Main Headline */}
+            <h1 className="max-w-4xl mx-auto font-serif text-4xl sm:text-6xl lg:text-7xl font-black text-slate-950 dark:text-white leading-[1.06] tracking-tight">
               KORYXA
               <br />
-              <em className="italic text-[#86efac] dark:text-[#4ade80]">
+              <em className="text-[#00a86b] dark:text-[#4ade80] not-italic">
                 la première plateforme d'orchestration IA en Afrique.
               </em>
             </h1>
 
             {/* Paragraph lead */}
-            <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-[#e2f5ea] leading-relaxed">
+            <p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-[#cbd5e1] leading-relaxed">
               KORYXA connecte et orchestre les produits autonomes de sa suite (<strong>MERQALOR</strong>, <strong>FlowCore</strong>, <strong>ChatLAYA</strong>, <strong>CoraBiz</strong>, <strong>Formation</strong>) sous un compte unique et une gouvernance claire.
             </p>
 
             {/* Centered Action CTAs */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
               <Link
-                href={PUBLIC_ROUTES.ecosysteme}
-                className="kx-pie-btn kx-pie-btn-gold w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold"
+                href={PUBLIC_ROUTES.produits}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00a86b] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(0,168,107,0.3)] transition hover:bg-[#008b58] hover:-translate-y-0.5 w-full sm:w-auto"
               >
-                Explorer l’écosystème
+                Explorer nos produits ({productList.length})
                 <ArrowRight size={18} />
               </Link>
               <a
                 href={KORYXA_ACCOUNT_URL}
-                className="kx-pie-btn kx-pie-btn-outline-white w-full sm:w-auto inline-flex items-center justify-center text-sm font-bold"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 w-full sm:w-auto"
               >
                 Accéder au Compte KORYXA
               </a>
             </div>
 
             {/* Live Interactive Architecture Visualizer */}
-            <div className="mt-14 sm:mt-16 w-full text-left">
+            <div className="mt-12 sm:mt-16 w-full text-left">
               <EcosystemOrchestrationVisualizer />
             </div>
 
             {/* Live Metrics Bar */}
-            <div className="mt-12 sm:mt-16 w-full">
+            <div className="mt-10 sm:mt-14 w-full">
               <LiveEcosystemMetrics />
             </div>
           </div>
@@ -175,7 +169,7 @@ export default function HomePage() {
         </section>
 
         {/* 3. SECTION ROUTEUR DE CAS D'USAGE GUIDÉ */}
-        <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
+        <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors duration-200">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 text-center sm:text-left">
             <div className="mx-auto max-w-2xl text-center mb-12">
               <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
@@ -194,7 +188,7 @@ export default function HomePage() {
         </section>
 
         {/* 4. SECTION CATALOGUE PRODUITS INTERACTIF */}
-        <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors">
+        <section className="py-20 sm:py-28 bg-white dark:bg-[#050b08] text-slate-900 dark:text-white transition-colors duration-200">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-12">
               <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
@@ -213,7 +207,7 @@ export default function HomePage() {
         </section>
 
         {/* 5. SECTION POURQUOI KORYXA & PILIERS */}
-        <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors">
+        <section className="py-20 sm:py-28 bg-[#faf9f5] dark:bg-[#07140c] text-slate-900 dark:text-white transition-colors duration-200">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-16">
               <span className="font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#4ade80]">
