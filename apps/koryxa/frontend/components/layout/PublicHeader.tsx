@@ -69,22 +69,22 @@ export default function PublicHeader() {
   return (
     <>
       <header className="kx-public-header sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-[0_2px_20px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-colors duration-200 dark:border-[#1b3d29] dark:bg-[#07140c]/90 dark:shadow-[0_2px_24px_rgba(0,0,0,0.5)]">
-        <div className="mx-auto flex h-[68px] w-full max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 sm:h-[68px] w-full max-w-[1240px] items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 lg:px-8">
           {/* Left: Brand Logo & Mobile Trigger */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setMobileOpen((current) => !current)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-800 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10 lg:hidden"
+              className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl text-slate-800 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10 lg:hidden"
               aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? <IconClose className="h-5 w-5" /> : <IconMenu className="h-5 w-5" />}
             </button>
 
-            <Link href={PUBLIC_ROUTES.home} className="group flex shrink-0 items-center gap-2.5" aria-label="Accueil KORYXA">
-              <BrandLogo className="h-9 w-9 rounded-xl object-cover shadow-sm transition group-hover:scale-105" />
-              <span className="font-serif text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+            <Link href={PUBLIC_ROUTES.home} className="group flex shrink-0 items-center gap-2 sm:gap-2.5" aria-label="Accueil KORYXA">
+              <BrandLogo className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl object-cover shadow-sm transition group-hover:scale-105" />
+              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">
                 KORY<span className="text-[#00a86b]">XA</span>
               </span>
             </Link>
@@ -112,26 +112,26 @@ export default function PublicHeader() {
           </nav>
 
           {/* Right: Search, Theme Toggle & Single Account CTA */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Compact Search Trigger */}
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-[#00a86b]/50 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:px-3 sm:py-1.5 text-xs font-semibold text-slate-600 transition hover:border-[#00a86b]/50 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
               title="Recherche rapide (Cmd + K)"
             >
-              <Search className="h-3.5 w-3.5 text-[#00a86b]" />
+              <Search className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-[#00a86b]" />
               <span className="hidden sm:inline">Rechercher</span>
               <kbd className="hidden rounded bg-slate-200/70 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-white/10 dark:text-slate-400 sm:inline">
                 ⌘K
               </kbd>
             </button>
 
-            <ThemeToggle showLabel={false} className="kx-theme-toggle" />
+            <ThemeToggle showLabel={false} className="kx-theme-toggle scale-90 sm:scale-100" />
 
             {/* Single Account Action */}
             {isLoaded && isSignedIn ? (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm dark:border-white/15 dark:bg-white/5">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl border border-slate-200 bg-white p-1 sm:px-2.5 sm:py-1.5 shadow-sm dark:border-white/15 dark:bg-white/5">
                 <span className="hidden text-xs font-bold text-slate-800 dark:text-[#86efac] sm:inline">
                   Compte actif
                 </span>
@@ -140,10 +140,11 @@ export default function PublicHeader() {
             ) : (
               <a
                 href={accountHref}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-[0_4px_14px_rgba(0,168,107,0.25)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#00a86b] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white shadow-[0_4px_14px_rgba(0,168,107,0.25)] transition hover:bg-[#008b58] hover:-translate-y-0.5"
               >
-                <span>Compte KORYXA</span>
-                <ExternalLink className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline sm:inline">Compte KORYXA</span>
+                <span className="xs:hidden sm:hidden">Compte</span>
+                <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </a>
             )}
           </div>

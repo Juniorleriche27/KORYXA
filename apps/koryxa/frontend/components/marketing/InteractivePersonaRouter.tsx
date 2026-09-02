@@ -216,9 +216,9 @@ export default function InteractivePersonaRouter() {
   const currentPersona = PERSONAS.find((p) => p.id === selectedPersonaId) || PERSONAS[0];
 
   return (
-    <div className="w-full rounded-3xl border border-slate-200/90 bg-white/95 p-6 sm:p-8 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] text-slate-900 dark:text-white">
+    <div className="w-full rounded-3xl border border-slate-200/90 bg-white/95 p-5 sm:p-8 shadow-[0_8px_30px_rgba(20,53,31,0.06)] backdrop-blur-xl dark:border-[#234b33] dark:bg-[#07190f]/95 dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] text-slate-900 dark:text-white">
       {/* Persona Selector Tabs */}
-      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 border-b border-slate-100 dark:border-white/10 pb-5">
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none w-full sm:flex-wrap border-b border-slate-100 dark:border-white/10">
         {PERSONAS.map((persona) => {
           const isSelected = persona.id === selectedPersonaId;
           const Icon = persona.icon;
@@ -227,7 +227,7 @@ export default function InteractivePersonaRouter() {
               key={persona.id}
               type="button"
               onClick={() => setSelectedPersonaId(persona.id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-200 ${
+              className={`whitespace-nowrap inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all duration-200 ${
                 isSelected
                   ? "bg-[#00a86b] text-white shadow-[0_4px_16px_rgba(0,168,107,0.35)] scale-102"
                   : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-[#00a86b]/40 hover:bg-white hover:text-black dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
@@ -243,7 +243,7 @@ export default function InteractivePersonaRouter() {
       {/* Selected Persona Detail Grid */}
       <div className="mt-7 grid gap-8 lg:grid-cols-2 items-center">
         {/* Left: Persona narrative & recommended products */}
-        <div className="text-center sm:text-left">
+        <div className="text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#00a86b]/30 bg-[#00a86b]/10 px-3.5 py-1 text-xs font-bold text-[#008b58] dark:bg-[#00a86b]/15 dark:text-[#86efac]">
             <Compass className="h-3.5 w-3.5" />
             <span>Orientation : {currentPersona.badge}</span>
@@ -292,8 +292,8 @@ export default function InteractivePersonaRouter() {
         </div>
 
         {/* Right: Step-by-Step Trajectory Card */}
-        <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-[#f8faf8] to-[#edf4f0] p-6 sm:p-7 shadow-md dark:border-[#234b33] dark:bg-gradient-to-b dark:from-[#0d2818] dark:to-[#040f09]">
-          <span className="block font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#86efac] text-center sm:text-left">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-[#f8faf8] to-[#edf4f0] p-5 sm:p-7 shadow-md dark:border-[#234b33] dark:bg-gradient-to-b dark:from-[#0d2818] dark:to-[#040f09]">
+          <span className="block font-serif text-xs font-bold uppercase tracking-widest text-[#008b58] dark:text-[#86efac] text-left">
             Trajectoire d’activation KORYXA
           </span>
 
@@ -303,14 +303,14 @@ export default function InteractivePersonaRouter() {
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#00a86b] text-xs font-black text-white shadow-sm mt-0.5">
                   {index + 1}
                 </div>
-                <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed text-left">
                   {step}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center gap-3">
+          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <a
               href={currentPersona.ctaHref}
               target="_blank"
