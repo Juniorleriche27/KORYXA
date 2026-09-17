@@ -1,6 +1,6 @@
 // Default to the same domain as the app unless explicitly overridden in env.
 // This avoids prod breakage when api.* is not configured.
-const DEFAULT_API_BASE = "https://innovaplus.africa";
+const DEFAULT_API_BASE = "https://www.koryxa.fr";
 const LEGACY_API_HOST = "https://api.innovaplus.africa";
 
 function normalize(base: string | undefined, fallback: string): string {
@@ -29,7 +29,7 @@ function alignLoopbackHost(base: string, siteBase: string): string {
 
 export const SITE_BASE_URL = normalize(
   process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL,
-  "https://innovaplus.africa",
+  "https://www.koryxa.fr",
 );
 
 export const AUTH_API_BASE = alignLoopbackHost(
@@ -80,7 +80,7 @@ function normalizeChatlayaBase(base: string | undefined, fallback: string): stri
 
 export const FORMATION_DATA_ANALYST_URL =
   (process.env.NEXT_PUBLIC_FORMATION_DATA_ANALYST_URL || "").trim() ||
-  "https://formation.innovaplus.africa";
+  "https://formation.koryxa.fr";
 
 export const DEV_AUTO_LOGIN_ENABLED =
   (process.env.NEXT_PUBLIC_DEV_AUTO_LOGIN || "").toLowerCase() === "true";

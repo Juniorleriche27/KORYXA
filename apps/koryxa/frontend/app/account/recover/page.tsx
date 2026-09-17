@@ -72,7 +72,7 @@ export default function RecoverPage() {
               type="url"
               value={redirectTo}
               onChange={(event) => setRedirectTo(event.target.value)}
-              placeholder="https://innovaplus.africa/login"
+              placeholder="https://www.koryxa.fr/login"
               className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-100"
             />
             <p className="mt-1 text-xs text-slate-500">

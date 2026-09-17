@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       ...payload,
       source: "koryxa_public_contact",
-      page_url: request.headers.get("referer") || "https://koryxa.fr/contact",
+      page_url: request.headers.get("referer") || "https://www.koryxa.fr/contact",
     }),
     cache: "no-store",
   });

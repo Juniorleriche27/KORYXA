@@ -56,7 +56,7 @@ export async function generateMetadata(props: ProductPageProps): Promise<Metadat
 
   const title = `${product.name} | Écosystème KORYXA`;
   const description = product.summary;
-  const canonicalUrl = `https://koryxa.fr/produits/${product.slug}`;
+  const canonicalUrl = `https://www.koryxa.fr/produits/${product.slug}`;
 
   return {
     title,
@@ -102,11 +102,11 @@ export default async function ProductDetailPage(props: ProductPageProps) {
     description: product.summary,
     applicationCategory: product.category,
     operatingSystem: "Cloud, Web, Mobile",
-    url: `https://koryxa.fr/produits/${product.slug}`,
+    url: `https://www.koryxa.fr/produits/${product.slug}`,
     publisher: {
       "@type": "Organization",
       name: "KORYXA",
-      url: "https://koryxa.fr",
+      url: "https://www.koryxa.fr",
     },
     offers: {
       "@type": "Offer",

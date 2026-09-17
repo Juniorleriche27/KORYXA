@@ -50,7 +50,7 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "KORYXA",
-  url: "https://koryxa.com",
+  url: "https://www.koryxa.fr",
   description: "La première plateforme d'orchestration IA en Afrique.",
   areaServed: "Africa",
   knowsAbout: [

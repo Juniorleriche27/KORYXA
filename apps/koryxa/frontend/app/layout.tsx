@@ -56,7 +56,10 @@ export const metadata: Metadata = {
   description: "La première plateforme d'orchestration IA en Afrique.",
   applicationName: "KORYXA",
   manifest: "/manifest.webmanifest",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://koryxa.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.koryxa.fr"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "KORYXA",
     description: "La première plateforme d'orchestration IA en Afrique.",

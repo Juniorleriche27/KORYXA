@@ -11,9 +11,9 @@ function isProtectedPath(pathname: string) {
 }
 
 const SESSION_COOKIE = "innova_session";
-const SITE_BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://koryxa.com").replace(/\/+$/, "");
+const SITE_BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "https://www.koryxa.fr").replace(/\/+$/, "");
 const LEGACY_API_HOST = "https://api.innovaplus.africa";
-const DEFAULT_API_BASE = "https://innovaplus.africa";
+const DEFAULT_API_BASE = "https://www.koryxa.fr";
 const KORYXA_ACCOUNTS_ORIGIN = "https://accounts.koryxa.fr";
 const KORYXA_IDENTITY_SIGN_IN_URL = `${KORYXA_ACCOUNTS_ORIGIN}/sign-in`;
 const KORYXA_IDENTITY_SIGN_UP_URL = `${KORYXA_ACCOUNTS_ORIGIN}/sign-up`;
