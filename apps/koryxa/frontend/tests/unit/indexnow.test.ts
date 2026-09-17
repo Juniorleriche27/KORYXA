@@ -365,3 +365,32 @@ describe("POST /api/indexnow Route Security", () => {
     }
   });
 });
+
+describe("Middleware Route Protection for /api/indexnow", () => {
+  it("allows /api/indexnow to pass without redirection to accounts.koryxa.fr under V1_SIMPLE mode", async () => {
+    process.env.NEXT_PUBLIC_V1_SIMPLE = "true";
+    const { NextRequest } = await import("next/server");
+    const { middleware } = await import("@/middleware");
+
+    const req = new NextRequest("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+    });
+
+    const response = await middleware(req);
+    expect(response.status).not.toBe(307);
+    expect(response.status).not.toBe(308);
+    expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("still strictly redirects protected routes like /account/role to sign-in", async () => {
+    process.env.NEXT_PUBLIC_V1_SIMPLE = "true";
+    const { NextRequest } = await import("next/server");
+    const { middleware } = await import("@/middleware");
+
+    const req = new NextRequest("https://www.koryxa.fr/account/role");
+
+    const response = await middleware(req);
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toContain("accounts.koryxa.fr/sign-in");
+  });
+});

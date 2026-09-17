@@ -217,6 +217,7 @@ const V1_PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/bientot",
+  "/api/indexnow",
 ];
 
 export async function middleware(request: NextRequest) {
