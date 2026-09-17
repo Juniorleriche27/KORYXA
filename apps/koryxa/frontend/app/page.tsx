@@ -23,7 +23,7 @@ import LiveEcosystemMetrics from "@/components/marketing/LiveEcosystemMetrics";
 export const metadata: Metadata = {
   title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
   description:
-    "KORYXA est la première plateforme d'orchestration IA en Afrique. Un compte unique et un écosystème de produits autonomes connectés : MERQALOR, FlowCore, ChatLAYA, CoraBiz, KORYXA Formation et APIs.",
+    "KORYXA conçoit des solutions d’IA, data, automatisation et logiciels pour aider entreprises, startups et institutions à accélérer leur transformation numérique.",
   keywords: [
     "KORYXA",
     "première plateforme d'orchestration IA en Afrique",
@@ -40,9 +40,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
     description:
-      "La première plateforme d'orchestration IA en Afrique reliant produits autonomes, entreprises, créateurs et institutions sous une identité unique.",
+      "KORYXA conçoit des solutions d’IA, data, automatisation et logiciels pour aider entreprises, startups et institutions à accélérer leur transformation numérique.",
     url: "/",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KORYXA | La première plateforme d'orchestration IA en Afrique",
+    description:
+      "KORYXA conçoit des solutions d’IA, data, automatisation et logiciels pour aider entreprises, startups et institutions à accélérer leur transformation numérique.",
   },
 };
 
