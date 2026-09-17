@@ -1,21 +1,32 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { submitUrlsToIndexNow, filterAndValidateUrls, getIndexNowConfig } from "@/lib/indexnow";
 import sitemap from "@/app/sitemap";
 
 export async function POST(request: Request) {
-  // If an INDEXNOW_SECRET is defined in env, enforce authorization
-  const expectedSecret = process.env.INDEXNOW_SECRET;
-  if (expectedSecret) {
-    const authHeader = request.headers.get("authorization") || "";
-    const apiKeyHeader = request.headers.get("x-indexnow-secret") || "";
-    const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  const expectedSecret = process.env.INDEXNOW_SECRET?.trim();
+  if (!expectedSecret) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Service IndexNow non configuré : INDEXNOW_SECRET manquant sur le serveur.",
+      },
+      { status: 500 },
+    );
+  }
 
-    if (token !== expectedSecret && apiKeyHeader !== expectedSecret) {
-      return NextResponse.json(
-        { success: false, message: "Non autorisé : secret IndexNow manquant ou invalide." },
-        { status: 401 },
-      );
-    }
+  const authHeader = request.headers.get("authorization") || "";
+  const apiKeyHeader = request.headers.get("x-indexnow-secret")?.trim() || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  const isAuthorized =
+    (Boolean(token) && token === expectedSecret) ||
+    (Boolean(apiKeyHeader) && apiKeyHeader === expectedSecret);
+
+  if (!isAuthorized) {
+    return NextResponse.json(
+      { success: false, message: "Non autorisé : secret IndexNow manquant ou invalide." },
+      { status: 401 },
+    );
   }
 
   const payload = (await request.json().catch(() => ({}))) as { urls?: string[] };

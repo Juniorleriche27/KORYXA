@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 import {
@@ -223,5 +223,145 @@ describe("IndexNow Batch Submission", () => {
     expect(result.totalSubmitted).toBe(2);
     expect(result.batches.length).toBe(1);
     expect(result.errors.length).toBe(0);
+  });
+});
+
+describe("POST /api/indexnow Route Security", () => {
+  const TEST_SECRET = "7eb38c64f834ab1f7f888c8d8acd42df769e75d5331bab3e966ac5bc00b7d69c";
+  const originalSecret = process.env.INDEXNOW_SECRET;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("returns 500 when INDEXNOW_SECRET is not configured on the server", async () => {
+    delete process.env.INDEXNOW_SECRET;
+    const { POST } = await import("@/app/api/indexnow/route");
+
+    const req = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/"] }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(500);
+
+    const data = await res.json();
+    expect(data.success).toBe(false);
+    expect(data.message).toContain("INDEXNOW_SECRET manquant");
+  });
+
+  it("returns 401 Unauthorized when request lacks authentication", async () => {
+    process.env.INDEXNOW_SECRET = TEST_SECRET;
+    const { POST } = await import("@/app/api/indexnow/route");
+
+    const req = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/"] }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(401);
+
+    const data = await res.json();
+    expect(data.success).toBe(false);
+    expect(data.message).toContain("Non autorisé");
+  });
+
+  it("returns 401 Unauthorized when an invalid token or key is provided", async () => {
+    process.env.INDEXNOW_SECRET = TEST_SECRET;
+    const { POST } = await import("@/app/api/indexnow/route");
+
+    const req1 = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer invalid_secret",
+      },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/"] }),
+    });
+
+    const res1 = await POST(req1);
+    expect(res1.status).toBe(401);
+
+    const req2 = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-indexnow-secret": "wrong_key",
+      },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/"] }),
+    });
+
+    const res2 = await POST(req2);
+    expect(res2.status).toBe(401);
+  });
+
+  it("authorizes successfully with valid Authorization: Bearer header", async () => {
+    process.env.INDEXNOW_SECRET = TEST_SECRET;
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 200,
+      statusText: "OK",
+      ok: true,
+      text: async () => "",
+    }) as unknown as typeof fetch;
+
+    const { POST } = await import("@/app/api/indexnow/route");
+
+    const req = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TEST_SECRET}`,
+      },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/produits"] }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.totalSubmitted).toBe(1);
+    // Ensure secret is never leaked
+    expect(JSON.stringify(data)).not.toContain(TEST_SECRET);
+  });
+
+  it("authorizes successfully with valid x-indexnow-secret header", async () => {
+    process.env.INDEXNOW_SECRET = TEST_SECRET;
+    global.fetch = vi.fn().mockResolvedValue({
+      status: 202,
+      statusText: "Accepted",
+      ok: true,
+      text: async () => "",
+    }) as unknown as typeof fetch;
+
+    const { POST } = await import("@/app/api/indexnow/route");
+
+    const req = new Request("https://www.koryxa.fr/api/indexnow", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-indexnow-secret": TEST_SECRET,
+      },
+      body: JSON.stringify({ urls: ["https://www.koryxa.fr/produits"] }),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.totalSubmitted).toBe(1);
+    expect(JSON.stringify(data)).not.toContain(TEST_SECRET);
+
+    // Restore original env
+    if (originalSecret) {
+      process.env.INDEXNOW_SECRET = originalSecret;
+    } else {
+      delete process.env.INDEXNOW_SECRET;
+    }
   });
 });
