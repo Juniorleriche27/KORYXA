@@ -43,6 +43,8 @@ html {
   font-size: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  scroll-padding-top: 4.5rem;
+  scroll-behavior: smooth;
 }
 
 body {

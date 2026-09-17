@@ -68,7 +68,7 @@ export default function PublicHeader() {
 
   return (
     <>
-      <header className="kx-public-header sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-[0_2px_20px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-colors duration-200 dark:border-[#1b3d29] dark:bg-[#07140c]/90 dark:shadow-[0_2px_24px_rgba(0,0,0,0.5)]">
+      <header className="kx-public-header fixed inset-x-0 top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 shadow-[0_2px_20px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-colors duration-200 dark:border-[#1b3d29] dark:bg-[#07140c]/90 dark:shadow-[0_2px_24px_rgba(0,0,0,0.5)]">
         <div className="mx-auto flex h-16 sm:h-[68px] w-full max-w-[1240px] items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 lg:px-8">
           {/* Left: Brand Logo & Mobile Trigger */}
           <div className="flex items-center gap-2 sm:gap-3">
