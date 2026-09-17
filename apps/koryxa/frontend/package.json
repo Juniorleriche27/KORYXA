@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "indexnow": "node scripts/submit-indexnow.mjs",
     "validate:resources": "echo \"validate:resources disabled (specialisation reset)\""
   },
   "dependencies": {
