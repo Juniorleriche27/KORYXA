@@ -18,7 +18,7 @@ export default function RouteShell({
   return (
     <div className="public-shell relative flex min-h-screen flex-col bg-[#faf9f5] dark:bg-[#050b08] text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <PublicHeader />
-      <main id="page-content" className="flex-1 w-full pt-20 sm:pt-24">
+      <main id="page-content" className="flex-1 w-full pt-16 sm:pt-[68px]">
         {children}
       </main>
       <Footer />
